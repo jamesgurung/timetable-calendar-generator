@@ -7,7 +7,7 @@ This is a command line tool for bulk generating student and teacher timetables o
 ### Usage
 
 1. Ensure you have the [.NET Core 2.0 runtime](https://www.microsoft.com/net/download/core#/runtime) installed
-1. Download [timetable-calendar-generator-2.0.zip](https://github.com/jamesgurung/timetable-calendar-generator/releases/download/v1.0/timetable-calendar-generator-1.0.zip) and extract the contents
+1. Download [timetable-calendar-generator-2.0.zip](https://github.com/jamesgurung/timetable-calendar-generator/releases/download/v2.0/timetable-calendar-generator-2.0.zip) and extract the contents
 1. In the same folder, add a directory called "inputs" and create the input files defined below
 1. Open a command line and run `dotnet makecal.dll`
 
