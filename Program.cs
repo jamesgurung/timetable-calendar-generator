@@ -169,7 +169,7 @@ namespace makecal
       var batch = new UnlimitedBatch(service);
 
       var myStudyLeave = person.YearGroup == null ? new List<StudyLeave>() : settings.StudyLeave.Where(o => o.Year == person.YearGroup);
-      var myLessons = person.Lessons.ToDictionary(o => o.PeriodCode);
+      var myLessons = person.Lessons.GroupBy(o => o.PeriodCode).ToDictionary(o => o.Key, o => o.First());
 
       foreach (var dayOfCalendar in settings.DayTypes.Where(o => o.Key >= DateTime.Today)) {
 
