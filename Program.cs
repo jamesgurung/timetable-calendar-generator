@@ -10,6 +10,7 @@ using Google.Apis.Calendar.v3;
 using Google.Apis.Services;
 using Google.Apis.Calendar.v3.Data;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace makecal
 {
@@ -23,6 +24,11 @@ namespace makecal
     private static readonly string calendarName = "My timetable";
     private static readonly string calendarColour = "#fbe983";
     private static readonly string appName = "makecal";
+    private static readonly int maxAttempts = 4;
+    private static readonly int headerHeight = 10;
+    private static readonly int statusCol = 50;
+    private static readonly int simultaneousRequests = 40;
+    private static readonly object consoleLock = new object();
 
     static void Main()
     {
@@ -34,27 +40,65 @@ namespace makecal
       try {
 
         Console.Clear();
+        Console.CursorVisible = false;
         Console.WriteLine("TIMETABLE CALENDAR GENERATOR\n");
 
         var settings = await LoadSettingsAsync();
         var students = await LoadStudentsAsync();
         var teachers = await LoadTeachersAsync();
 
-        Console.WriteLine("\nSetting up calendars:\n");
+        Console.WriteLine("\nSetting up calendars:");
 
+        var tasks = new List<Task>();
+        var throttler = new SemaphoreSlim(initialCount: simultaneousRequests);
+        
         var people = students.Concat(teachers).ToList();
+       
         for (var i = 0; i < people.Count; i++) {
-          var person = people[i];
-          Console.WriteLine($"({i+1}/{people.Count}) {person.Email}\n  - Connecting to Google Calendar...");
-          await WriteTimetableAsync(person, settings);
+          var countLocal = i;
+          await Task.Delay(10);
+          await throttler.WaitAsync();
+          var person = people[countLocal];
+          tasks.Add(Task.Run(async () => {
+            try {
+              var line = countLocal + headerHeight;
+              WriteToConsole(line, 0, $"({countLocal + 1}/{people.Count}) {person.Email}", consoleLock);
+              WriteToConsole(line, statusCol, "|   |               ", consoleLock);
+              for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+                try {
+                  await WriteTimetableAsync(person, settings, line);
+                  attempt = maxAttempts + 1;
+                } catch (Google.GoogleApiException) {
+                  if (attempt == maxAttempts) throw;
+                  var backoff = 5 * (int)Math.Pow(4, attempt - 1);
+                  WriteToConsole(line, statusCol, $"Waiting to retry ({attempt} of {maxAttempts - 1})...", consoleLock);
+                  await Task.Delay(backoff * 1000);
+                }
+              }
+            } finally {
+              throttler.Release();
+            }
+          }));
         }
 
+        await Task.WhenAll(tasks);
+        Console.SetCursorPosition(0, headerHeight + people.Count);
         Console.WriteLine("\nCalendar generation complete.\n");
 
       } catch (Exception exc) {
 
         DisplayError(exc.Message);
 
+      } finally {
+        Console.ReadKey();
+      }
+    }
+
+    private static void WriteToConsole(int line, int col, string text, object consoleLock)
+    {
+      lock (consoleLock) {
+        Console.SetCursorPosition(col, line);
+        Console.Write(text);
       }
     }
 
@@ -142,7 +186,7 @@ namespace makecal
             var timetable = await reader.ReadDataRecordAsync();
             var rooms = await reader.ReadDataRecordAsync();
 
-            var currentTeacher = new Person { Email = timetable[0], Lessons = new List<Lesson>() };
+            var currentTeacher = new Person { Email = timetable[0].ToLower(), Lessons = new List<Lesson>() };
 
             for (var i = 1; i < timetable.Count; i++) {
               if (string.IsNullOrEmpty(timetable[i])) continue;
@@ -160,12 +204,13 @@ namespace makecal
       return teachers;
     }
 
-    private static async Task WriteTimetableAsync(Person person, Settings settings)
+    private static async Task WriteTimetableAsync(Person person, Settings settings, int line)
     {
       var service = GetCalendarService(settings.ServiceAccountKey, person.Email);
-      var calendarId = await PrepareCalendarAsync(service);
+      
+      var calendarId = await PrepareCalendarAsync(service, line);
+      WriteToConsole(line, statusCol, "|\u2588\u2588 |               ", consoleLock);
 
-      Console.WriteLine("  - Adding events...");
       var batch = new UnlimitedBatch(service);
 
       var myStudyLeave = person.YearGroup == null ? new List<StudyLeave>() : settings.StudyLeave.Where(o => o.Year == person.YearGroup);
@@ -213,8 +258,7 @@ namespace makecal
       }
 
       await batch.ExecuteAsync();
-
-      Console.WriteLine("  - Done.\n");
+      WriteToConsole(line, statusCol, "|\u2588\u2588\u2588|               ", consoleLock);
     }
 
     private static CalendarService GetCalendarService(string serviceAccountKey, string email)
@@ -227,19 +271,19 @@ namespace makecal
       });
     }
 
-    private static async Task<string> PrepareCalendarAsync(CalendarService service)
+    private static async Task<string> PrepareCalendarAsync(CalendarService service, int line)
     {
       var calendars = await service.CalendarList.List().ExecuteAsync();
       var calendarId = calendars.Items.FirstOrDefault(o => o.Summary == calendarName)?.Id;
 
+      WriteToConsole(line, statusCol, "|\u2588  |               ", consoleLock);
+
       if (calendarId == null) {
-        Console.WriteLine("  - Creating new calendar...");
         var newCalendar = new Calendar { Summary = calendarName };
         newCalendar = await service.Calendars.Insert(newCalendar).ExecuteAsync();
         calendarId = newCalendar.Id;
         await service.CalendarList.SetColor(calendarId, calendarColour).ExecuteAsync();
       } else {
-        Console.WriteLine("  - Clearing previous timetable from calendar...");
         var existingFutureEvents = await service.Events.List(calendarId).FetchAllAsync(after: DateTime.Today);
         var batch = new UnlimitedBatch(service);
         foreach (var existingEvent in existingFutureEvents) {
