@@ -1,3 +1,7 @@
 .vscode/
+.vs/
 obj/
 bin/
+inputs/
+Properties/
+*.user
