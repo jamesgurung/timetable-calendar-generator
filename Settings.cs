@@ -12,10 +12,15 @@ namespace makecal
         OverrideDictionary = value.ToDictionary(o => (o.Date, o.Period), o => o.Title);
       }
     }
+    public IList<Rename> Renames { set {
+        RenameDictionary = value.ToDictionary(o => o.OriginalTitle, o => o.NewTitle);
+      }
+    }
 
     public string ServiceAccountKey { get; set; }
     public IDictionary<DateTime, string> DayTypes { get; set; }
     public IDictionary<(DateTime, int), string> OverrideDictionary { get; private set; }
+    public IDictionary<string, string> RenameDictionary { get; private set; }
 
     internal class LessonTime
     {
@@ -44,5 +49,11 @@ namespace makecal
     public DateTime Date { get; set; }
     public int Period { get; set; }
     public string Title { get; set; }
+  }
+
+  internal class Rename
+  {
+    public string OriginalTitle { get; set; }
+    public string NewTitle { get; set; }
   }
 }

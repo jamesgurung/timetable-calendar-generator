@@ -2,13 +2,13 @@
 
 This is a command line tool for bulk generating student and teacher timetables on Google Calendar.
 
-![Student timetable](student-timetable.png)
+![Student timetable](resources/example.png)
 
 ### Usage
 
-1. Ensure you have the [.NET Core 2.0 runtime](https://www.microsoft.com/net/download/core#/runtime) installed
-1. Download [timetable-calendar-generator-2.1.zip](https://github.com/jamesgurung/timetable-calendar-generator/releases/download/v2.1/timetable-calendar-generator-2.1.zip) and extract the contents
-1. In the same folder, add a directory called "inputs" and create the input files defined below
+1. Ensure you have the [.NET Core 2.0 runtime](https://www.microsoft.com/net/download/core#/runtime) installed.
+1. Download [timetable-calendar-generator-2.2.zip](https://github.com/jamesgurung/timetable-calendar-generator/releases/download/v2.2/timetable-calendar-generator-2.2.zip) and extract the contents.
+1. In the same folder, add a directory called "inputs" and create the input files defined below.
 1. Open a command line and run `dotnet makecal.dll`
 
 ### Input files
@@ -40,6 +40,10 @@ Configure lesson timings, study leave dates and periods to override for all user
     { "date": "20-Dec-17", "period": 3, "title": "Whole school assembly" },
     { "date": "20-Dec-17", "period": 4, "title": "" },
     { "date": "20-Dec-17", "period": 5, "title": "" }
+  ],
+  "renames":
+  [
+    { "originalTitle": "PPA", "newTitle": "" }
   ]
 }
 
@@ -47,7 +51,7 @@ Configure lesson timings, study leave dates and periods to override for all user
 
 #### key.json
 
-The private key file for your service account, which can be downloaded from the [Google Cloud Platform console](https://console.cloud.google.com/apis/credentials). Your service account needs domain-delegated authority to the scope `https://www.googleapis.com/auth/calendar`.
+The private key file for your service account, which can be downloaded from the [Google Cloud Platform console](https://console.cloud.google.com/apis/credentials). Your service account needs to be delegated domain-wide authority to the scope `https://www.googleapis.com/auth/calendar`.
 
 #### days.csv
 
@@ -75,10 +79,11 @@ student1@school.org , 10   , Business , 1Mon:3 , D5   , JGO
 student2@school.org , 11   , P.E.     , 1Tue:3 ,      , DBA
 ...
 ```
+SIMS users can download the report [SIMS-StudentTimetables.RptDef](resources/SIMS-StudentTimetables.RptDef). This needs to be run and saved as `students.csv`
 
 #### teachers.csv
 
-This takes a different format. There is a column for each period in the timetable, and two rows for each teacher. The first row contains class codes, and the second contains room numbers.
+This takes a different format. There is a column for each period in the timetable, and two rows for each teacher: the first containing class codes, and the second containing room numbers.
 
 ```
 Email               , 1Mon:1   , 1Mon:2   , 1Mon:3   , ...
@@ -88,10 +93,23 @@ teacher2@school.org ,          , 10ab/Ma4 , 8a/Ma3   , ...
                     ,          , M4       , M4       , ...
 ...
 ```
+To create this file in SIMS:
+
+1. Click Reports -> Timetables -> All Staff Timetable.
+1. Choose an Effective Date and click OK.
+1. Click the "Flip" button in the top-left corner. Teacher names should now appear going down the page.
+1. On the far right of the screen, click the button for "Show/Hide Cell Settings".
+1. At the bottom of the Cell Settings pane, set "Number of Rows" to 2.
+1. In the middle of the pane, there is a split box which says "ClassRM" in the top half. Click and drag the "RM" part into the lower half of that box.
+1. Back at the top-left of the screen, click "Export".
+1. Change "HTML" to "Excel" and click OK.
+1. When the spreadsheet opens, delete rows 1-4 which contain the title.
+1. Replace staff names in the left-hand column with their email addresses. You may be able to do this with a `VLOOKUP` formula.
+1. Save as `teachers.csv`
 
 ### Output
 
-The tool creates a new Google Calendar for each user, called "My timetable", and fills this with their lessons for the year.
+The tool creates a new "My timetable" calendar for each user, and fills this with their lessons for the remainder of the year. If the "My timetable" calendar already exists, all future events are cleared and replaced with new events.
 
 ### Contributing
 
