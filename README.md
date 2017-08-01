@@ -79,7 +79,7 @@ student1@school.org , 10   , Business , 1Mon:3 , D5   , JGO
 student2@school.org , 11   , P.E.     , 1Tue:3 ,      , DBA
 ...
 ```
-SIMS users can download the report [SIMS-StudentTimetables.RptDef](resources/SIMS-StudentTimetables.RptDef). This needs to be run and saved as `students.csv`
+SIMS users can download the report [SIMS-StudentTimetables.RptDef](resources/SIMS-StudentTimetables.RptDef).
 
 #### teachers.csv
 

@@ -14,7 +14,7 @@ namespace makecal
       get {
           var year = new string(Class.TakeWhile(char.IsDigit).ToArray());
           if (year == string.Empty) return null;
-          return Int32.Parse(year);
+          return int.Parse(year);
       }
     }
   }

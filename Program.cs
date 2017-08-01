@@ -24,11 +24,16 @@ namespace makecal
     private static readonly string calendarName = "My timetable";
     private static readonly string calendarColour = "#fbe983";
     private static readonly string appName = "makecal";
+    private static readonly string blankingCode = "Blanking Code";
     private static readonly int maxAttempts = 4;
     private static readonly int headerHeight = 10;
     private static readonly int statusCol = 50;
+    private static readonly int statusWidth = 30;
     private static readonly int simultaneousRequests = 40;
+    private static readonly int retryFirst = 5000;
+    private static readonly int retryExponent = 4;
     private static readonly object consoleLock = new object();
+    private static readonly ConsoleColor defaultBackground = Console.BackgroundColor;
 
     static void Main()
     {
@@ -41,6 +46,7 @@ namespace makecal
 
         Console.Clear();
         Console.CursorVisible = false;
+
         Console.WriteLine("TIMETABLE CALENDAR GENERATOR\n");
 
         var settings = await LoadSettingsAsync();
@@ -63,16 +69,18 @@ namespace makecal
             try {
               var line = countLocal + headerHeight;
               WriteToConsole(line, 0, $"({countLocal + 1}/{people.Count}) {person.Email}", consoleLock);
-              WriteToConsole(line, statusCol, "|   |               ", consoleLock);
+              WriteToConsole(line, statusCol, "|   |", consoleLock);
               for (var attempt = 1; attempt <= maxAttempts; attempt++) {
                 try {
                   await WriteTimetableAsync(person, settings, line);
-                  attempt = maxAttempts + 1;
-                } catch (Google.GoogleApiException) {
-                  if (attempt == maxAttempts) throw;
-                  var backoff = 5 * (int)Math.Pow(4, attempt - 1);
-                  WriteToConsole(line, statusCol, $"Waiting to retry ({attempt} of {maxAttempts - 1})...", consoleLock);
-                  await Task.Delay(backoff * 1000);
+                  break;
+                } catch (Google.GoogleApiException) when (attempt < maxAttempts) {
+                  var backoff = retryFirst * (int)Math.Pow(retryExponent, attempt - 1);
+                  WriteToConsole(line, statusCol, $"Error. Retrying ({attempt} of {maxAttempts - 1})...", consoleLock, ConsoleColor.DarkYellow);
+                  await Task.Delay(backoff);
+                } catch (Exception exc) {
+                  WriteToConsole(line, statusCol, $"Failed. {exc.Message}", consoleLock, ConsoleColor.Red);
+                  break;
                 }
               }
             } finally {
@@ -89,16 +97,27 @@ namespace makecal
 
         DisplayError(exc.Message);
 
-      } finally {
+      }
+#if DEBUG
+      finally {
         Console.ReadKey();
       }
+#endif
     }
 
-    private static void WriteToConsole(int line, int col, string text, object consoleLock)
+    private static void WriteToConsole(int line, int col, string text, object consoleLock, ConsoleColor? colour = null)
     {
       lock (consoleLock) {
+        if (colour == null) {
+          colour = defaultBackground;
+        }
         Console.SetCursorPosition(col, line);
+        Console.BackgroundColor = defaultBackground;
+        Console.Write(new string(' ', statusWidth));
+        Console.SetCursorPosition(col, line);
+        Console.BackgroundColor = colour.Value;
         Console.Write(text);
+        Console.BackgroundColor = defaultBackground;
       }
     }
 
@@ -192,8 +211,8 @@ namespace makecal
               if (string.IsNullOrEmpty(timetable[i])) continue;
               currentTeacher.Lessons.Add(new Lesson {
                 PeriodCode = periodCodes[i],
-                Class = timetable[i],
-                Room = rooms[i]
+                Class = timetable[i].Trim(new[] { '\ufffd' }),
+                Room = rooms[i].Trim(new[] { '\ufffd' })
               });
             }
 
@@ -209,7 +228,7 @@ namespace makecal
       var service = GetCalendarService(settings.ServiceAccountKey, person.Email);
       
       var calendarId = await PrepareCalendarAsync(service, line);
-      WriteToConsole(line, statusCol, "|\u2588\u2588 |               ", consoleLock);
+      WriteToConsole(line, statusCol, "|\u2588\u2588 |", consoleLock);
 
       var batch = new UnlimitedBatch(service);
 
@@ -227,16 +246,26 @@ namespace makecal
           string title = $"P{period}. ";
           string room;
 
+          if (myLessons.TryGetValue($"{dayCode}:{period}", out var lesson)) {
+            if (lesson.Class == blankingCode) continue;
+          }
+
           if (settings.OverrideDictionary.TryGetValue((date, period), out var overrideTitle)) {
             if (string.IsNullOrEmpty(overrideTitle)) continue;
             title += overrideTitle;
             room = null;
-          } else if (myLessons.TryGetValue($"{dayCode}:{period}", out var lesson)) {
+          } else if (lesson != null) {
             if (person.YearGroup == null) {
               var classYearGroup = lesson.YearGroup;
               if (classYearGroup != null && settings.StudyLeave.Any(o => o.Year == classYearGroup && o.StartDate <= date && o.EndDate >= date)) continue;
             }
-            title += string.IsNullOrEmpty(lesson.Teacher) ? lesson.Class : $"{lesson.Class} ({lesson.Teacher})";
+            var clsName = lesson.Class;
+            if (settings.RenameDictionary.TryGetValue(clsName, out var newTitle)) {
+              if (string.IsNullOrEmpty(newTitle)) continue;
+              clsName = newTitle;
+            }
+            if (clsName == blankingCode) continue;
+            title += string.IsNullOrEmpty(lesson.Teacher) ? clsName : $"{clsName} ({lesson.Teacher})";
             room = lesson.Room;
           } else {
             continue;
@@ -258,7 +287,7 @@ namespace makecal
       }
 
       await batch.ExecuteAsync();
-      WriteToConsole(line, statusCol, "|\u2588\u2588\u2588|               ", consoleLock);
+      WriteToConsole(line, statusCol, "|\u2588\u2588\u2588|", consoleLock);
     }
 
     private static CalendarService GetCalendarService(string serviceAccountKey, string email)
@@ -276,7 +305,7 @@ namespace makecal
       var calendars = await service.CalendarList.List().ExecuteAsync();
       var calendarId = calendars.Items.FirstOrDefault(o => o.Summary == calendarName)?.Id;
 
-      WriteToConsole(line, statusCol, "|\u2588  |               ", consoleLock);
+      WriteToConsole(line, statusCol, "|\u2588  |", consoleLock);
 
       if (calendarId == null) {
         var newCalendar = new Calendar { Summary = calendarName };
