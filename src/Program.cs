@@ -21,19 +21,21 @@ namespace makecal
     private static readonly string daysFileName = @"inputs\days.csv";
     private static readonly string studentsFileName = @"inputs\students.csv";
     private static readonly string teachersFileName = @"inputs\teachers.csv";
+
+    private static readonly string appName = "makecal";
     private static readonly string calendarName = "My timetable";
     private static readonly string calendarColour = "#fbe983";
-    private static readonly string appName = "makecal";
+
     private static readonly string blankingCode = "Blanking Code";
-    private static readonly int maxAttempts = 4;
+
     private static readonly int headerHeight = 10;
-    private static readonly int statusCol = 50;
-    private static readonly int statusWidth = 30;
+
     private static readonly int simultaneousRequests = 40;
+    private static readonly int maxAttempts = 4;
     private static readonly int retryFirst = 5000;
     private static readonly int retryExponent = 4;
-    private static readonly object consoleLock = new object();
-    private static readonly ConsoleColor defaultBackground = Console.BackgroundColor;
+
+    private const char REPLACEMENT_CHARACTER = '\ufffd';
 
     static void Main()
     {
@@ -42,8 +44,8 @@ namespace makecal
 
     private static async Task MainAsync()
     {
-      try {
-
+      try
+      {
         Console.Clear();
         Console.CursorVisible = false;
 
@@ -60,43 +62,51 @@ namespace makecal
         
         var people = students.Concat(teachers).ToList();
        
-        for (var i = 0; i < people.Count; i++) {
+        for (var i = 0; i < people.Count; i++)
+        {
           var countLocal = i;
           await Task.Delay(10);
           await throttler.WaitAsync();
           var person = people[countLocal];
           tasks.Add(Task.Run(async () => {
-            try {
+            try
+            {
               var line = countLocal + headerHeight;
-              WriteToConsole(line, 0, $"({countLocal + 1}/{people.Count}) {person.Email}", consoleLock);
-              WriteToConsole(line, statusCol, "|   |", consoleLock);
-              for (var attempt = 1; attempt <= maxAttempts; attempt++) {
-                try {
+              ConsoleHelper.WriteDescription(line, $"({countLocal + 1}/{people.Count}) {person.Email}");
+              ConsoleHelper.WriteProgress(line, 0);
+              for (var attempt = 1; attempt <= maxAttempts; attempt++)
+              {
+                try
+                {
                   await WriteTimetableAsync(person, settings, line);
                   break;
-                } catch (Google.GoogleApiException) when (attempt < maxAttempts) {
+                }
+                catch (Google.GoogleApiException) when (attempt < maxAttempts)
+                {
                   var backoff = retryFirst * (int)Math.Pow(retryExponent, attempt - 1);
-                  WriteToConsole(line, statusCol, $"Error. Retrying ({attempt} of {maxAttempts - 1})...", consoleLock, ConsoleColor.DarkYellow);
+                  ConsoleHelper.WriteStatus(line, $"Error. Retrying ({attempt} of {maxAttempts - 1})...", ConsoleColor.DarkYellow);
                   await Task.Delay(backoff);
-                } catch (Exception exc) {
-                  WriteToConsole(line, statusCol, $"Failed. {exc.Message}", consoleLock, ConsoleColor.Red);
+                }
+                catch (Exception exc)
+                {
+                  ConsoleHelper.WriteStatus(line, $"Failed. {exc.Message}", ConsoleColor.Red);
                   break;
                 }
               }
-            } finally {
+            }
+            finally
+            {
               throttler.Release();
             }
           }));
         }
-
         await Task.WhenAll(tasks);
         Console.SetCursorPosition(0, headerHeight + people.Count);
         Console.WriteLine("\nCalendar generation complete.\n");
-
-      } catch (Exception exc) {
-
-        DisplayError(exc.Message);
-
+      }
+      catch (Exception exc)
+      {
+        ConsoleHelper.WriteError(exc.Message);
       }
 #if DEBUG
       finally {
@@ -105,26 +115,11 @@ namespace makecal
 #endif
     }
 
-    private static void WriteToConsole(int line, int col, string text, object consoleLock, ConsoleColor? colour = null)
-    {
-      lock (consoleLock) {
-        if (colour == null) {
-          colour = defaultBackground;
-        }
-        Console.SetCursorPosition(col, line);
-        Console.BackgroundColor = defaultBackground;
-        Console.Write(new string(' ', statusWidth));
-        Console.SetCursorPosition(col, line);
-        Console.BackgroundColor = colour.Value;
-        Console.Write(text);
-        Console.BackgroundColor = defaultBackground;
-      }
-    }
-
     private static async Task<Settings> LoadSettingsAsync()
     {
       Console.WriteLine($"Reading {settingsFileName}");
-      var settings = JsonConvert.DeserializeObject<Settings>(await File.ReadAllTextAsync(settingsFileName), new IsoDateTimeConverter { DateTimeFormat = "dd-MMM-yy" });
+      var settingsText = await File.ReadAllTextAsync(settingsFileName);
+      var settings = JsonConvert.DeserializeObject<Settings>(settingsText, new IsoDateTimeConverter { DateTimeFormat = "dd-MMM-yy" });
 
       Console.WriteLine($"Reading {keyFileName}");
       settings.ServiceAccountKey = await File.ReadAllTextAsync(keyFileName);
@@ -133,17 +128,18 @@ namespace makecal
       settings.DayTypes = new Dictionary<DateTime, string>();
 
       using (var fs = File.Open(daysFileName, FileMode.Open))
-      using (var reader = new CsvReader(fs)) {
-
-        while (reader.HasMoreRecords) {
+      using (var reader = new CsvReader(fs))
+      {
+        while (reader.HasMoreRecords)
+        {
           var record = await reader.ReadDataRecordAsync();
-          if (string.IsNullOrEmpty(record[0])) continue;
+          if (string.IsNullOrEmpty(record[0])) {
+            continue;
+          }
           var date = DateTime.ParseExact(record[0], "dd-MMM-yy", null);
           settings.DayTypes.Add(date, record[1] + date.DayOfWeek.ToString("G").Substring(0, 3));
         }
-
       }
-
       return settings;
     }
 
@@ -153,37 +149,51 @@ namespace makecal
 
       var students = new List<Person>();
 
-      using (var fs = File.Open(studentsFileName, FileMode.Open)) {
-        using (var reader = new CsvReader(fs)) {
+      using (var fs = File.Open(studentsFileName, FileMode.Open))
+      using (var reader = new CsvReader(fs))
+      {
+        Person currentStudent = null;
+        string currentSubject = null;
 
-          Person currentStudent = null;
-          string currentSubject = null;
+        while (reader.HasMoreRecords) {
 
-          while (reader.HasMoreRecords) {
-
-            var record = await reader.ReadDataRecordAsync();
-            if (record[StudentFields.Email] == nameof(StudentFields.Email)) continue;
-
-            if (!string.IsNullOrEmpty(record[StudentFields.Email])) {
-              var newEmail = record[StudentFields.Email].ToLower();
-              if (currentStudent?.Email != newEmail) {
-                currentStudent = new Person { Email = newEmail, YearGroup = Int32.Parse(record[StudentFields.Year]), Lessons = new List<Lesson>() };
-                currentSubject = null;
-                students.Add(currentStudent);
-              }
-            }
-
-            if (!string.IsNullOrEmpty(record[StudentFields.Subject])) currentSubject = record[StudentFields.Subject];
-            if (currentStudent == null || currentSubject == null) throw new Exception("Incorrectly formatted timetable.");
-
-            currentStudent.Lessons.Add(new Lesson {
-              PeriodCode = record[StudentFields.Period],
-              Class = currentSubject,
-              Room = record[StudentFields.Room],
-              Teacher = record[StudentFields.Teacher]
-            });
-
+          var record = await reader.ReadDataRecordAsync();
+          if (record[StudentFields.Email] == nameof(StudentFields.Email))
+          {
+            continue;
           }
+
+          if (!string.IsNullOrEmpty(record[StudentFields.Email]))
+          {
+            var newEmail = record[StudentFields.Email].ToLower();
+            if (currentStudent?.Email != newEmail)
+            {
+              currentStudent = new Person {
+                Email = newEmail,
+                YearGroup = Int32.Parse(record[StudentFields.Year]),
+                Lessons = new List<Lesson>()
+              };
+              currentSubject = null;
+              students.Add(currentStudent);
+            }
+          }
+
+          if (!string.IsNullOrEmpty(record[StudentFields.Subject]))
+          {
+            currentSubject = record[StudentFields.Subject];
+          }
+
+          if (currentStudent == null || currentSubject == null)
+          {
+            throw new Exception("Incorrectly formatted timetable.");
+          }
+
+          currentStudent.Lessons.Add(new Lesson {
+            PeriodCode = record[StudentFields.Period],
+            Class = currentSubject,
+            Room = record[StudentFields.Room],
+            Teacher = record[StudentFields.Teacher]
+          });
         }
       }
       return students;
@@ -195,29 +205,31 @@ namespace makecal
 
       var teachers = new List<Person>();
 
-      using (var fs = File.Open(teachersFileName, FileMode.Open)) {
-        using (var reader = new CsvReader(fs)) {
+      using (var fs = File.Open(teachersFileName, FileMode.Open))
+      using (var reader = new CsvReader(fs))
+      {
+        var periodCodes = await reader.ReadDataRecordAsync();
 
-          var periodCodes = await reader.ReadDataRecordAsync();
+        while (reader.HasMoreRecords)
+        {
+          var timetable = await reader.ReadDataRecordAsync();
+          var rooms = await reader.ReadDataRecordAsync();
+          var currentTeacher = new Person { Email = timetable[0].ToLower(), Lessons = new List<Lesson>() };
 
-          while (reader.HasMoreRecords) {
-
-            var timetable = await reader.ReadDataRecordAsync();
-            var rooms = await reader.ReadDataRecordAsync();
-
-            var currentTeacher = new Person { Email = timetable[0].ToLower(), Lessons = new List<Lesson>() };
-
-            for (var i = 1; i < timetable.Count; i++) {
-              if (string.IsNullOrEmpty(timetable[i])) continue;
-              currentTeacher.Lessons.Add(new Lesson {
-                PeriodCode = periodCodes[i],
-                Class = timetable[i].Trim(new[] { '\ufffd' }),
-                Room = rooms[i].Trim(new[] { '\ufffd' })
-              });
+          for (var i = 1; i < timetable.Count; i++)
+          {
+            if (string.IsNullOrEmpty(timetable[i]))
+            {
+              continue;
             }
-
-            teachers.Add(currentTeacher);
+            currentTeacher.Lessons.Add(new Lesson {
+              PeriodCode = periodCodes[i],
+              Class = timetable[i].Trim(new[] { REPLACEMENT_CHARACTER }),
+              Room = rooms[i].Trim(new[] { REPLACEMENT_CHARACTER })
+            });
           }
+
+          teachers.Add(currentTeacher);
         }
       }
       return teachers;
@@ -228,46 +240,69 @@ namespace makecal
       var service = GetCalendarService(settings.ServiceAccountKey, person.Email);
       
       var calendarId = await PrepareCalendarAsync(service, line);
-      WriteToConsole(line, statusCol, "|\u2588\u2588 |", consoleLock);
+      ConsoleHelper.WriteProgress(line, 2);
 
       var batch = new UnlimitedBatch(service);
 
       var myStudyLeave = person.YearGroup == null ? new List<StudyLeave>() : settings.StudyLeave.Where(o => o.Year == person.YearGroup);
       var myLessons = person.Lessons.GroupBy(o => o.PeriodCode).ToDictionary(o => o.Key, o => o.First());
 
-      foreach (var dayOfCalendar in settings.DayTypes.Where(o => o.Key >= DateTime.Today)) {
-
+      foreach (var dayOfCalendar in settings.DayTypes.Where(o => o.Key >= DateTime.Today))
+      {
         var date = dayOfCalendar.Key;
         var dayCode = dayOfCalendar.Value;
-        if (myStudyLeave.Any(o => o.StartDate <= date && o.EndDate >= date)) continue;
+        if (myStudyLeave.Any(o => o.StartDate <= date && o.EndDate >= date))
+        {
+          continue;
+        }
 
-        for (var period = 1; period <= settings.DayTypes.Count; period++) {
-
+        for (var period = 1; period <= settings.DayTypes.Count; period++)
+        {
           string title = $"P{period}. ";
           string room;
 
-          if (myLessons.TryGetValue($"{dayCode}:{period}", out var lesson)) {
-            if (lesson.Class == blankingCode) continue;
+          if (myLessons.TryGetValue($"{dayCode}:{period}", out var lesson) && lesson.Class == blankingCode)
+          {
+            continue;
           }
 
-          if (settings.OverrideDictionary.TryGetValue((date, period), out var overrideTitle)) {
-            if (string.IsNullOrEmpty(overrideTitle)) continue;
+          if (settings.OverrideDictionary.TryGetValue((date, period), out var overrideTitle))
+          {
+            if (string.IsNullOrEmpty(overrideTitle))
+            {
+              continue;
+            }
             title += overrideTitle;
             room = null;
-          } else if (lesson != null) {
-            if (person.YearGroup == null) {
+          }
+          else if (lesson != null)
+          {
+            if (person.YearGroup == null)
+            {
               var classYearGroup = lesson.YearGroup;
-              if (classYearGroup != null && settings.StudyLeave.Any(o => o.Year == classYearGroup && o.StartDate <= date && o.EndDate >= date)) continue;
+              if (classYearGroup != null && settings.StudyLeave.Any(o => o.Year == classYearGroup && o.StartDate <= date && o.EndDate >= date))
+              {
+                continue;
+              }
             }
             var clsName = lesson.Class;
-            if (settings.RenameDictionary.TryGetValue(clsName, out var newTitle)) {
-              if (string.IsNullOrEmpty(newTitle)) continue;
+            if (settings.RenameDictionary.TryGetValue(clsName, out var newTitle))
+            {
+              if (string.IsNullOrEmpty(newTitle))
+              {
+                continue;
+              }
               clsName = newTitle;
             }
-            if (clsName == blankingCode) continue;
+            if (clsName == blankingCode)
+            {
+              continue;
+            }
             title += string.IsNullOrEmpty(lesson.Teacher) ? clsName : $"{clsName} ({lesson.Teacher})";
             room = lesson.Room;
-          } else {
+          }
+          else
+          {
             continue;
           }
 
@@ -287,7 +322,7 @@ namespace makecal
       }
 
       await batch.ExecuteAsync();
-      WriteToConsole(line, statusCol, "|\u2588\u2588\u2588|", consoleLock);
+      ConsoleHelper.WriteProgress(line, 3);
     }
 
     private static CalendarService GetCalendarService(string serviceAccountKey, string email)
@@ -296,7 +331,7 @@ namespace makecal
 
       return new CalendarService(new BaseClientService.Initializer() {
         HttpClientInitializer = credential,
-        ApplicationName = appName,
+        ApplicationName = appName
       });
     }
 
@@ -305,33 +340,27 @@ namespace makecal
       var calendars = await service.CalendarList.List().ExecuteAsync();
       var calendarId = calendars.Items.FirstOrDefault(o => o.Summary == calendarName)?.Id;
 
-      WriteToConsole(line, statusCol, "|\u2588  |", consoleLock);
+      ConsoleHelper.WriteProgress(line, 1);
 
-      if (calendarId == null) {
+      if (calendarId == null)
+      {
         var newCalendar = new Calendar { Summary = calendarName };
         newCalendar = await service.Calendars.Insert(newCalendar).ExecuteAsync();
         calendarId = newCalendar.Id;
         await service.CalendarList.SetColor(calendarId, calendarColour).ExecuteAsync();
-      } else {
+      }
+      else
+      {
         var existingFutureEvents = await service.Events.List(calendarId).FetchAllAsync(after: DateTime.Today);
         var batch = new UnlimitedBatch(service);
-        foreach (var existingEvent in existingFutureEvents) {
+        foreach (var existingEvent in existingFutureEvents)
+        {
           batch.Queue(service.Events.Delete(calendarId, existingEvent.Id));
         }
         await batch.ExecuteAsync();
       }
 
       return calendarId;
-    }
-
-    private static void DisplayError(string message)
-    {
-      Console.WriteLine();
-      var backgroundColor = Console.BackgroundColor;
-      Console.BackgroundColor = ConsoleColor.Red;
-      Console.WriteLine($"Error: {message}");
-      Console.BackgroundColor = backgroundColor;
-      Console.WriteLine();
     }
   }
 }

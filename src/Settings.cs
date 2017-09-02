@@ -27,8 +27,8 @@ namespace makecal
       public string StartTime {
         set {
           var parts = value.Split(':');
-          StartHour = Convert.ToInt32(parts[0]);
-          StartMinute = Convert.ToInt32(parts[1]);
+          StartHour = int.Parse(parts[0]);
+          StartMinute = int.Parse(parts[1]);
         }
       }
       public int StartHour { get; private set; }

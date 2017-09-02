@@ -8,7 +8,7 @@ using Google.Apis.Requests;
 
 namespace makecal
 {
-  public static class CalendarHelper
+  public static class CalendarExtensions
   {
 
     public static async Task<IList<Event>> FetchAllAsync(this EventsResource.ListRequest listRequest, DateTime? after = null, DateTime? before = null)

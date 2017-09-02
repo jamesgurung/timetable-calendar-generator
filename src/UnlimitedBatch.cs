@@ -17,7 +17,10 @@ namespace makecal
 
     public UnlimitedBatch(IClientService service, int batchSizeLimit = 50)
     {
-      if (batchSizeLimit <= 0) throw new ArgumentException("Batch size limit must be positive.", nameof(batchSizeLimit));
+      if (batchSizeLimit <= 0)
+      {
+        throw new ArgumentOutOfRangeException(nameof(batchSizeLimit));
+      }
       _service = service ?? throw new ArgumentNullException(nameof(service));
       _batches = new List<BatchRequest>() { new BatchRequest(_service) };
       BatchSizeLimit = batchSizeLimit;
@@ -25,8 +28,15 @@ namespace makecal
 
     public void Queue<TResponse>(IClientServiceRequest request, BatchRequest.OnResponse<TResponse> callback) where TResponse : class
     {
-      if (request == null) throw new ArgumentNullException(nameof(request));
-      if (callback == null) throw new ArgumentNullException(nameof(callback));
+      if (request == null)
+      {
+        throw new ArgumentNullException(nameof(request));
+      }
+
+      if (callback == null)
+      {
+        throw new ArgumentNullException(nameof(callback));
+      }
 
       var currentBatch = _batches.Last();
       if (currentBatch.Count == BatchSizeLimit)
