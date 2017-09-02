@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
 namespace makecal
 {
@@ -12,9 +11,12 @@ namespace makecal
 
     public int? YearGroup {
       get {
-          var year = new string(Class.TakeWhile(char.IsDigit).ToArray());
-          if (year == string.Empty) return null;
-          return int.Parse(year);
+        var year = new string(Class.TakeWhile(char.IsDigit).ToArray());
+        if (year == string.Empty)
+        {
+          return null;
+        }
+        return int.Parse(year);
       }
     }
   }
