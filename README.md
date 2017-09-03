@@ -51,7 +51,19 @@ Configure lesson timings, study leave dates and periods to override for all user
 
 #### key.json
 
-The private key file for your service account, which can be downloaded from the [Google Cloud Platform console](https://console.cloud.google.com/apis/credentials). Your service account needs to be delegated domain-wide authority to the scope `https://www.googleapis.com/auth/calendar`.
+You need to create a free Google service account so this tool can access user calendars:
+
+ 1. Create a new project on the [Google Cloud Platform console](https://console.cloud.google.com/projectcreate).
+ 1. On this project, [create a new service account](https://console.cloud.google.com/apis/credentials/serviceaccountkey). Give it any name and set the role to "Project - Editor". Select "Furnish a new private key (JSON)" and "Enable G Suite Domain-wide Delegation". Set the product name to "Timetable Calendar Generator" and click "Create".
+ 1. The service account's private key will be downloaded to your computer. Rename it to `key.json` and put it in the `inputs` folder.
+ 1. Now delegate domain-wide authority to this service account:
+    1. On the Service Accounts overview page, click "View Client ID" and copy the long ID number.
+    1. Open your G Suite domain control panel and click on the "Security" icon. This can sometimes be found in the "More controls" option.
+    1. Go to Advanced settings > Authentication > Manage OAuth client access.
+    1. In the "Client Name" field enter the service account's Client ID which you copied earlier.
+    1. In the "One or More API Scopes" field enter `https://www.googleapis.com/auth/calendar`
+    1. Click the Authorize button.
+
 
 #### days.csv
 
