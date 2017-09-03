@@ -14,7 +14,7 @@ using Newtonsoft.Json.Converters;
 
 namespace makecal
 {
-  public class Program
+  public static class Program
   {
     private static readonly string settingsFileName = @"inputs\settings.json";
     private static readonly string keyFileName = @"inputs\key.json";
@@ -185,7 +185,7 @@ namespace makecal
 
           if (currentStudent == null || currentSubject == null)
           {
-            throw new Exception("Incorrectly formatted timetable.");
+            throw new InvalidOperationException("Incorrectly formatted timetable.");
           }
 
           currentStudent.Lessons.Add(new Lesson {
@@ -310,11 +310,11 @@ namespace makecal
           var start = new DateTime(date.Year, date.Month, date.Day, lessonTime.StartHour, lessonTime.StartMinute, 0);
           var end = start.AddMinutes(lessonTime.Duration);
 
-          var ev = new Event() {
+          var ev = new Event {
             Summary = title,
             Location = room,
-            Start = new EventDateTime() { DateTime = start },
-            End = new EventDateTime() { DateTime = end }
+            Start = new EventDateTime { DateTime = start },
+            End = new EventDateTime { DateTime = end }
           };
           batch.Queue(service.Events.Insert(ev, calendarId));
 
@@ -329,7 +329,7 @@ namespace makecal
     {
       var credential = GoogleCredential.FromJson(serviceAccountKey).CreateScoped(CalendarService.Scope.Calendar).CreateWithUser(email);
 
-      return new CalendarService(new BaseClientService.Initializer() {
+      return new CalendarService(new BaseClientService.Initializer {
         HttpClientInitializer = credential,
         ApplicationName = appName
       });

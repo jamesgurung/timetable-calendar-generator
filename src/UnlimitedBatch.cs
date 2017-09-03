@@ -9,8 +9,8 @@ namespace makecal
 {
   public class UnlimitedBatch
   {
-    private IClientService _service;
-    private IList<BatchRequest> _batches;
+    private readonly IClientService _service;
+    private readonly IList<BatchRequest> _batches;
 
     public int BatchSizeLimit { get; private set; }
     public int BatchCount => _batches.Count;
@@ -22,7 +22,7 @@ namespace makecal
         throw new ArgumentOutOfRangeException(nameof(batchSizeLimit));
       }
       _service = service ?? throw new ArgumentNullException(nameof(service));
-      _batches = new List<BatchRequest>() { new BatchRequest(_service) };
+      _batches = new List<BatchRequest> { new BatchRequest(_service) };
       BatchSizeLimit = batchSizeLimit;
     }
 
