@@ -109,7 +109,8 @@ namespace makecal
         ConsoleHelper.WriteError(exc.Message);
       }
 #if DEBUG
-      finally {
+      finally
+      {
         Console.ReadKey();
       }
 #endif

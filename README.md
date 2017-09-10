@@ -53,8 +53,9 @@ Configure lesson timings, study leave dates and periods to override for all user
 
 You need to create a free Google service account so this tool can access user calendars:
 
- 1. Create a new project on the [Google Cloud Platform console](https://console.cloud.google.com/projectcreate).
- 1. On this project, [create a new service account](https://console.cloud.google.com/apis/credentials/serviceaccountkey). Give it any name and set the role to "Project - Editor". Select "Furnish a new private key (JSON)" and "Enable G Suite Domain-wide Delegation". Set the product name to "Timetable Calendar Generator" and click "Create".
+ 1. [Create a new project](https://console.cloud.google.com/projectcreate) on the Google Cloud Platform console.
+ 1. [Enable the Google Calendar API.](https://console.cloud.google.com/apis/api/calendar-json.googleapis.com/overview) Depending on the size of your school, you may also need to apply for a raised quota. The tool typically uses up to 2000 API requests per user each time it is run.
+ 1. [Create a new service account.](https://console.cloud.google.com/apis/credentials/serviceaccountkey) Give it any name and set the role to "Project - Editor". Select "Furnish a new private key (JSON)" and "Enable G Suite Domain-wide Delegation". Set the product name to "Timetable Calendar Generator" and click "Create".
  1. The service account's private key will be downloaded to your computer. Rename it to `key.json` and put it in the `inputs` folder.
  1. Now delegate domain-wide authority to this service account:
     1. On the Service Accounts overview page, click "View Client ID" and copy the long ID number.
