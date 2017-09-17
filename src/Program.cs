@@ -159,6 +159,7 @@ namespace makecal
         while (reader.HasMoreRecords) {
 
           var record = await reader.ReadDataRecordAsync();
+
           if (record[StudentFields.Email] == nameof(StudentFields.Email))
           {
             continue;
@@ -225,8 +226,8 @@ namespace makecal
             }
             currentTeacher.Lessons.Add(new Lesson {
               PeriodCode = periodCodes[i],
-              Class = timetable[i].Trim(new[] { REPLACEMENT_CHARACTER }),
-              Room = rooms[i].Trim(new[] { REPLACEMENT_CHARACTER })
+              Class = timetable[i].Trim().TrimEnd(new[] { REPLACEMENT_CHARACTER }),
+              Room = rooms[i].Trim().TrimEnd(new[] { REPLACEMENT_CHARACTER })
             });
           }
 
