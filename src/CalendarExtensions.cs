@@ -19,11 +19,10 @@ namespace makecal
       return await pageStreamer.FetchAllAsync(listRequest, CancellationToken.None);
     }
 
-    public static CalendarListResource.PatchRequest SetColor(this CalendarListResource calendarList, string calendarId, string color)
+    public static CalendarListResource.PatchRequest SetColor(this CalendarListResource calendarList, string calendarId, string colorId)
     {
-      var calListEntry = new CalendarListEntry { BackgroundColor = color };
+      var calListEntry = new CalendarListEntry { ColorId = colorId };
       var setColourRequest = calendarList.Patch(calListEntry, calendarId);
-      setColourRequest.ColorRgbFormat = true;
       return setColourRequest;
     }
 

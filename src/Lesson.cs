@@ -2,7 +2,7 @@
 
 namespace makecal
 {
-  internal class Lesson
+  public class Lesson
   {
     public string PeriodCode { get; set; }
     public string Room { get; set; }

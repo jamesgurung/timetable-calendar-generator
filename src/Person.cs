@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace makecal
 {
-  internal class Person
+  public class Person
   {
     public string Email { get; set; }
     public int? YearGroup { get; set; }

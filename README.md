@@ -9,7 +9,7 @@ This is a cross-platform command line tool for bulk generating student and teach
 1. Ensure you have the [.NET Core 2 runtime](https://www.microsoft.com/net/download/core#/runtime) installed.
 1. Download the latest ZIP package from our [Releases page](https://github.com/jamesgurung/timetable-calendar-generator/releases) and extract the contents.
 1. In the "inputs" directory, add the input files defined below.
-1. Open a command line and run `dotnet makecal.dll`
+1. Open a command line and run `dotnet makecal.dll` to generate CSV calendar files, or `dotnet makecal.dll --online` to directly upload users' timetables to Google Calendar (this requires domain admin privileges).
 
 ### Input files
 
@@ -51,7 +51,7 @@ Configure lesson timings, study leave dates and periods to override for all user
 
 #### key.json
 
-You need to create a free Google service account so this tool can access user calendars:
+If you are using the `--online` flag to directly upload timetables to Google Calendar, you will need a service account key:
 
  1. [Create a new project](https://console.cloud.google.com/projectcreate) on the Google Cloud Platform console.
  1. [Enable the Google Calendar API.](https://console.cloud.google.com/apis/api/calendar-json.googleapis.com/overview) Depending on the size of your school, you may also need to apply for a raised quota. The tool typically uses up to 2000 API requests per user each time it is run.
@@ -122,6 +122,12 @@ To create this file in SIMS:
 
 ### Output
 
+The output depends on which flag was set:
+
+#### `--csv` (default)
+The tool creates a "calendars" folder containing a CSV calendar file for each user. These files can be shared along with the [instructions for importing to Google Calendar](csv-import-tutorial.md).
+
+#### `--online`
 The tool creates a new "My timetable" calendar for each user, and fills this with their lessons for the remainder of the year. If the "My timetable" calendar already exists, all future events are cleared and replaced with new events.
 
 ### Contributing

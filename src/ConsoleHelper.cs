@@ -11,6 +11,8 @@ namespace makecal
 
     private const char FULL_BLOCK = '\u2588';
 
+    public static int MinConsoleWidth => statusCol + statusWidth;
+
     private static void Write(int line, int col, string text, ConsoleColor? colour = null)
     {
       lock (consoleLock)
@@ -40,11 +42,11 @@ namespace makecal
     }
 
     public static void WriteProgress(int line, int progress) {
-      if (progress < 0 || progress > 3)
+      if (progress < 0 || progress > 2)
       {
         throw new ArgumentOutOfRangeException(nameof(progress));
       }
-      var status = new string(FULL_BLOCK, progress).PadRight(3);
+      var status = new string(FULL_BLOCK, progress).PadRight(2);
       Write(line, statusCol, $"|{status}|");
     }
 

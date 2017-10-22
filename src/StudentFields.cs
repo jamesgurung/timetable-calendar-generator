@@ -1,6 +1,6 @@
 ﻿namespace makecal
 {
-  static class StudentFields
+  public static class StudentFields
   {
     public static readonly int Email = 0;
     public static readonly int Year = 1;
