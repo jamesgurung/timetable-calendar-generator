@@ -34,7 +34,7 @@ namespace makecal
       else
       {
         await DeleteExistingEventsAsync();
-      }      
+      }
     }
 
     public async Task WriteAsync(IList<CalendarEvent> events)
@@ -49,9 +49,11 @@ namespace makecal
           Start = new EventDateTime { DateTime = calendarEvent.Start },
           End = new EventDateTime { DateTime = calendarEvent.End }
         };
-        insertBatch.Queue(Service.Events.Insert(googleCalendarEvent, CalendarId));
+        var insertRequest = Service.Events.Insert(googleCalendarEvent, CalendarId);
+        insertRequest.Fields = "id";
+        insertBatch.Queue(insertRequest);
       }
-      await insertBatch.ExecuteAsync();
+      await insertBatch.ExecuteWithRetryAsync();
     }
 
     private static CalendarService GetCalendarService(string serviceAccountKey, string email)
@@ -67,27 +69,33 @@ namespace makecal
 
     private async Task<string> GetCalendarIdAsync()
     {
-      var calendars = await Service.CalendarList.List().ExecuteAsync();
+      var listRequest = Service.CalendarList.List();
+      listRequest.Fields = "items(id,summary)";
+      var calendars = await listRequest.ExecuteWithRetryAsync();
       return calendars.Items.FirstOrDefault(o => o.Summary == calendarName)?.Id;
     }
 
     private async Task CreateNewCalendarAsync()
     {
       var newCalendar = new Calendar { Summary = calendarName };
-      newCalendar = await Service.Calendars.Insert(newCalendar).ExecuteAsync();
+      var insertRequest = Service.Calendars.Insert(newCalendar);
+      insertRequest.Fields = "id";
+      newCalendar = await insertRequest.ExecuteWithRetryAsync();
       CalendarId = newCalendar.Id;
-      await Service.CalendarList.SetColor(CalendarId, calendarColor).ExecuteAsync();
+      await Service.CalendarList.SetColor(CalendarId, calendarColor).ExecuteWithRetryAsync();
     }
 
     private async Task DeleteExistingEventsAsync()
     {
-      var existingFutureEvents = await Service.Events.List(CalendarId).FetchAllAsync(after: DateTime.Today);
+      var listRequest = Service.Events.List(CalendarId);
+      listRequest.Fields = "items(id),nextPageToken";
+      var existingFutureEvents = await listRequest.FetchAllWithRetryAsync(after: DateTime.Today);
       var deleteBatch = new UnlimitedBatch(Service);
       foreach (var existingEvent in existingFutureEvents)
       {
         deleteBatch.Queue(Service.Events.Delete(CalendarId, existingEvent.Id));
       }
-      await deleteBatch.ExecuteAsync();
+      await deleteBatch.ExecuteWithRetryAsync();
     }
   }
 }

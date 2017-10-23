@@ -1,6 +1,6 @@
 # Timetable Calendar Generator :calendar:
 
-This is a cross-platform command line tool for bulk generating student and teacher timetables on Google Calendar.
+This is a cross-platform command line tool for bulk generating student and teacher timetables. It can create comma-separated (.csv) and iCal (.ics) files as well as uploading directly to Google Calendar.
 
 ![Student timetable](resources/example.png)
 
@@ -9,7 +9,10 @@ This is a cross-platform command line tool for bulk generating student and teach
 1. Ensure you have the [.NET Core 2 runtime](https://www.microsoft.com/net/download/core#/runtime) installed.
 1. Download the latest ZIP package from our [Releases page](https://github.com/jamesgurung/timetable-calendar-generator/releases) and extract the contents.
 1. In the "inputs" directory, add the input files defined below.
-1. Open a command line and run `dotnet makecal.dll` to generate CSV calendar files, or `dotnet makecal.dll --online` to directly upload users' timetables to Google Calendar (this requires domain admin privileges).
+1. Open a command line and run one of the following commands:
+    1. `dotnet makecal.dll` to generate comma-separated (.csv) calendar files
+    1. `dotnet makecal.dll --ical` to generate iCalendar (.ics) files
+    1. `dotnet makecal.dll --online` to directly upload users' timetables to Google Calendar (this requires domain admin privileges)
 
 ### Input files
 
@@ -124,8 +127,8 @@ To create this file in SIMS:
 
 The output depends on which flag was set:
 
-#### `--csv` (default)
-The tool creates a "calendars" folder containing a CSV calendar file for each user. These files can be shared along with the [instructions for importing to Google Calendar](csv-import-tutorial.md).
+#### `--csv` (default) or `--ical`
+The tool creates a "calendars" folder containing a CSV or ICS calendar file for each user. These files can be shared along with the [instructions for importing to Google Calendar](import-tutorial.md).
 
 #### `--online`
 The tool creates a new "My timetable" calendar for each user, and fills this with their lessons for the remainder of the year. If the "My timetable" calendar already exists, all future events are cleared and replaced with new events.

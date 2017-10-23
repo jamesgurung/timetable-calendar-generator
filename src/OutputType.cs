@@ -3,6 +3,7 @@
   public enum OutputType
   {
     Csv,
+    Ical,
     GoogleCalendar
   }
 }

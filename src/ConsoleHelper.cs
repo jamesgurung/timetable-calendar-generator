@@ -4,6 +4,9 @@ namespace makecal
 {
   public static class ConsoleHelper
   {
+    public static int HeaderHeight { get; } = 10;
+    public static int FooterHeight { get; } = 3;
+
     private static readonly int statusCol = 50;
     private static readonly int statusWidth = 30;
     private static readonly ConsoleColor defaultBackground = Console.BackgroundColor;

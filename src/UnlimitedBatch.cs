@@ -53,11 +53,11 @@ namespace makecal
       Queue<object>(request, (content, error, index, message) => { });
     }
 
-    public async Task ExecuteAsync()
+    public async Task ExecuteWithRetryAsync()
     {
       foreach (var batch in _batches)
       {
-        await batch.ExecuteAsync();
+        await batch.ExecuteWithRetryAsync();
       }
     }
   }

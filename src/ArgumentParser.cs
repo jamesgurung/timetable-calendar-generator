@@ -8,7 +8,8 @@ namespace makecal
   {
     private bool UseGoogle { get; }
     private bool UseCsv { get; }
-
+    private bool UseIcal { get; }
+    
     public ArgumentParser(string[] args)
     {
       var flags = args?.Select(o => o.ToLowerInvariant()).ToList() ?? new List<string>();
@@ -16,27 +17,32 @@ namespace makecal
       {
         switch (flag)
         {
-          case "--online":
-          case "-o":
-            UseGoogle = true;
-            break;
           case "--csv":
           case "-c":
             UseCsv = true;
+            break;
+          case "--ical":
+          case "-i":
+            UseIcal = true;
+            break;
+          case "--online":
+          case "-o":
+            UseGoogle = true;
             break;
           default:
             throw new ArgumentException("Flag not recognised: " + flag);
         }
       }
-      if (UseGoogle && UseCsv)
+      if (new[] { UseCsv, UseIcal, UseGoogle }.Count(b => b) > 1)
       {
-        throw new ArgumentException("Use only one flag: --online or --csv");
+        throw new ArgumentException("Use only one flag: --csv or --ical or --online");
       }
     }
 
     public (OutputType Type, string Name, int SimultaneousRequests) GetOutputFormat()
     {
       if (UseGoogle) return (OutputType.GoogleCalendar, "Google", 40);
+      if (UseIcal) return (OutputType.Ical, "iCal", 4);
       return (OutputType.Csv, "CSV", 4);
     }
   }
