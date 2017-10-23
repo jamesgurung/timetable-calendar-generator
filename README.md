@@ -1,6 +1,6 @@
 # Timetable Calendar Generator :calendar:
 
-This is a cross-platform command line tool for bulk generating student and teacher timetables. It can create comma-separated (.csv) and iCal (.ics) files as well as uploading directly to Google Calendar.
+This is a cross-platform command line tool for bulk generating student and teacher timetables. It can create calendar files in comma-separated (.csv) or iCal (.ics) format, or upload directly to Google Calendar.
 
 ![Student timetable](resources/example.png)
 
@@ -128,7 +128,7 @@ To create this file in SIMS:
 The output depends on which flag was set:
 
 #### `--csv` (default) or `--ical`
-The tool creates a "calendars" folder containing a CSV or ICS calendar file for each user. These files can be shared along with the [instructions for importing to Google Calendar](import-tutorial.md).
+The tool creates a "calendars" folder containing a CSV or ICS calendar file for each user. These files can be shared along with [instructions for importing to Google Calendar](import-tutorial.md).
 
 #### `--google`
 The tool creates a new "My timetable" calendar for each user, and fills this with their lessons for the remainder of the year. If the "My timetable" calendar already exists, all future events are cleared and replaced with new events.
