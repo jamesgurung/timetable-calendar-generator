@@ -16,46 +16,32 @@ namespace makecal
     private static readonly string calendarColor = "15";
 
     private CalendarService Service { get; }
-    private string CalendarId { get; set; }
 
     public GoogleCalendarWriter(string email, string serviceAccountKey)
     {
       Service = GetCalendarService(serviceAccountKey, email);
     }
 
-    private async Task PrepareAsync()
-    {
-      CalendarId = await GetCalendarIdAsync();
-
-      if (CalendarId == null)
-      {
-        await CreateNewCalendarAsync();
-      }
-      else
-      {
-        await DeleteExistingEventsAsync();
-      }
-    }
-
     public async Task WriteAsync(IList<CalendarEvent> events)
     {
-      await PrepareAsync();
-
-      var insertBatch = new UnlimitedBatch(Service);
-      foreach (var calendarEvent in events)
+      var calendarId = await GetCalendarIdAsync();
+      var existingEvents = await GetExistingEventsAsync(calendarId);
+      if (calendarId == null)
       {
-        var googleCalendarEvent = new Event
-        {
-          Summary = calendarEvent.Title,
-          Location = calendarEvent.Location,
-          Start = new EventDateTime { DateTime = calendarEvent.Start },
-          End = new EventDateTime { DateTime = calendarEvent.End }
-        };
-        var insertRequest = Service.Events.Insert(googleCalendarEvent, CalendarId);
-        insertRequest.Fields = "id";
-        insertBatch.Queue(insertRequest);
+        calendarId = await CreateNewCalendarAsync();
       }
-      await insertBatch.ExecuteWithRetryAsync();
+
+      var expectedEvents = events.Select(o => new Event
+      {
+        Summary = o.Title,
+        Location = o.Location,
+        Start = new EventDateTime { DateTime = o.Start },
+        End = new EventDateTime { DateTime = o.End }
+      });
+
+      var comparer = new GoogleCalendarEventComparer();
+      await DeleteEventsAsync(calendarId, existingEvents.Except(expectedEvents, comparer));
+      await AddEventsAsync(calendarId, expectedEvents.Except(existingEvents, comparer));
     }
 
     private static CalendarService GetCalendarService(string serviceAccountKey, string email)
@@ -77,27 +63,44 @@ namespace makecal
       return calendars.Items.FirstOrDefault(o => o.Summary == calendarName)?.Id;
     }
 
-    private async Task CreateNewCalendarAsync()
+    private async Task<string> CreateNewCalendarAsync()
     {
       var newCalendar = new Calendar { Summary = calendarName };
       var insertRequest = Service.Calendars.Insert(newCalendar);
       insertRequest.Fields = "id";
       newCalendar = await insertRequest.ExecuteWithRetryAsync();
-      CalendarId = newCalendar.Id;
-      await Service.CalendarList.SetColor(CalendarId, calendarColor).ExecuteWithRetryAsync();
+      await Service.CalendarList.SetColor(newCalendar.Id, calendarColor).ExecuteWithRetryAsync();
+      return newCalendar.Id;
     }
 
-    private async Task DeleteExistingEventsAsync()
+    private async Task<IList<Event>> GetExistingEventsAsync(string calendarId)
     {
-      var listRequest = Service.Events.List(CalendarId);
-      listRequest.Fields = "items(id),nextPageToken";
-      var existingFutureEvents = await listRequest.FetchAllWithRetryAsync(after: DateTime.Today);
+      if (calendarId == null) return new List<Event>();
+      var listRequest = Service.Events.List(calendarId);
+      listRequest.Fields = "items(id,summary,location,start(dateTime),end(dateTime)),nextPageToken";
+      return await listRequest.FetchAllWithRetryAsync(after: DateTime.Today);
+    }
+
+    private async Task DeleteEventsAsync(string calendarId, IEnumerable<Event> events)
+    {
       var deleteBatch = new UnlimitedBatch(Service);
-      foreach (var existingEvent in existingFutureEvents)
+      foreach (var ev in events)
       {
-        deleteBatch.Queue(Service.Events.Delete(CalendarId, existingEvent.Id));
+        deleteBatch.Queue(Service.Events.Delete(calendarId, ev.Id));
       }
       await deleteBatch.ExecuteWithRetryAsync();
+    }
+
+    private async Task AddEventsAsync(string calendarId, IEnumerable<Event> events)
+    {
+      var insertBatch = new UnlimitedBatch(Service);
+      foreach (var ev in events)
+      {
+        var insertRequest = Service.Events.Insert(ev, calendarId);
+        insertRequest.Fields = "id";
+        insertBatch.Queue(insertRequest);
+      }
+      await insertBatch.ExecuteWithRetryAsync();
     }
   }
 }
