@@ -12,7 +12,7 @@ This is a cross-platform command line tool for bulk generating student and teach
 1. Open a command line and run one of the following commands:
     1. `dotnet makecal.dll` to generate comma-separated (.csv) calendar files
     1. `dotnet makecal.dll --ical` to generate iCalendar (.ics) files
-    1. `dotnet makecal.dll --online` to directly upload users' timetables to Google Calendar (this requires domain admin privileges)
+    1. `dotnet makecal.dll --google` to directly upload users' timetables to Google Calendar (this requires domain admin privileges)
 
 ### Input files
 
@@ -54,7 +54,7 @@ Configure lesson timings, study leave dates and periods to override for all user
 
 #### key.json
 
-If you are using the `--online` flag to directly upload timetables to Google Calendar, you will need a service account key:
+If you are using the `--google` flag to directly upload timetables to Google Calendar, you will need a service account key:
 
  1. [Create a new project](https://console.cloud.google.com/projectcreate) on the Google Cloud Platform console.
  1. [Enable the Google Calendar API.](https://console.cloud.google.com/apis/api/calendar-json.googleapis.com/overview) Depending on the size of your school, you may also need to apply for a raised quota. The tool typically uses up to 2000 API requests per user each time it is run.
@@ -130,7 +130,7 @@ The output depends on which flag was set:
 #### `--csv` (default) or `--ical`
 The tool creates a "calendars" folder containing a CSV or ICS calendar file for each user. These files can be shared along with the [instructions for importing to Google Calendar](import-tutorial.md).
 
-#### `--online`
+#### `--google`
 The tool creates a new "My timetable" calendar for each user, and fills this with their lessons for the remainder of the year. If the "My timetable" calendar already exists, all future events are cleared and replaced with new events.
 
 ### Contributing

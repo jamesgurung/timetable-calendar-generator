@@ -25,8 +25,8 @@ namespace makecal
           case "-i":
             UseIcal = true;
             break;
-          case "--online":
-          case "-o":
+          case "--google":
+          case "-g":
             UseGoogle = true;
             break;
           default:
@@ -35,7 +35,7 @@ namespace makecal
       }
       if (new[] { UseCsv, UseIcal, UseGoogle }.Count(b => b) > 1)
       {
-        throw new ArgumentException("Use only one flag: --csv or --ical or --online");
+        throw new ArgumentException("Use only one flag: --csv or --ical or --google");
       }
     }
 
