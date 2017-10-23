@@ -82,6 +82,11 @@ namespace makecal
       {
         throw new InvalidOperationException($"You must include at least one of '{studentsFileName}' and '{teachersFileName}'.");
       }
+      
+      if (people.Count == 0)
+      {
+        throw new InvalidOperationException($"No students or teachers were found in the input files.");
+      }
 
       return people;
     }
