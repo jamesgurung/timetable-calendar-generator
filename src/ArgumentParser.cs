@@ -41,8 +41,15 @@ namespace makecal
 
     public (OutputType Type, string Name, int SimultaneousRequests) GetOutputFormat()
     {
-      if (UseGoogle) return (OutputType.GoogleCalendar, "Google", 40);
-      if (UseIcal) return (OutputType.Ical, "iCal", 4);
+      if (UseGoogle)
+      {
+        return (OutputType.GoogleCalendar, "Google", 40);
+      }
+      if (UseIcal)
+      {
+        return (OutputType.Ical, "iCal", 4);
+      }
+
       return (OutputType.Csv, "CSV", 4);
     }
   }

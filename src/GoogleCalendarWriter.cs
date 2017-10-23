@@ -75,7 +75,10 @@ namespace makecal
 
     private async Task<IList<Event>> GetExistingEventsAsync(string calendarId)
     {
-      if (calendarId == null) return new List<Event>();
+      if (calendarId == null)
+      {
+        return new List<Event>();
+      }
       var listRequest = Service.Events.List(calendarId);
       listRequest.Fields = "items(id,summary,location,start(dateTime),end(dateTime)),nextPageToken";
       return await listRequest.FetchAllWithRetryAsync(after: DateTime.Today);

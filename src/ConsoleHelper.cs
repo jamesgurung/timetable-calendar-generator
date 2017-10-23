@@ -12,8 +12,6 @@ namespace makecal
     private static readonly ConsoleColor defaultBackground = Console.BackgroundColor;
     private static readonly object consoleLock = new object();
 
-    private const char FULL_BLOCK = '\u2588';
-
     public static int MinConsoleWidth => statusCol + statusWidth;
 
     private static void Write(int line, int col, string text, ConsoleColor? colour = null)
