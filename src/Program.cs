@@ -39,19 +39,16 @@ namespace makecal
           var person = people[countLocal];
           var line = countLocal + ConsoleHelper.HeaderHeight;
           ConsoleHelper.WriteDescription(line, $"({countLocal + 1}/{people.Count}) {person.Email}");
-          ConsoleHelper.WriteProgress(line, 0);
+          ConsoleHelper.WriteStatus(line, "...");
 
           writeTasks.Add(Task.Run(async () =>
           {
             try
             {
-              var calendarWriter = calendarWriterFactory.GetCalendarWriter(person.Email);
-              await calendarWriter.PrepareAsync();
-              ConsoleHelper.WriteProgress(line, 1);
-
               var events = calendarGenerator.Generate(person);
+              var calendarWriter = calendarWriterFactory.GetCalendarWriter(person.Email);
               await calendarWriter.WriteAsync(events);
-              ConsoleHelper.WriteProgress(line, 2);
+              ConsoleHelper.WriteStatus(line, "Done.");
             }
             catch (Exception exc)
             {

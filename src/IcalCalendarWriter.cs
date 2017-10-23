@@ -16,11 +16,6 @@ namespace makecal
       OutputFileName = outputFileName;
     }
 
-    public Task PrepareAsync()
-    {
-      return Task.CompletedTask;
-    }
-
     public async Task WriteAsync(IList<CalendarEvent> events)
     {
       var sb = new StringBuilder();

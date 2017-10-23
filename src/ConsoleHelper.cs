@@ -44,15 +44,6 @@ namespace makecal
       Write(line, statusCol, text, colour);
     }
 
-    public static void WriteProgress(int line, int progress) {
-      if (progress < 0 || progress > 2)
-      {
-        throw new ArgumentOutOfRangeException(nameof(progress));
-      }
-      var status = new string(FULL_BLOCK, progress).PadRight(2);
-      Write(line, statusCol, $"|{status}|");
-    }
-
     public static void WriteError(string message)
     {
       lock (consoleLock)

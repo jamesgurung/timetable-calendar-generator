@@ -23,7 +23,7 @@ namespace makecal
       Service = GetCalendarService(serviceAccountKey, email);
     }
 
-    public async Task PrepareAsync()
+    private async Task PrepareAsync()
     {
       CalendarId = await GetCalendarIdAsync();
 
@@ -39,6 +39,8 @@ namespace makecal
 
     public async Task WriteAsync(IList<CalendarEvent> events)
     {
+      await PrepareAsync();
+
       var insertBatch = new UnlimitedBatch(Service);
       foreach (var calendarEvent in events)
       {

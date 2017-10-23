@@ -5,7 +5,6 @@ namespace makecal
 {
   public interface ICalendarWriter
   {
-    Task PrepareAsync();
     Task WriteAsync(IList<CalendarEvent> events);
   }
 }
