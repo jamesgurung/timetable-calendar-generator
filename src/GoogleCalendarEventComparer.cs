@@ -12,8 +12,8 @@ namespace makecal
       if (x == null || y == null) return false;
       return 
         x.Summary == y.Summary &&
-        x.Start.DateTime == y.Start.DateTime &&
-        x.End.DateTime == y.End.DateTime &&
+        x.Start?.DateTime == y.Start?.DateTime &&
+        x.End?.DateTime == y.End?.DateTime &&
         (x.Location == y.Location || (String.IsNullOrEmpty(x.Location) && String.IsNullOrEmpty(y.Location)));
     }
 
