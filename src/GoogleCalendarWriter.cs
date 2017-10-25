@@ -37,7 +37,7 @@ namespace makecal
         Location = o.Location,
         Start = new EventDateTime { DateTime = o.Start },
         End = new EventDateTime { DateTime = o.End }
-      });
+      }).ToList();
 
       var comparer = new GoogleCalendarEventComparer();
       await DeleteEventsAsync(calendarId, existingEvents.Except(expectedEvents, comparer));
