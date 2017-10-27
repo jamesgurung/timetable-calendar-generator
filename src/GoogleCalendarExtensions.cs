@@ -49,7 +49,7 @@ namespace makecal
       => await ExecuteWithRetryAsync(() => request.ExecuteAsync());
 
     public static async Task ExecuteWithRetryAsync(this BatchRequest request)
-      => await ExecuteWithRetryAsync(async () => { await request.ExecuteAsync(); return Task.FromResult(0); });
+      => await ExecuteWithRetryAsync(async () => { await request.ExecuteAsync(); return 0; });
 
     public static CalendarListResource.PatchRequest SetColor(this CalendarListResource calendarList, string calendarId, string colorId)
       => calendarList.Patch(new CalendarListEntry { ColorId = colorId }, calendarId);
