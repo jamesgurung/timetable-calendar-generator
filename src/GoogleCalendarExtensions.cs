@@ -14,6 +14,8 @@ namespace makecal
     private static readonly int retryFirst = 5000;
     private static readonly int retryExponent = 4;
 
+    private static readonly int maxPageSize = 2500;
+
     private static async Task<TResponse> ExecuteWithRetryAsync<TResponse>(Func<Task<TResponse>> func)
     {
       TResponse response = default;
@@ -37,6 +39,7 @@ namespace makecal
     {
       listRequest.TimeMin = after;
       listRequest.TimeMax = before;
+      listRequest.MaxResults = maxPageSize;
       var pageStreamer = new PageStreamer<Event, EventsResource.ListRequest, Events, string>(
         (request, token) => request.PageToken = token,
         response => response.NextPageToken,
