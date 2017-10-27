@@ -6,51 +6,49 @@ namespace makecal
 {
   public class ArgumentParser
   {
-    private bool UseGoogle { get; }
-    private bool UseCsv { get; }
-    private bool UseIcal { get; }
+    public (OutputType Type, string Name, int SimultaneousRequests) OutputFormat { get; private set; }
+
+    private bool OutputFormatSet { set; get; } = false;
     
     public ArgumentParser(string[] args)
     {
-      var flags = args?.Select(o => o.ToLowerInvariant()).ToList() ?? new List<string>();
+      var flags = args?.Select(o => o.ToLowerInvariant()).Distinct().ToList() ?? new List<string>();
+
       foreach (var flag in flags)
       {
         switch (flag)
         {
           case "--csv":
           case "-c":
-            UseCsv = true;
+            SetOutputFormat(OutputType.Csv, "CSV", 4);
             break;
           case "--ical":
           case "-i":
-            UseIcal = true;
+            SetOutputFormat(OutputType.Ical, "iCal", 4);
             break;
           case "--google":
           case "-g":
-            UseGoogle = true;
+            SetOutputFormat(OutputType.GoogleCalendar, "Google", 40);
             break;
           default:
             throw new ArgumentException("Flag not recognised: " + flag);
         }
       }
-      if (new[] { UseCsv, UseIcal, UseGoogle }.Count(b => b) > 1)
+      
+      if (!OutputFormatSet)
       {
-        throw new ArgumentException("Use only one flag: --csv or --ical or --google");
+        throw new ArgumentException("You must specify an output type: --csv or --ical or --google");
       }
     }
 
-    public (OutputType Type, string Name, int SimultaneousRequests) GetOutputFormat()
+    private void SetOutputFormat(OutputType type, string name, int simultaneousRequests)
     {
-      if (UseGoogle)
+      if (OutputFormatSet)
       {
-        return (OutputType.GoogleCalendar, "Google", 40);
+        throw new ArgumentException("Use only one flag: --csv or --ical or --google");
       }
-      if (UseIcal)
-      {
-        return (OutputType.Ical, "iCal", 4);
-      }
-
-      return (OutputType.Csv, "CSV", 4);
+      OutputFormat = (type, name, simultaneousRequests);
+      OutputFormatSet = true;
     }
   }
 }

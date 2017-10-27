@@ -16,7 +16,7 @@ namespace makecal
         Console.WriteLine("TIMETABLE CALENDAR GENERATOR\n");
 
         var argumentParser = new ArgumentParser(args);
-        var outputFormat = argumentParser.GetOutputFormat();
+        var outputFormat = argumentParser.OutputFormat;
 
         var settings = await InputReader.LoadSettingsAsync();
         var serviceAccountKey = (outputFormat.Type == OutputType.GoogleCalendar) ? await InputReader.LoadKeyAsync() : null;

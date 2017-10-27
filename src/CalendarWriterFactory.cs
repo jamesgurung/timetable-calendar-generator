@@ -12,13 +12,18 @@ namespace makecal
     public CalendarWriterFactory(OutputType outputType, string serviceAccountKey)
     {
       OutputType = outputType;
-      if (OutputType == OutputType.GoogleCalendar)
+      
+      if (OutputType == OutputType.Csv)
+      {
+        OutputDirectory = CreateOutputDirectory("csv");
+      }
+      else if (OutputType == OutputType.Ical)
+      {
+        OutputDirectory = CreateOutputDirectory("ical");
+      }
+      else if (OutputType == OutputType.GoogleCalendar)
       {
         ServiceAccountKey = serviceAccountKey;
-      }
-      else
-      {
-        OutputDirectory = CreateOutputDirectory();
       }
     }
 
@@ -28,8 +33,10 @@ namespace makecal
       {
         return new GoogleCalendarWriter(email, ServiceAccountKey);
       }
+
       var userName = email.Split('@')[0];
       var outputFileName = Path.Combine(OutputDirectory, userName);
+
       switch (OutputType)
       {
         case OutputType.Csv:
@@ -41,9 +48,9 @@ namespace makecal
       }
     }
 
-    private static string CreateOutputDirectory()
+    private static string CreateOutputDirectory(string subfolder)
     {
-      var directory = Path.Combine(AppContext.BaseDirectory, "calendars");
+      var directory = Path.Combine(AppContext.BaseDirectory, "calendars", subfolder);
       Directory.CreateDirectory(directory);
       return directory;
     }

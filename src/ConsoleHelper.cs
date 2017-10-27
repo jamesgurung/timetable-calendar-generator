@@ -48,7 +48,7 @@ namespace makecal
       {
         Console.WriteLine();
         var backgroundColor = Console.BackgroundColor;
-        Console.BackgroundColor = ConsoleColor.Red;
+        Console.BackgroundColor = ConsoleColor.DarkRed;
         Console.WriteLine($"Error: {message}");
         Console.BackgroundColor = backgroundColor;
         Console.WriteLine();
