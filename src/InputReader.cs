@@ -133,7 +133,7 @@ namespace makecal
 
           if (currentStudent == null || currentSubject == null)
           {
-            throw new InvalidOperationException("Incorrectly formatted timetable.");
+            throw new InvalidOperationException("Incorrectly formatted timetable (students).");
           }
 
           currentStudent.Lessons.Add(new Lesson
@@ -160,6 +160,10 @@ namespace makecal
         while (reader.HasMoreRecords)
         {
           var timetable = await reader.ReadDataRecordAsync();
+          if (!reader.HasMoreRecords)
+          {
+            throw new InvalidOperationException("Incorrectly formatted timetable (teachers).");
+          }
           var rooms = await reader.ReadDataRecordAsync();
           var currentTeacher = new Person { Email = timetable[0].ToLower(), Lessons = new List<Lesson>() };
 
