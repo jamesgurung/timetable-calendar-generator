@@ -24,12 +24,12 @@ Configure lesson timings, study leave dates and periods to override for all user
 {
   "lessonTimes":
   [
-    { "startTime": "08:50", "duration": 60 },
-    { "startTime": "09:55", "duration": 60 },
-    { "startTime": "11:15", "duration": 60 },
-    { "startTime": "12:20", "duration": 60 },
-    { "startTime": "14:00", "duration": 60 },
-    { "startTime": "15:05", "duration": 60 }
+    { "lesson": "1", "startTime": "08:50", "duration": 60 },
+    { "lesson": "2", "startTime": "09:55", "duration": 60 },
+    { "lesson": "3", "startTime": "11:15", "duration": 60 },
+    { "lesson": "4", "startTime": "12:20", "duration": 60 },
+    { "lesson": "5", "startTime": "14:00", "duration": 60 },
+    { "lesson": "6", "startTime": "15:05", "duration": 60 }
   ],
   "studyLeave":
   [
@@ -39,10 +39,10 @@ Configure lesson timings, study leave dates and periods to override for all user
   ],
   "overrides":
   [
-    { "date": "07-Sep-17", "period": 1, "title": "Tutorial" },
-    { "date": "20-Dec-17", "period": 3, "title": "Whole school assembly" },
-    { "date": "20-Dec-17", "period": 4, "title": "" },
-    { "date": "20-Dec-17", "period": 5, "title": "" }
+    { "date": "07-Sep-17", "period": "1", "title": "Tutorial" },
+    { "date": "20-Dec-17", "period": "3", "title": "Whole school assembly" },
+    { "date": "20-Dec-17", "period": "4", "title": "" },
+    { "date": "20-Dec-17", "period": "5", "title": "" }
   ],
   "renames":
   [
@@ -63,6 +63,7 @@ Each teaching day in the school year, in `dd-MMM-yy` format, followed by a numer
 11-Sep-17,2
 ...
 ```
+For schools which use a one-week timetable, the second column should be omitted so the file only contains a list of working days.
 
 #### students.csv
 
@@ -78,7 +79,7 @@ student1@school.org , 10   , Business , 1Mon:3 , D5   , JGO
 student2@school.org , 11   , P.E.     , 1Tue:3 ,      , DBA
 ...
 ```
-SIMS users can download the report [SIMS-StudentTimetables.RptDef](resources/SIMS-StudentTimetables.RptDef).
+SIMS users can download the report [SIMS-StudentTimetables.RptDef](https://github.com/jamesgurung/timetable-calendar-generator/raw/master/resources/SIMS-StudentTimetables.RptDef).
 
 #### teachers.csv
 
@@ -129,7 +130,7 @@ If you are using the `--google` flag to directly upload timetables to Google Cal
 The output depends on which flag was set:
 
 #### `--csv` or `--ical`
-The tool creates a "calendars" folder containing a CSV or ICS calendar file for each user. These files can be shared along with [instructions for importing to Google Calendar](import-tutorial.md).
+The tool creates a "calendars" folder containing a CSV or ICS calendar file for each user. These files can be shared along with [instructions for importing to Google Calendar](import-tutorial.md) or any other calendar system.
 
 #### `--google`
 The tool creates a new "My timetable" calendar for each user, and fills this with their lessons for the remainder of the year. If the "My timetable" calendar already exists, all modified future events are cleared and replaced with new events.

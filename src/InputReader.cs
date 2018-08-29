@@ -39,7 +39,8 @@ namespace makecal
             continue;
           }
           var date = DateTime.ParseExact(record[0], "dd-MMM-yy", null);
-          settings.DayTypes.Add(date, record[1] + date.DayOfWeek.ToString("G").Substring(0, 3));
+          var weekType = record.Count > 1 ? record[1] : string.Empty;
+          settings.DayTypes.Add(date, weekType + date.DayOfWeek.ToString("G").Substring(0, 3));
         }
       }
       return settings;

@@ -31,17 +31,21 @@ namespace makecal
           continue;
         }
 
-        for (var period = 1; period <= Settings.DayTypes.Count; period++)
+        for (var period = 0; period < Settings.LessonTimes.Count; period++)
         {
-          string title = $"P{period}. ";
-          string room;
+          var lessonTime = Settings.LessonTimes[period];
+          var periodName = lessonTime.Lesson;
 
-          if (myLessons.TryGetValue($"{dayCode}:{period}", out var lesson) && lesson.Class == blankingCode)
+          if (myLessons.TryGetValue($"{dayCode}:{periodName}", out var lesson) && lesson.Class == blankingCode)
           {
             continue;
           }
 
-          if (Settings.OverrideDictionary.TryGetValue((date, period), out var overrideTitle))
+          string title = !string.IsNullOrEmpty(periodName) && char.IsDigit(periodName[0]) ? $"P{periodName}. " : string.Empty;
+
+          string room;
+
+          if (Settings.OverrideDictionary.TryGetValue((date, periodName), out var overrideTitle))
           {
             if (string.IsNullOrEmpty(overrideTitle))
             {
@@ -80,8 +84,7 @@ namespace makecal
           {
             continue;
           }
-
-          var lessonTime = Settings.LessonTimes[period - 1];
+          
           var start = new DateTime(date.Year, date.Month, date.Day, lessonTime.StartHour, lessonTime.StartMinute, 0);
           var end = start.AddMinutes(lessonTime.Duration);
 

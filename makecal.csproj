@@ -11,7 +11,7 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Google.Apis.Calendar.v3" Version="1.34.0.1244" />
+    <PackageReference Include="Google.Apis.Calendar.v3" Version="1.35.1.1328" />
     <PackageReference Include="KBCsv" Version="5.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>

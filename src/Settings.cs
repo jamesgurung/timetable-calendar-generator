@@ -17,7 +17,7 @@ namespace makecal
       }
     }
     public IDictionary<DateTime, string> DayTypes { get; set; }
-    public IDictionary<(DateTime, int), string> OverrideDictionary { get; private set; }
+    public IDictionary<(DateTime, string), string> OverrideDictionary { get; private set; }
     public IDictionary<string, string> RenameDictionary { get; private set; }
   }
 
@@ -31,7 +31,7 @@ namespace makecal
   public class Override
   {
     public DateTime Date { get; set; }
-    public int Period { get; set; }
+    public string Period { get; set; }
     public string Title { get; set; }
   }
 
@@ -55,5 +55,6 @@ namespace makecal
     public int StartHour { get; private set; }
     public int StartMinute { get; private set; }
     public int Duration { get; set; }
+    public string Lesson {get; set; }
   }
 }
