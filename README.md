@@ -10,9 +10,9 @@ This is a cross-platform command line tool for bulk generating student and teach
 1. Download the latest ZIP package from our [Releases page](https://github.com/jamesgurung/timetable-calendar-generator/releases) and extract the contents.
 1. In the "inputs" directory, add the input files defined below.
 1. Open a command line and run one of the following commands:
-    1. `dotnet makecal.dll --csv` to generate comma-separated (.csv) calendar files
-    1. `dotnet makecal.dll --ical` to generate iCalendar (.ics) files
-    1. `dotnet makecal.dll --google` to directly upload users' timetables to Google Calendar (this requires domain admin privileges)
+    1. `makecal --csv` to generate comma-separated (.csv) calendar files
+    1. `makecal --ical` to generate iCalendar (.ics) files
+    1. `makecal --google` to directly upload users' timetables to Google Calendar (this requires domain admin privileges)
 
 ### Input files
 
