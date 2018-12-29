@@ -30,35 +30,37 @@ namespace makecal
         Console.WriteLine($"\nGenerating {outputFormat.Name} calendars:");
 
         var writeTasks = new List<Task>();
-        var throttler = new SemaphoreSlim(outputFormat.SimultaneousRequests);
-
-        for (var i = 0; i < people.Count; i++)
+        using (var throttler = new SemaphoreSlim(outputFormat.SimultaneousRequests))
         {
-          var countLocal = i;
-          await throttler.WaitAsync();
-          var person = people[countLocal];
-          var line = countLocal + ConsoleHelper.HeaderHeight;
-          ConsoleHelper.WriteDescription(line, $"({countLocal + 1}/{people.Count}) {person.Email}");
-          ConsoleHelper.WriteStatus(line, "...");
 
-          writeTasks.Add(Task.Run(async () =>
+          for (var i = 0; i < people.Count; i++)
           {
-            try
+            var countLocal = i;
+            await throttler.WaitAsync();
+            var person = people[countLocal];
+            var line = countLocal + ConsoleHelper.HeaderHeight;
+            ConsoleHelper.WriteDescription(line, $"({countLocal + 1}/{people.Count}) {person.Email}");
+            ConsoleHelper.WriteStatus(line, "...");
+
+            writeTasks.Add(Task.Run(async () =>
             {
-              var events = calendarGenerator.Generate(person);
-              var calendarWriter = calendarWriterFactory.GetCalendarWriter(person.Email);
-              await calendarWriter.WriteAsync(events);
-              ConsoleHelper.WriteStatus(line, "Done.");
-            }
-            catch (Exception exc)
-            {
-              ConsoleHelper.WriteStatus(line, $"Failed. {exc.Message}", ConsoleColor.Red);
-            }
-            finally
-            {
-              throttler.Release();
-            }
-          }));
+              try
+              {
+                var events = calendarGenerator.Generate(person);
+                var calendarWriter = calendarWriterFactory.GetCalendarWriter(person.Email);
+                await calendarWriter.WriteAsync(events);
+                ConsoleHelper.WriteStatus(line, "Done.");
+              }
+              catch (Exception exc)
+              {
+                ConsoleHelper.WriteStatus(line, $"Failed. {exc.Message}", ConsoleColor.Red);
+              }
+              finally
+              {
+                throttler.Release();
+              }
+            }));
+          }
         }
         await Task.WhenAll(writeTasks);
         Console.SetCursorPosition(0, ConsoleHelper.HeaderHeight + people.Count);
