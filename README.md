@@ -33,9 +33,9 @@ Configure lesson timings, study leave dates and periods to override for all user
   ],
   "studyLeave":
   [
-    { "year": 11, "startDate": "04-Jun-18", endDate: "20-Jul-18" },
-    { "year": 12, "startDate": "11-May-18", endDate: "10-Jun-18" },
-    { "year": 13, "startDate": "25-May-18", endDate: "20-Jul-18" }
+    { "year": 11, "startDate": "04-Jun-19", "endDate": "20-Jul-19" },
+    { "year": 12, "startDate": "11-May-19", "endDate": "10-Jun-19" },
+    { "year": 13, "startDate": "25-May-19", "endDate": "20-Jul-19" }
   ],
   "overrides":
   [
@@ -57,10 +57,10 @@ Configure lesson timings, study leave dates and periods to override for all user
 Each teaching day in the school year, in `dd-MMM-yy` format, followed by a numerical week indicator (i.e. Week 1 or Week 2). Non-teaching days such as weekends and holidays should be omitted. This file can be created in a spreadsheet app.
 
 ```
-06-Sep-17,1
-07-Sep-17,1
-08-Sep-17,1
-11-Sep-17,2
+05-Sep-18,1
+06-Sep-18,1
+07-Sep-18,1
+10-Sep-18,2
 ...
 ```
 For schools which use a one-week timetable, the second column should be omitted so the file only contains a list of working days.
