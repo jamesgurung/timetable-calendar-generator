@@ -32,7 +32,6 @@ namespace makecal
         var writeTasks = new List<Task>();
         using (var throttler = new SemaphoreSlim(outputFormat.SimultaneousRequests))
         {
-
           for (var i = 0; i < people.Count; i++)
           {
             var countLocal = i;
@@ -61,8 +60,9 @@ namespace makecal
               }
             }));
           }
+          await Task.WhenAll(writeTasks);
         }
-        await Task.WhenAll(writeTasks);
+
         Console.SetCursorPosition(0, ConsoleHelper.HeaderHeight + people.Count);
         Console.WriteLine("\nCalendar generation complete.\n");
       }
