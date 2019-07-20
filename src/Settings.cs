@@ -7,6 +7,7 @@ namespace makecal
   public class Settings
   {
     public IList<LessonTime> LessonTimes { get; set; }
+    public LessonTime WeirdFriday5Time { get; set; }
     public IList<StudyLeave> StudyLeave { get; set; }
     public IList<Override> Overrides { set {
         OverrideDictionary = value.ToDictionary(o => (o.Date, o.Period), o => o.Title);

@@ -34,6 +34,10 @@ namespace makecal
         for (var period = 0; period < Settings.LessonTimes.Count; period++)
         {
           var lessonTime = Settings.LessonTimes[period];
+          if (Settings.WeirdFriday5Time != null && date.DayOfWeek == DayOfWeek.Friday && lessonTime.Lesson == "5")
+          {
+            lessonTime = Settings.WeirdFriday5Time;
+          }
           var periodName = lessonTime.Lesson;
 
           if (myLessons.TryGetValue($"{dayCode}:{periodName}", out var lesson) && lesson.Class == blankingCode)

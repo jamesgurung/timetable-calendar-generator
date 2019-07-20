@@ -14,8 +14,8 @@
     <PackageReference Update="Microsoft.NETCore.App" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Google.Apis.Calendar.v3" Version="1.36.1.1445" />
+    <PackageReference Include="Google.Apis.Calendar.v3" Version="1.40.2.1643" />
     <PackageReference Include="KBCsv" Version="5.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
   </ItemGroup>
 </Project>
