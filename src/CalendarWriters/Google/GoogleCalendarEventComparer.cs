@@ -17,7 +17,7 @@ namespace makecal
         return false;
       }
       return 
-        x.Summary == y.Summary &&
+        GetOriginalTitle(x.Summary) == GetOriginalTitle(y.Summary) &&
         x.Start?.DateTime == y.Start?.DateTime &&
         x.End?.DateTime == y.End?.DateTime &&
         (x.Location == y.Location || (String.IsNullOrEmpty(x.Location) && String.IsNullOrEmpty(y.Location)));
@@ -32,12 +32,19 @@ namespace makecal
       unchecked
       {
         var hash = 17;
-        hash = hash * 23 + (ev.Summary?.GetHashCode() ?? 0);
+        hash = hash * 23 + (GetOriginalTitle(ev.Summary)?.GetHashCode() ?? 0);
         hash = hash * 23 + (ev.Start?.DateTime?.GetHashCode() ?? 0);
         hash = hash * 23 + (ev.End?.DateTime?.GetHashCode() ?? 0);
         hash = hash * 23 + (ev.Location ?? string.Empty).GetHashCode();
         return hash;
       }
+    }
+
+    private static string GetOriginalTitle(string title) {
+      if (title is null) return null;
+      var index = title.IndexOf('-');
+      if (index < 0) return title;
+      return title.Substring(0, index).Trim();
     }
   }
 }
