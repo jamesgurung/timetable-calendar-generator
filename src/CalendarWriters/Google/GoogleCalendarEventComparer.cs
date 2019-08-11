@@ -17,10 +17,10 @@ namespace makecal
         return false;
       }
       return 
-        GetOriginalTitle(x.Summary) == GetOriginalTitle(y.Summary) &&
         x.Start?.DateTime == y.Start?.DateTime &&
         x.End?.DateTime == y.End?.DateTime &&
-        (x.Location == y.Location || (String.IsNullOrEmpty(x.Location) && String.IsNullOrEmpty(y.Location)));
+        GetOriginalTitle(x.Summary) == GetOriginalTitle(y.Summary) &&
+        (x.Location == y.Location || (string.IsNullOrEmpty(x.Location) && string.IsNullOrEmpty(y.Location)));
     }
 
     public int GetHashCode(Event ev)
