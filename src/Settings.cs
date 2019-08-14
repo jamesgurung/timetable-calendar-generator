@@ -9,11 +9,15 @@ namespace makecal
     public IList<LessonTime> LessonTimes { get; set; }
     public LessonTime WeirdFriday4Time { get; set; }
     public IList<StudyLeave> StudyLeave { get; set; }
-    public IList<Override> Overrides { set {
+    public IList<Override> Overrides
+    {
+      set {
         OverrideDictionary = value.ToDictionary(o => (o.Date, o.Period), o => o.Title);
       }
     }
-    public IList<Rename> Renames { set {
+    public IList<Rename> Renames
+    {
+      set {
         RenameDictionary = value.ToDictionary(o => o.OriginalTitle, o => o.NewTitle);
       }
     }
@@ -46,8 +50,7 @@ namespace makecal
   {
     public string StartTime
     {
-      set
-      {
+      set {
         var parts = value.Split(':');
         StartHour = int.Parse(parts[0]);
         StartMinute = int.Parse(parts[1]);
@@ -56,6 +59,6 @@ namespace makecal
     public int StartHour { get; private set; }
     public int StartMinute { get; private set; }
     public int Duration { get; set; }
-    public string Lesson {get; set; }
+    public string Lesson { get; set; }
   }
 }

@@ -9,7 +9,8 @@ namespace makecal
     public string Class { get; set; }
     public string Teacher { get; set; }
 
-    public int? YearGroup {
+    public int? YearGroup
+    {
       get {
         var year = new string(Class.TakeWhile(char.IsDigit).ToArray());
         if (year == string.Empty)

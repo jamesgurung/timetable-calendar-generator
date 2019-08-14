@@ -11,12 +11,10 @@ namespace makecal
     private string _email;
     public string Email
     {
-      get
-      {
+      get {
         return _email;
       }
-      set
-      {
+      set {
         if (string.IsNullOrEmpty(value) || !validator.IsValid(value))
         {
           throw new InvalidOperationException("Invalid email address: " + value);
