@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Google.Apis.Calendar.v3.Data;
 
 namespace makecal
@@ -16,7 +15,7 @@ namespace makecal
       {
         return false;
       }
-      return 
+      return
         x.Start?.DateTime == y.Start?.DateTime &&
         x.End?.DateTime == y.End?.DateTime &&
         GetOriginalTitle(x.Summary) == GetOriginalTitle(y.Summary) &&
@@ -40,11 +39,12 @@ namespace makecal
       }
     }
 
-    private static string GetOriginalTitle(string title) {
+    private static string GetOriginalTitle(string title)
+    {
       if (title is null) return null;
       var index = title.IndexOf('-');
       if (index < 0) return title;
-      return title.Substring(0, index).Trim();
+      return title.Substring(0, index).TrimEnd(' ');
     }
   }
 }

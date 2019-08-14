@@ -15,6 +15,8 @@ namespace makecal
     private static readonly string calendarName = "My timetable";
     private static readonly string calendarColor = "15";
 
+    private static readonly GoogleCalendarEventComparer _comparer = new GoogleCalendarEventComparer();
+
     private CalendarService Service { get; }
 
     public GoogleCalendarWriter(string email, string serviceAccountKey)
@@ -39,9 +41,8 @@ namespace makecal
         End = new EventDateTime { DateTime = o.End }
       }).ToList();
 
-      var comparer = new GoogleCalendarEventComparer();
-      await DeleteEventsAsync(calendarId, existingEvents.Except(expectedEvents, comparer));
-      await AddEventsAsync(calendarId, expectedEvents.Except(existingEvents, comparer));
+      await DeleteEventsAsync(calendarId, existingEvents.Except(expectedEvents, _comparer));
+      await AddEventsAsync(calendarId, expectedEvents.Except(existingEvents, _comparer));
     }
 
     private static CalendarService GetCalendarService(string serviceAccountKey, string email)
