@@ -25,6 +25,10 @@ namespace makecal
       {
         ServiceAccountKey = serviceAccountKey;
       }
+      else if (OutputType == OutputType.PrimaryGoogle)
+      {
+        ServiceAccountKey = serviceAccountKey;
+      }
     }
 
     public ICalendarWriter GetCalendarWriter(string email)
@@ -32,6 +36,10 @@ namespace makecal
       if (OutputType == OutputType.GoogleCalendar)
       {
         return new GoogleCalendarWriter(email, ServiceAccountKey);
+      }
+      if (OutputType == OutputType.PrimaryGoogle)
+      {
+        return new PrimaryGoogleCalendarWriter(email, ServiceAccountKey);
       }
 
       var userName = email.Split('@')[0];

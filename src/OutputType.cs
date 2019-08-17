@@ -5,6 +5,7 @@
     NotSet,
     Csv,
     Ical,
-    GoogleCalendar
+    GoogleCalendar,
+    PrimaryGoogle
   }
 }

@@ -19,7 +19,7 @@ namespace makecal
         var outputFormat = argumentParser.OutputFormat;
 
         var settings = await InputReader.LoadSettingsAsync();
-        var serviceAccountKey = (outputFormat.Type == OutputType.GoogleCalendar) ? await InputReader.LoadKeyAsync() : null;
+        var serviceAccountKey = (outputFormat.Type == OutputType.GoogleCalendar || outputFormat.Type == OutputType.PrimaryGoogle) ? await InputReader.LoadKeyAsync() : null;
 
         var people = await InputReader.LoadPeopleAsync();
 
