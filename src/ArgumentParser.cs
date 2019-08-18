@@ -33,7 +33,13 @@ namespace makecal
 	  case "--primarygoogle":
           case "-p":
             Console.WriteLine("WARNING: This will edit users' primary calendars. Continue? [y/n] ");
-            System.Threading.Thread.Sleep(12000);
+            if (Console.ReadKey().Key != ConsoleKey.Y)
+            {
+              Console.Write("\n\nCancelled.");
+              Environment.Exit(0);
+              return;
+            }
+            Console.WriteLine("\n");
             SetOutputFormat(OutputType.PrimaryGoogle, "Google", 40);
             break;
           default:
