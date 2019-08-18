@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using Google.Apis.Calendar.v3.Data;
 
@@ -16,11 +15,11 @@ namespace makecal
       {
         return false;
       }
-      return 
-        GetOriginalTitle(x.Summary) == GetOriginalTitle(y.Summary) &&
+      return
         x.Start?.DateTime == y.Start?.DateTime &&
         x.End?.DateTime == y.End?.DateTime &&
-        (x.Location == y.Location || (String.IsNullOrEmpty(x.Location) && String.IsNullOrEmpty(y.Location)));
+        GetOriginalTitle(x.Summary) == GetOriginalTitle(y.Summary) &&
+        (x.Location == y.Location || (string.IsNullOrEmpty(x.Location) && string.IsNullOrEmpty(y.Location)));
     }
 
     public int GetHashCode(Event ev)
@@ -40,11 +39,12 @@ namespace makecal
       }
     }
 
-    private static string GetOriginalTitle(string title) {
+    private static string GetOriginalTitle(string title)
+    {
       if (title is null) return null;
       var index = title.IndexOf('-');
       if (index < 0) return title;
-      return title.Substring(0, index).Trim();
+      return title.Substring(0, index).TrimEnd(' ');
     }
   }
 }
