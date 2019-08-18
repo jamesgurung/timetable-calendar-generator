@@ -35,7 +35,7 @@ namespace makecal
       }
       if (OutputType == OutputType.PrimaryGoogle)
       {
-        return new PrimaryGoogleCalendarWriter(email, ServiceAccountKey);
+        return new GooglePrimaryCalendarWriter(email, ServiceAccountKey);
       }
 
       var userName = email.Split('@')[0];
