@@ -1,66 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace makecal
 {
   public class ArgumentParser
   {
-    public (OutputType Type, string Name, int SimultaneousRequests) OutputFormat { get; private set; }
-
-    private bool OutputFormatSet { set; get; } = false;
-    
-    public ArgumentParser(string[] args)
+    public (OutputType Type, string Text, int SimultaneousRequests) Parse(string[] args)
     {
-      var flags = args?.Select(o => o.ToLowerInvariant()).Distinct().ToList() ?? new List<string>();
+      if (args is null || args.Length == 0)
+      {
+        throw new ArgumentException("You must specify an output type: --csv or --ical or --google");
+      }
 
-      foreach (var flag in flags)
+      var flags = args == null ? null : string.Join(' ', args).ToLowerInvariant();
+
+      return flags switch
       {
-        switch (flag)
-        {
-          case "--csv":
-          case "-c":
-            SetOutputFormat(OutputType.Csv, "CSV", 4);
-            break;
-          case "--ical":
-          case "-i":
-            SetOutputFormat(OutputType.Ical, "iCal", 4);
-            break;
-          case "--google":
-          case "-g":
-            SetOutputFormat(OutputType.GoogleCalendar, "Google", 40);
-            break;
-	  case "--primarygoogle":
-          case "-p":
-            Console.WriteLine("WARNING: This will edit users' primary calendars. Continue? [y/n] ");
-            if (Console.ReadKey().Key != ConsoleKey.Y)
-            {
-              Console.Write("\n\nCancelled.");
-              Environment.Exit(0);
-              return;
-            }
-            Console.WriteLine("\n");
-            SetOutputFormat(OutputType.PrimaryGoogle, "Google", 40);
-            break;
-          default:
-            throw new ArgumentException("Flag not recognised: " + flag);
-        }
-      }
-      
-      if (!OutputFormatSet)
-      {
-        throw new ArgumentException("You must specify an output type: --csv or --ical or --google or --primarygoogle");
-      }
+        "--csv" => (OutputType.Csv, "Generating CSV calendars", 4),
+        "--ical" => (OutputType.Ical, "Generating iCal calendars", 4),
+        "--google" => (OutputType.GoogleCalendar, "Writing to Google \"My timetable\" calendars", 40),
+        "--google --primary" => (OutputType.GoogleCalendarPrimary, "Writing to primary Google calendars", 40),
+        "--google --remove-secondary" => (OutputType.GoogleCalendarRemoveSecondary, "Removing \"My timetable\" Google calendars", 40),
+        _ => throw new ArgumentException("Flag combination not recognised: " + flags),
+      };
     }
 
-    private void SetOutputFormat(OutputType type, string name, int simultaneousRequests)
-    {
-      if (OutputFormatSet)
-      {
-        throw new ArgumentException("Use only one flag: --csv or --ical or --google or --primarygoogle");
-      }
-      OutputFormat = (type, name, simultaneousRequests);
-      OutputFormatSet = true;
-    }
   }
 }

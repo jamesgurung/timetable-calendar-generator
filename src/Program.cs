@@ -15,11 +15,11 @@ namespace makecal
         Console.CursorVisible = false;
         Console.WriteLine("TIMETABLE CALENDAR GENERATOR\n");
 
-        var argumentParser = new ArgumentParser(args);
-        var outputFormat = argumentParser.OutputFormat;
+        var argumentParser = new ArgumentParser();
+        var outputFormat = argumentParser.Parse(args);
 
         var settings = await InputReader.LoadSettingsAsync();
-        var serviceAccountKey = (outputFormat.Type == OutputType.GoogleCalendar || outputFormat.Type == OutputType.PrimaryGoogle) ? await InputReader.LoadKeyAsync() : null;
+        var serviceAccountKey = (outputFormat.Type == OutputType.GoogleCalendar || outputFormat.Type == OutputType.GoogleCalendarPrimary) ? await InputReader.LoadKeyAsync() : null;
 
         var people = await InputReader.LoadPeopleAsync();
 
@@ -27,7 +27,7 @@ namespace makecal
         var calendarWriterFactory = new CalendarWriterFactory(outputFormat.Type, serviceAccountKey);
         
         Console.SetBufferSize(Math.Max(ConsoleHelper.MinConsoleWidth, Console.BufferWidth), Math.Max(ConsoleHelper.HeaderHeight + people.Count + ConsoleHelper.FooterHeight, Console.BufferHeight));
-        Console.WriteLine($"\nGenerating {outputFormat.Name} calendars:");
+        Console.WriteLine($"\n{outputFormat.Text}:");
 
         var writeTasks = new List<Task>();
         using (var throttler = new SemaphoreSlim(outputFormat.SimultaneousRequests))
@@ -45,9 +45,16 @@ namespace makecal
             {
               try
               {
-                var events = calendarGenerator.Generate(person);
                 var calendarWriter = calendarWriterFactory.GetCalendarWriter(person.Email);
-                await calendarWriter.WriteAsync(events);
+                if (calendarWriterFactory.OutputType == OutputType.GoogleCalendarRemoveSecondary)
+                {
+                  await calendarWriter.WriteAsync(null);
+                }
+                else
+                {
+                  var events = calendarGenerator.Generate(person);
+                  await calendarWriter.WriteAsync(events);
+                }
                 ConsoleHelper.WriteStatus(line, "Done.");
               }
               catch (Exception exc)

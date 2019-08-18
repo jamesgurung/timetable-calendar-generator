@@ -12,28 +12,30 @@ namespace makecal
     public CalendarWriterFactory(OutputType outputType, string serviceAccountKey)
     {
       OutputType = outputType;
-      
-      if (OutputType == OutputType.Csv)
+
+      switch (OutputType)
       {
-        OutputDirectory = CreateOutputDirectory("csv");
-      }
-      else if (OutputType == OutputType.Ical)
-      {
-        OutputDirectory = CreateOutputDirectory("ical");
-      }
-       else if (OutputType == OutputType.GoogleCalendar || OutputType == OutputType.PrimaryGoogle)
-      {
-        ServiceAccountKey = serviceAccountKey;
+        case OutputType.Csv:
+          OutputDirectory = CreateOutputDirectory("csv");
+          break;
+        case OutputType.Ical:
+          OutputDirectory = CreateOutputDirectory("ical");
+          break;
+        case OutputType.GoogleCalendar:
+        case OutputType.GoogleCalendarPrimary:
+        case OutputType.GoogleCalendarRemoveSecondary:
+          ServiceAccountKey = serviceAccountKey;
+          break;
       }
     }
 
     public ICalendarWriter GetCalendarWriter(string email)
     {
-      if (OutputType == OutputType.GoogleCalendar)
+      if (OutputType == OutputType.GoogleCalendar || OutputType == OutputType.GoogleCalendarRemoveSecondary)
       {
-        return new GoogleCalendarWriter(email, ServiceAccountKey);
+        return new GoogleCalendarWriter(email, ServiceAccountKey, removeCalendars: OutputType == OutputType.GoogleCalendarRemoveSecondary);
       }
-      if (OutputType == OutputType.PrimaryGoogle)
+      if (OutputType == OutputType.GoogleCalendarPrimary)
       {
         return new GooglePrimaryCalendarWriter(email, ServiceAccountKey);
       }
@@ -41,15 +43,12 @@ namespace makecal
       var userName = email.Split('@')[0];
       var outputFileName = Path.Combine(OutputDirectory, userName);
 
-      switch (OutputType)
+      return OutputType switch
       {
-        case OutputType.Csv:
-          return new CsvCalendarWriter(outputFileName + ".csv");
-        case OutputType.Ical:
-          return new IcalCalendarWriter(outputFileName + ".ics");
-        default:
-          throw new NotImplementedException();
-      }
+        OutputType.Csv => new CsvCalendarWriter(outputFileName + ".csv"),
+        OutputType.Ical => new IcalCalendarWriter(outputFileName + ".ics"),
+        _ => throw new NotImplementedException(),
+      };
     }
 
     private static string CreateOutputDirectory(string subfolder)

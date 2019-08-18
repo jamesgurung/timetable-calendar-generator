@@ -12,8 +12,8 @@ This is a cross-platform command line tool for bulk generating student and teach
 1. Open a command line and run one of the following commands:
     1. `makecal --csv` to generate comma-separated (.csv) calendar files
     1. `makecal --ical` to generate iCalendar (.ics) files
-    1. `makecal --google` to directly upload users' timetables to a secondary Google Calendar (this requires domain admin privileges but is a little less risky than working with users' main calendars)
-    1. `makecal --primarygoogle` to directly upload users' timetables to their primary Google Calendar (this requires domain admin privileges and will delete any calendars named 'My timetable', which may have been created with the `--google` option.)
+    1. `makecal --google` to directly upload users' timetables to Google Calendar (see below for more options)
+
 
 ### Input files
 
@@ -34,16 +34,16 @@ Configure lesson timings, study leave dates and periods to override for all user
   ],
   "studyLeave":
   [
-    { "year": 11, "startDate": "04-Jun-19", "endDate": "20-Jul-19" },
-    { "year": 12, "startDate": "11-May-19", "endDate": "10-Jun-19" },
-    { "year": 13, "startDate": "25-May-19", "endDate": "20-Jul-19" }
+    { "year": 11, "startDate": "04-Jun-20", "endDate": "20-Jul-20" },
+    { "year": 12, "startDate": "11-May-20", "endDate": "10-Jun-20" },
+    { "year": 13, "startDate": "25-May-20", "endDate": "20-Jul-20" }
   ],
   "overrides":
   [
-    { "date": "07-Sep-17", "period": "1", "title": "Tutorial" },
-    { "date": "20-Dec-17", "period": "3", "title": "Whole school assembly" },
-    { "date": "20-Dec-17", "period": "4", "title": "" },
-    { "date": "20-Dec-17", "period": "5", "title": "" }
+    { "date": "07-Sep-19", "period": "1", "title": "Tutorial" },
+    { "date": "20-Dec-19", "period": "3", "title": "Whole school assembly" },
+    { "date": "20-Dec-19", "period": "4", "title": "" },
+    { "date": "20-Dec-19", "period": "5", "title": "" }
   ],
   "renames":
   [
@@ -58,10 +58,10 @@ Configure lesson timings, study leave dates and periods to override for all user
 Each teaching day in the school year, in `dd-MMM-yy` format, followed by a numerical week indicator (i.e. Week 1 or Week 2). Non-teaching days such as weekends and holidays should be omitted. This file can be created in a spreadsheet app.
 
 ```
-05-Sep-18,1
-06-Sep-18,1
-07-Sep-18,1
-10-Sep-18,2
+04-Sep-19,1
+05-Sep-19,1
+06-Sep-19,1
+09-Sep-19,2
 ...
 ```
 For schools which use a one-week timetable, the second column should be omitted so the file only contains a list of working days.
@@ -128,16 +128,19 @@ If you are using the `--google` flag to directly upload timetables to Google Cal
 
 ### Output
 
-The output depends on which flag was set:
+The output depends on which flags are set:
 
 #### `--csv` or `--ical`
-The tool creates a "calendars" folder containing a CSV or ICS calendar file for each user. These files can be shared along with [instructions for importing to Google Calendar](import-tutorial.md) or any other calendar system.
+Creates a "calendars" folder containing a CSV or ICS calendar file for each user. These files can be shared along with [instructions for importing to Google Calendar](import-tutorial.md) or any other calendar system.
 
 #### `--google`
-The tool creates a new "My timetable" calendar for each user, and fills this with their lessons for the remainder of the year. If the "My timetable" calendar already exists, all modified future events are cleared and replaced with new events.
+Creates a new "My timetable" calendar for each user, and fills this with their lessons for the remainder of the year. If the "My timetable" calendar already exists, all modified future events are cleared and replaced with new events.
 
-#### `--primarygoogle`
-The tool creates events in the primary calendar for each user, and fills this with their lessons for the remainder of the year. If the "My timetable" calendar exists (see above), it will be deleted. This option 'tags' the events as it creates them and should only delete its own events on subsequent runs, in cases where the timetable has changed. Working with users primary calendars makes it more difficult to tidy up, should you have bad data in your input files. I suggest running with a single test user in your teachers.csv, for whom the primary calendar can be safely cleared before proceeding. The advantage of using the primary calander is that users can then have access to free/busy times, so that Google Calendar can suggest meeting times to suit multiple attendees.
+#### `--google --primary` (Experimental)
+Writes each user's lessons directly to their primary Google calendar. This has the advantage of users being listed as 'Busy' during their lessons, which is useful for scheduling meetings. The tool does not read or edit any events except for those which it creates itself (these are tagged with the property `makecal=true`). However, there is inherently a greater risk in editing users' primary calendars and you should trial this with a test user first.
+
+#### `--google --remove-secondary`
+Removes all "My timetable" calendars. This is useful for users migrating to `--google --primary`.
 
 ### Contributing
 

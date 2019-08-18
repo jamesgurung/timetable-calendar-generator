@@ -18,14 +18,22 @@ namespace makecal
     private static readonly GoogleCalendarEventComparer comparer = new GoogleCalendarEventComparer();
 
     private CalendarService Service { get; }
+    private bool RemoveCalendars { get; }
 
-    public GoogleCalendarWriter(string email, string serviceAccountKey)
+    public GoogleCalendarWriter(string email, string serviceAccountKey, bool removeCalendars)
     {
       Service = GetCalendarService(serviceAccountKey, email);
+      RemoveCalendars = removeCalendars;
     }
 
     public async Task WriteAsync(IList<CalendarEvent> events)
     {
+      if (RemoveCalendars)
+      {
+        await DeleteTimetableCalendarAsync();
+        return;
+      }
+
       var calendarId = await GetCalendarIdAsync();
       var existingEvents = await GetExistingEventsAsync(calendarId);
       if (calendarId is null)

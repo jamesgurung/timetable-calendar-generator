@@ -2,10 +2,10 @@
 {
   public enum OutputType
   {
-    NotSet,
     Csv,
     Ical,
     GoogleCalendar,
-    PrimaryGoogle
+    GoogleCalendarPrimary,
+    GoogleCalendarRemoveSecondary
   }
 }
