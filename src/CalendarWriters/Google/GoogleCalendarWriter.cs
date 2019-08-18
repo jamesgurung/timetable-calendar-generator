@@ -13,7 +13,7 @@ namespace makecal
   {
     private static readonly string appName = "makecal";
     private static readonly string calendarName = "My timetable";
-    private static readonly string calendarColor = "15";
+    private static readonly string calendarColor = "5";
 
     private static readonly GoogleCalendarEventComparer comparer = new GoogleCalendarEventComparer();
 

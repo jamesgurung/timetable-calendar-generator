@@ -13,7 +13,7 @@ namespace makecal
   {
     private static readonly string calendarId = "primary";
     private static readonly string appName = "makecal";
-    private static readonly string eventColor = "3";
+    private static readonly string eventColor = "5";
 
     private static readonly string tag = $"{appName}=true";
 
