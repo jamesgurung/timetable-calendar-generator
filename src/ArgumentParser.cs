@@ -32,7 +32,7 @@ namespace makecal
             break;
 	  case "--primarygoogle":
           case "-p":
-            Console.WriteLine("WARNING: The --primarygoogle option deletes any calendars named 'My timetable'.\nIt will also input events into users' primary calendars...\n\nHit ctrl+c or close the window if you're uncertain!\n");
+            Console.WriteLine("WARNING: This will edit users' primary calendars. Continue? [y/n] ");
             System.Threading.Thread.Sleep(12000);
             SetOutputFormat(OutputType.PrimaryGoogle, "PrimaryGoogle", 40);
             break;
