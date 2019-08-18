@@ -12,7 +12,8 @@ This is a cross-platform command line tool for bulk generating student and teach
 1. Open a command line and run one of the following commands:
     1. `makecal --csv` to generate comma-separated (.csv) calendar files
     1. `makecal --ical` to generate iCalendar (.ics) files
-    1. `makecal --google` to directly upload users' timetables to Google Calendar (this requires domain admin privileges)
+    1. `makecal --google` to directly upload users' timetables to a secondary Google Calendar (this requires domain admin privileges but is a little less risky than working with users' main calendars)
+    1. `makecal --primarygoogle` to directly upload users' timetables to their primary Google Calendar (this requires domain admin privileges and will delete any calendars named 'My timetable', which may have been created with the `--google` option.)
 
 ### Input files
 
@@ -134,6 +135,9 @@ The tool creates a "calendars" folder containing a CSV or ICS calendar file for 
 
 #### `--google`
 The tool creates a new "My timetable" calendar for each user, and fills this with their lessons for the remainder of the year. If the "My timetable" calendar already exists, all modified future events are cleared and replaced with new events.
+
+#### `--primarygoogle`
+The tool creates events in the primary calendar for each user, and fills this with their lessons for the remainder of the year. If the "My timetable" calendar exists (see above), it will be deleted. This option 'tags' the events as it creates them and should only delete its own events on subsequent runs, in cases where the timetable has changed. Working with users primary calendars makes it more difficult to tidy up, should you have bad data in your input files. I suggest running with a single test user in your teachers.csv, for whom the primary calendar can be safely cleared before proceeding. The advantage of using the primary calander is that users can then have access to free/busy times, so that Google Calendar can suggest meeting times to suit multiple attendees.
 
 ### Contributing
 

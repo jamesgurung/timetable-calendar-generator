@@ -21,7 +21,7 @@ namespace makecal
       {
         OutputDirectory = CreateOutputDirectory("ical");
       }
-      else if (OutputType == OutputType.GoogleCalendar)
+       else if (OutputType == OutputType.GoogleCalendar || OutputType == OutputType.PrimaryGoogle)
       {
         ServiceAccountKey = serviceAccountKey;
       }
@@ -32,6 +32,10 @@ namespace makecal
       if (OutputType == OutputType.GoogleCalendar)
       {
         return new GoogleCalendarWriter(email, ServiceAccountKey);
+      }
+      if (OutputType == OutputType.PrimaryGoogle)
+      {
+        return new PrimaryGoogleCalendarWriter(email, ServiceAccountKey);
       }
 
       var userName = email.Split('@')[0];

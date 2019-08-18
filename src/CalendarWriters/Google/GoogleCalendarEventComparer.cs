@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Google.Apis.Calendar.v3.Data;
 
 namespace makecal

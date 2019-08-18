@@ -30,6 +30,18 @@ namespace makecal
           case "-g":
             SetOutputFormat(OutputType.GoogleCalendar, "Google", 40);
             break;
+	  case "--primarygoogle":
+          case "-p":
+            Console.WriteLine("WARNING: This will edit users' primary calendars. Continue? [y/n] ");
+            if (Console.ReadKey().Key != ConsoleKey.Y)
+            {
+              Console.Write("\n\nCancelled.");
+              Environment.Exit(0);
+              return;
+            }
+            Console.WriteLine("\n");
+            SetOutputFormat(OutputType.PrimaryGoogle, "Google", 40);
+            break;
           default:
             throw new ArgumentException("Flag not recognised: " + flag);
         }
@@ -37,7 +49,7 @@ namespace makecal
       
       if (!OutputFormatSet)
       {
-        throw new ArgumentException("You must specify an output type: --csv or --ical or --google");
+        throw new ArgumentException("You must specify an output type: --csv or --ical or --google or --primarygoogle");
       }
     }
 
@@ -45,7 +57,7 @@ namespace makecal
     {
       if (OutputFormatSet)
       {
-        throw new ArgumentException("Use only one flag: --csv or --ical or --google");
+        throw new ArgumentException("Use only one flag: --csv or --ical or --google or --primarygoogle");
       }
       OutputFormat = (type, name, simultaneousRequests);
       OutputFormatSet = true;

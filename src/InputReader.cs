@@ -10,11 +10,11 @@ namespace makecal
 {
   public static class InputReader
   {
-    private static readonly string settingsFileName = @"inputs\settings.json";
-    private static readonly string keyFileName = @"inputs\key.json";
-    private static readonly string daysFileName = @"inputs\days.csv";
-    private static readonly string studentsFileName = @"inputs\students.csv";
-    private static readonly string teachersFileName = @"inputs\teachers.csv";
+    private static readonly string settingsFileName = @"inputs/settings.json";
+    private static readonly string keyFileName = @"inputs/key.json";
+    private static readonly string daysFileName = @"inputs/days.csv";
+    private static readonly string studentsFileName = @"inputs/students.csv";
+    private static readonly string teachersFileName = @"inputs/teachers.csv";
 
     private const char REPLACEMENT_CHARACTER = '\ufffd';
     
