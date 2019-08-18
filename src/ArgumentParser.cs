@@ -57,7 +57,7 @@ namespace makecal
     {
       if (OutputFormatSet)
       {
-        throw new ArgumentException("Use only one flag: --csv or --ical or --google or --primary-google");
+        throw new ArgumentException("Use only one flag: --csv or --ical or --google or --primarygoogle");
       }
       OutputFormat = (type, name, simultaneousRequests);
       OutputFormatSet = true;
