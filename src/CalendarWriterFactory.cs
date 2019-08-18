@@ -21,11 +21,7 @@ namespace makecal
       {
         OutputDirectory = CreateOutputDirectory("ical");
       }
-      else if (OutputType == OutputType.GoogleCalendar)
-      {
-        ServiceAccountKey = serviceAccountKey;
-      }
-      else if (OutputType == OutputType.PrimaryGoogle)
+       else if (OutputType == OutputType.GoogleCalendar || OutputType == OutputType.PrimaryGoogle)
       {
         ServiceAccountKey = serviceAccountKey;
       }
