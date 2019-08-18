@@ -34,7 +34,7 @@ namespace makecal
           case "-p":
             Console.WriteLine("WARNING: This will edit users' primary calendars. Continue? [y/n] ");
             System.Threading.Thread.Sleep(12000);
-            SetOutputFormat(OutputType.PrimaryGoogle, "PrimaryGoogle", 40);
+            SetOutputFormat(OutputType.PrimaryGoogle, "Google", 40);
             break;
           default:
             throw new ArgumentException("Flag not recognised: " + flag);
