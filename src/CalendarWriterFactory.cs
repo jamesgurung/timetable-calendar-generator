@@ -47,7 +47,7 @@ namespace makecal
       {
         OutputType.Csv => new CsvCalendarWriter(outputFileName + ".csv"),
         OutputType.Ical => new IcalCalendarWriter(outputFileName + ".ics"),
-        _ => throw new NotImplementedException(),
+        _ => throw new NotImplementedException()
       };
     }
 
