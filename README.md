@@ -98,7 +98,7 @@ To create this file in SIMS:
 
 1. Click Reports -> Timetables -> All Staff Timetable.
 1. Choose an Effective Date and click OK.
-1. Click the "Flip" button in the top-left corner. Teacher names should now appear going down the page.
+1. If needed, click the "Flip" button in the top-left corner. Teacher names should appear going down the page.
 1. On the far right of the screen, click the button for "Show/Hide Cell Settings".
 1. At the bottom of the Cell Settings pane, set "Number of Rows" to 2.
 1. In the middle of the pane, there is a split box which says "ClassRM" in the top half. Click and drag the "RM" part into the lower half of that box.
