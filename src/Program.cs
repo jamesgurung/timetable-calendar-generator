@@ -19,14 +19,16 @@ namespace makecal
         var outputFormat = argumentParser.Parse(args);
 
         var settings = await InputReader.LoadSettingsAsync();
-        var serviceAccountKey = (outputFormat.Type == OutputType.GoogleCalendar || outputFormat.Type == OutputType.GoogleCalendarPrimary) ? await InputReader.LoadKeyAsync() : null;
+        var serviceAccountKey = (outputFormat.Type == OutputType.GoogleCalendar || outputFormat.Type == OutputType.GoogleCalendarPrimary
+          || outputFormat.Type == OutputType.GoogleCalendarRemoveSecondary) ? await InputReader.LoadKeyAsync() : null;
 
         var people = await InputReader.LoadPeopleAsync();
 
         var calendarGenerator = new CalendarGenerator(settings);
         var calendarWriterFactory = new CalendarWriterFactory(outputFormat.Type, serviceAccountKey);
         
-        Console.SetBufferSize(Math.Max(ConsoleHelper.MinConsoleWidth, Console.BufferWidth), Math.Max(ConsoleHelper.HeaderHeight + people.Count + ConsoleHelper.FooterHeight, Console.BufferHeight));
+        Console.SetBufferSize(Math.Max(ConsoleHelper.MinConsoleWidth, Console.BufferWidth),
+          Math.Max(ConsoleHelper.HeaderHeight + people.Count + ConsoleHelper.FooterHeight, Console.BufferHeight));
         Console.WriteLine($"\n{outputFormat.Text}:");
 
         var writeTasks = new List<Task>();
