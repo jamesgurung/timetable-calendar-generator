@@ -140,8 +140,18 @@ Creates a new "My timetable" calendar for each user, and fills this with their l
 Writes each user's lessons directly to their primary Google calendar. This has the advantage of users being listed as 'Busy' during their lessons, which is useful for scheduling meetings. The tool does not read or edit any events except for those which it creates itself (these are tagged with the property `makecal=true`). However, there is inherently a greater risk in editing users' primary calendars and you should trial this with a test user first.
 
 #### `--google --remove-secondary`
-Removes all "My timetable" calendars. This is useful for users migrating to `--google --primary`.
+Removes all "My timetable" calendars. This is useful if you are migrating to `--google --primary`.
 
 ### Contributing
 
-Issues and pull requests are welcome.
+If you have a question or feature request, please open an issue.
+
+To contribute improvements to this project, or to adapt the code for the specific needs of your school, you are welcome to fork the repository. The recommended tools are [GitHub Desktop](https://desktop.github.com) to sync the repo with your computer, and [VS Code](https://code.visualstudio.com) as an editor. You will need the [.NET Core 3.0 SDK](https://dotnet.microsoft.com/download/dotnet-core/3.0) to compile. The easiest way to run from source is at the command line, using the `--` token before passing arguments. For example: `dotnet run -- --csv`
+
+Pull requests are welcome; please open an issue first to discuss.
+
+### Credits
+
+This project is maintained by [@jamesgurung](https://github.com/jamesgurung), who is a full-time teacher at a UK secondary school.
+
+Many thanks to [@jschneideruk](https://github.com/jschneideruk) for making Google Calendar updates much more efficient, and to [@timmy-mac](https://github.com/timmy-mac) for creating and testing the new `--google --primary` feature. :+1:
