@@ -73,7 +73,7 @@ namespace makecal
         }
 
         Console.SetCursorPosition(0, ConsoleHelper.HeaderHeight + people.Count);
-        Console.WriteLine("\nCalendar generation complete.\n");
+        Console.WriteLine("\nOperation complete.\n");
       }
       catch (Exception exc)
       {
