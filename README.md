@@ -157,6 +157,6 @@ Pull requests are welcome; please open an issue first to discuss.
 
 ### Credits
 
-This project is maintained by [@jamesgurung](https://github.com/jamesgurung), who is a full-time teacher at a UK secondary school.
+This project is maintained by [@jamesgurung](https://github.com/jamesgurung), who is a teacher at a UK secondary school.
 
 Many thanks to [@jschneideruk](https://github.com/jschneideruk) for making Google Calendar updates much more efficient, and to [@timmy-mac](https://github.com/timmy-mac) for creating and testing the new `--google --primary` feature. :+1:
