@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,9 +27,13 @@ namespace makecal
 
         var calendarGenerator = new CalendarGenerator(settings);
         var calendarWriterFactory = new CalendarWriterFactory(outputFormat.Type, serviceAccountKey);
-        
-        Console.SetBufferSize(Math.Max(ConsoleHelper.MinConsoleWidth, Console.BufferWidth),
-          Math.Max(ConsoleHelper.HeaderHeight + people.Count + ConsoleHelper.FooterHeight, Console.BufferHeight));
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+          Console.SetBufferSize(Math.Max(ConsoleHelper.MinConsoleWidth, Console.BufferWidth),
+            Math.Max(ConsoleHelper.HeaderHeight + people.Count + ConsoleHelper.FooterHeight, Console.BufferHeight));
+        }
+
         Console.WriteLine($"\n{outputFormat.Text}:");
 
         var writeTasks = new List<Task>();
