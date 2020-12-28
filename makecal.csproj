@@ -1,15 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <LangVersion>latest</LangVersion>
+    <UseAppHost>false</UseAppHost>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DebugType>None</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Google.Apis.Calendar.v3" Version="1.42.0.1767" />
-    <PackageReference Include="KBCsv" Version="5.0.0" />
+    <PackageReference Include="Google.Apis.Calendar.v3" Version="1.49.0.2161" />
+    <PackageReference Include="KBCsv" Version="6.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 </Project>
