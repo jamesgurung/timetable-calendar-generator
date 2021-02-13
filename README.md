@@ -56,7 +56,7 @@ Note that all times will be set in the `Europe/London` timezone.
 
 #### days.csv
 
-Each teaching day in the school year, in `dd-MMM-yy` format, followed by a week indicator (i.e. Week 1 or Week 2, or A/B). Non-teaching days such as weekends and holidays should be excluded. This file can be created in a spreadsheet app.
+Each teaching day in the school year, in `dd-MMM-yy` format, followed by a week indicator (i.e. Week 1 or Week 2). Non-teaching days such as weekends and holidays should be excluded. This file can be created in a spreadsheet app.
 
 ```
 04-Sep-19,1
