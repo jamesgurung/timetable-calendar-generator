@@ -85,7 +85,7 @@ namespace makecal
         deleteRequest.Method = HttpMethod.Delete;
         deleteBatch.Queue(deleteRequest);
       }
-      await deleteBatch.ExecuteAsync();
+      await deleteBatch.ExecuteWithRetryAsync();
     }
 
     private async Task AddEventsAsync(IEnumerable<Event> events)
@@ -100,7 +100,7 @@ namespace makecal
         insertRequest.Content = serializer.SerializeAsJsonContent(ev);
         insertBatch.Queue(insertRequest);
       }
-      await insertBatch.ExecuteAsync();
+      await insertBatch.ExecuteWithRetryAsync();
     }
   }
 }

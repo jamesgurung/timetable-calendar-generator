@@ -9,21 +9,22 @@ namespace makecal
 {
   public class MicrosoftUnlimitedBatch
   {
-    private readonly IGraphServiceClient _service;
-    private readonly IList<BatchRequestContent> _batches;
+    private readonly IGraphServiceClient service;
+    private readonly IList<BatchRequestContent> batches;
 
-    public int BatchSizeLimit { get; private set; }
-    public int BatchCount => _batches.Count;
+    private int counter = 0;
 
-    public MicrosoftUnlimitedBatch(IGraphServiceClient service, int batchSizeLimit = 20)
+    private static readonly int batchSizeLimit = 20;
+    private static readonly int maxAttempts = 4;
+    private static readonly int retryFirst = 5000;
+    private static readonly int retryMultiplier = 4;
+
+    public int BatchCount => batches.Count;
+
+    public MicrosoftUnlimitedBatch(IGraphServiceClient service)
     {
-      if (batchSizeLimit <= 0)
-      {
-        throw new ArgumentOutOfRangeException(nameof(batchSizeLimit));
-      }
-      _service = service ?? throw new ArgumentNullException(nameof(service));
-      _batches = new List<BatchRequestContent> { new BatchRequestContent() };
-      BatchSizeLimit = batchSizeLimit;
+      this.service = service ?? throw new ArgumentNullException(nameof(service));
+      batches = new List<BatchRequestContent> { new BatchRequestContent() };
     }
 
     public void Queue(HttpRequestMessage request)
@@ -33,22 +34,49 @@ namespace makecal
         throw new ArgumentNullException(nameof(request));
       }
 
-      var currentBatch = _batches.Last();
-      if (currentBatch.BatchRequestSteps.Count == BatchSizeLimit)
+      var currentBatch = batches.Last();
+      if (currentBatch.BatchRequestSteps.Count == batchSizeLimit)
       {
         currentBatch = new BatchRequestContent();
-        _batches.Add(currentBatch);
+        batches.Add(currentBatch);
+        counter = 0;
       }
 
-      currentBatch.AddBatchRequestStep(request);
+      var step = new BatchRequestStep(counter.ToString(), request, counter == 0 ? null : new List<string> { (counter - 1).ToString() });
+      currentBatch.AddBatchRequestStep(step);
+      counter++;
     }
 
-    public async Task ExecuteAsync()
+    public async Task ExecuteWithRetryAsync()
     {
-      foreach (var batch in _batches)
+      foreach (var batch in batches)
       {
-        if (batch.BatchRequestSteps.Count == 0) continue;
-        await _service.Batch.Request().PostAsync(batch);
+        var current = batch;
+
+        for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+          if (current.BatchRequestSteps.Count == 0) break;
+          if (attempt > 1)
+          {
+            var backoff = retryFirst * (int)Math.Pow(retryMultiplier, attempt - 1);
+            await Task.Delay(backoff);
+          }
+          var result = await service.Batch.Request().PostAsync(current);
+          var responses = await result.GetResponsesAsync();
+
+          current = new BatchRequestContent();
+          var i = 0;
+          foreach (var response in responses)
+          {
+            if (!response.Value.IsSuccessStatusCode)
+            {
+              var step = new BatchRequestStep(i.ToString(), batch.BatchRequestSteps[response.Key].Request, i == 0 ? null : new List<string> { (i - 1).ToString() });
+              current.AddBatchRequestStep(step);
+              i++;
+            }
+            response.Value.Dispose();
+          }
+        }
+
       }
     }
   }
