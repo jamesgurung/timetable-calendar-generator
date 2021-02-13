@@ -4,9 +4,7 @@
   {
     Csv,
     Ical,
-    GoogleCalendar,
-    GoogleCalendarPrimary,
-    GoogleCalendarRemoveSecondary,
+    GoogleWorkspace,
     Microsoft365
   }
 }

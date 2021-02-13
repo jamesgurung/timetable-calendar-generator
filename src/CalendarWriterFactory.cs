@@ -22,9 +22,7 @@ namespace makecal
         case OutputType.Ical:
           OutputDirectory = CreateOutputDirectory("ical");
           break;
-        case OutputType.GoogleCalendar:
-        case OutputType.GoogleCalendarPrimary:
-        case OutputType.GoogleCalendarRemoveSecondary:
+        case OutputType.GoogleWorkspace:
           GoogleServiceAccountKey = googleServiceAccountKey;
           break;
         case OutputType.Microsoft365:
@@ -35,28 +33,23 @@ namespace makecal
 
     public ICalendarWriter GetCalendarWriter(string email)
     {
-      if (OutputType == OutputType.GoogleCalendar || OutputType == OutputType.GoogleCalendarRemoveSecondary)
+      switch (OutputType)
       {
-        return new GoogleCalendarWriter(email, GoogleServiceAccountKey, removeCalendars: OutputType == OutputType.GoogleCalendarRemoveSecondary);
-      }
-      if (OutputType == OutputType.GoogleCalendarPrimary)
-      {
-        return new GooglePrimaryCalendarWriter(email, GoogleServiceAccountKey);
-      }
-      if (OutputType == OutputType.Microsoft365)
-      {
-        return new MicrosoftCalendarWriter(email, MicrosoftClientKey);
-      }
+        case OutputType.GoogleWorkspace:
+          return new GoogleCalendarWriter(email, GoogleServiceAccountKey);
+        case OutputType.Microsoft365:
+          return new MicrosoftCalendarWriter(email, MicrosoftClientKey);
+        default:
+          var userName = email.Split('@')[0];
+          var outputFileName = Path.Combine(OutputDirectory, userName);
 
-      var userName = email.Split('@')[0];
-      var outputFileName = Path.Combine(OutputDirectory, userName);
-
-      return OutputType switch
-      {
-        OutputType.Csv => new CsvCalendarWriter(outputFileName + ".csv"),
-        OutputType.Ical => new IcalCalendarWriter(outputFileName + ".ics"),
-        _ => throw new NotImplementedException()
-      };
+          return OutputType switch
+          {
+            OutputType.Csv => new CsvCalendarWriter(outputFileName + ".csv"),
+            OutputType.Ical => new IcalCalendarWriter(outputFileName + ".ics"),
+            _ => throw new NotImplementedException()
+          };
+      }
     }
 
     private static string CreateOutputDirectory(string subfolder)

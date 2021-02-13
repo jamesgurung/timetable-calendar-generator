@@ -10,18 +10,16 @@ namespace makecal
   {
     private static async Task Main(string[] args)
     {
-      //try
-      //{
+      try
+      {
         Console.Clear();
         Console.CursorVisible = false;
         Console.WriteLine("TIMETABLE CALENDAR GENERATOR\n");
 
-        var argumentParser = new ArgumentParser();
-        var outputFormat = argumentParser.Parse(args);
+        var outputFormat = ArgumentParser.Parse(args);
 
         var settings = await InputReader.LoadSettingsAsync();
-        var googleKey = (outputFormat.Type == OutputType.GoogleCalendar || outputFormat.Type == OutputType.GoogleCalendarPrimary
-          || outputFormat.Type == OutputType.GoogleCalendarRemoveSecondary) ? await InputReader.LoadGoogleKeyAsync() : null;
+        var googleKey = outputFormat.Type == OutputType.GoogleWorkspace ? await InputReader.LoadGoogleKeyAsync() : null;
         var microsoftKey = outputFormat.Type == OutputType.Microsoft365 ? await InputReader.LoadMicrosoftKeyAsync() : null;
 
         var people = await InputReader.LoadPeopleAsync();
@@ -54,15 +52,8 @@ namespace makecal
               try
               {
                 var calendarWriter = calendarWriterFactory.GetCalendarWriter(person.Email);
-                if (calendarWriterFactory.OutputType == OutputType.GoogleCalendarRemoveSecondary)
-                {
-                  await calendarWriter.WriteAsync(null);
-                }
-                else
-                {
-                  var events = calendarGenerator.Generate(person);
-                  await calendarWriter.WriteAsync(events);
-                }
+                var events = calendarGenerator.Generate(person);
+                await calendarWriter.WriteAsync(events);
                 ConsoleHelper.WriteStatus(line, "Done.");
               }
               catch (Exception exc)
@@ -80,15 +71,15 @@ namespace makecal
 
         Console.SetCursorPosition(0, ConsoleHelper.HeaderHeight + people.Count);
         Console.WriteLine("\nOperation complete.\n");
-      //}
-      //catch (Exception exc)
-      //{
-      //  ConsoleHelper.WriteError(exc.Message);
-      //}
-      //finally
-      //{
-      //  Console.CursorVisible = true;
-      //}
+      }
+      catch (Exception exc)
+      {
+        ConsoleHelper.WriteError(exc.Message);
+      }
+      finally
+      {
+        Console.CursorVisible = true;
+      }
     }
 
   }

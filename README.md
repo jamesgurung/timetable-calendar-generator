@@ -12,8 +12,8 @@ This is a cross-platform command line tool for bulk generating student and teach
 1. Open a command line and run one of the following commands:
     1. `dotnet makecal.dll --csv` to generate comma-separated (.csv) calendar files
     1. `dotnet makecal.dll --ical` to generate iCalendar (.ics) files
-    1. `dotnet makecal.dll --google --primary` to directly upload timetables to Google Calendar
-    1. `dotnet makecal.dll --microsoft` to directly upload timetables to Microsoft 365 **(Preview)**
+    1. `dotnet makecal.dll --google` to directly upload timetables to Google Workspace calendars
+    1. `dotnet makecal.dll --microsoft` to directly upload timetables to Microsoft 365 calendars **(Preview)**
 
 
 ### Input files
@@ -152,17 +152,11 @@ The output depends on which flags are set:
 #### `--csv` or `--ical`
 Creates a "calendars" folder containing a CSV or ICS calendar file for each user. These files can be shared along with [instructions for importing to Google Calendar](import-tutorial.md) or any other calendar system.
 
-#### `--google --primary`
-Writes each user's lessons directly to their primary Google calendar. This has the advantage of users being listed as 'Busy' during their lessons, which is useful for scheduling meetings. The tool does not read or edit any events except for those which it creates itself (these are tagged with the property `makecal=true`).
-
-#### `--google --secondary`
-Creates a new "My timetable" calendar for each user, and fills this with their lessons for the remainder of the year. If the "My timetable" calendar already exists, all modified future events are cleared and replaced with new events.
-
-#### `--google --remove-secondary`
-Removes all "My timetable" calendars. This is useful if you are migrating to `--google --primary`.
+#### `--google`
+Writes each user's lessons directly to their Google calendar. This has the advantage of users being listed as 'Busy' during their lessons, which is useful for scheduling meetings. The tool does not read or edit any events except for those which it creates itself (these are tagged with the property `makecal=true`).
 
 #### `--microsoft`
-Writes each user's lessons directly to their primary Microsoft 365 calendar. The tool does not read or edit any events except for those which it creates itself (these are tagged with the property `timetable-calendar-generator`).
+Writes each user's lessons directly to their Microsoft 365 calendar. The tool does not read or edit any events except for those which it creates itself (these are tagged with the property `timetable-calendar-generator`).
 
 ### Automation
 
@@ -182,4 +176,4 @@ Pull requests are welcome; please open an issue first to discuss.
 
 This project is maintained by [@jamesgurung](https://github.com/jamesgurung), who is a teacher at a UK secondary school.
 
-Many thanks to [@jschneideruk](https://github.com/jschneideruk) for making Google Calendar updates much more efficient, and to [@timmy-mac](https://github.com/timmy-mac) for creating and testing the new `--google --primary` feature. :+1:
+Many thanks to [@jschneideruk](https://github.com/jschneideruk) for making Google Calendar updates much more efficient, and to [@timmy-mac](https://github.com/timmy-mac) for the update to use primary calendars. :+1:
