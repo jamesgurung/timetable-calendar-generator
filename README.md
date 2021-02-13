@@ -56,7 +56,7 @@ Note that all times will be set in the `Europe/London` timezone.
 
 #### days.csv
 
-Each teaching day in the school year, in `dd-MMM-yy` format, followed by a numerical week indicator (i.e. Week 1 or Week 2). Non-teaching days such as weekends and holidays should not be included. This file can be created in a spreadsheet app.
+Each teaching day in the school year, in `dd-MMM-yy` format, followed by a week indicator (i.e. Week 1 or Week 2, or A/B). Non-teaching days such as weekends and holidays should be excluded. This file can be created in a spreadsheet app.
 
 ```
 04-Sep-19,1
@@ -111,7 +111,7 @@ To create this file in SIMS:
 
 #### google-key.json
 
-If you are using the `--google` flag to directly upload timetables to Google Calendar, you will need to create a free service account key:
+If you are using the `--google` flag to directly upload timetables to Google Calendar, your domain administrator will need to create a free service account key:
 
 1. [Create a new project](https://console.cloud.google.com/projectcreate) on the Google Cloud Platform console.
 1. [Enable the Google Calendar API.](https://console.cloud.google.com/apis/api/calendar-json.googleapis.com/overview) Depending on the size of your school, you may also need to apply for a raised quota. The tool may use up to 1000 API requests per user when it is first run.
@@ -153,10 +153,10 @@ The output depends on which flags are set:
 Creates a "calendars" folder containing a CSV or ICS calendar file for each user. These files can be shared along with [instructions for importing to Google Calendar](import-tutorial.md) or any other calendar system.
 
 #### `--google`
-Writes each user's lessons directly to their Google calendar. This has the advantage of users being listed as 'Busy' during their lessons, which is useful for scheduling meetings. The tool does not read or edit any events except for those which it creates itself (these are tagged with the property `makecal=true`).
+Writes each user's lessons directly to their Google Workspace calendar. The tool does not read or edit any events except for those which it creates itself (these are tagged with the extended property `makecal=true`).
 
 #### `--microsoft`
-Writes each user's lessons directly to their Microsoft 365 calendar. The tool does not read or edit any events except for those which it creates itself (these are tagged with the property `timetable-calendar-generator`).
+Writes each user's lessons directly to their Microsoft 365 calendar. The tool does not read or edit any events except for those which it creates itself (these are tagged with the open extension `timetable-calendar-generator`).
 
 ### Automation
 
