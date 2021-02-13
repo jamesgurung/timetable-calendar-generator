@@ -13,7 +13,7 @@ namespace makecal
   {
     private static readonly string calendarId = "primary";
     private static readonly string appName = "makecal";
-    private static readonly string eventColor = "5";
+    private static readonly string eventColour = "5";
     private static readonly string tag = $"{appName}=true";
 
     private static readonly Event.ExtendedPropertiesData eventProperties = new()
@@ -80,7 +80,7 @@ namespace makecal
       var insertBatch = new GoogleUnlimitedBatch(service);
       foreach (var ev in events)
       {
-        ev.ColorId = eventColor;
+        ev.ColorId = eventColour;
         ev.ExtendedProperties = eventProperties;
         var insertRequest = service.Events.Insert(ev, calendarId);
         insertRequest.Fields = "id";
