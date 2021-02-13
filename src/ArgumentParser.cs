@@ -8,7 +8,7 @@ namespace makecal
     {
       if (args is null || args.Length == 0)
       {
-        throw new ArgumentException("You must specify an output type: --csv or --ical or --google or --microsoft");
+        throw new ArgumentException("You must specify --csv or --ical or --google or --microsoft");
       }
 
       var flags = args == null ? null : string.Join(' ', args).ToLowerInvariant();
