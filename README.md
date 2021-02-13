@@ -1,27 +1,26 @@
 # Timetable Calendar Generator :calendar:
 
-This is a cross-platform command line tool for bulk generating student and teacher timetables. It can create calendar files in comma-separated (.csv) or iCal (.ics) format, or upload directly to Google Calendar.
+This is a cross-platform command line tool for bulk generating student and teacher timetables. It can create calendar files in comma-separated (.csv) or iCal (.ics) format, or upload directly to Google Calendar or Microsoft 365.
 
 ![Student timetable](resources/example.png)
 
 ### Usage
 
-1. Ensure you have the [.NET Runtime 5.0](https://dotnet.microsoft.com/download/dotnet/5.0) installed (look for the ".NET Runtime" heading in the right-hand column).
+1. Ensure you have the [.NET Runtime 5.0](https://dotnet.microsoft.com/download/dotnet/5.0) installed (on the download page, look for the ".NET Runtime" heading in the right-hand column).
 1. Download the latest ZIP package from our [Releases page](https://github.com/jamesgurung/timetable-calendar-generator/releases) and extract the contents.
 1. In the "inputs" directory, add the input files defined below.
 1. Open a command line and run one of the following commands:
     1. `dotnet makecal.dll --csv` to generate comma-separated (.csv) calendar files
     1. `dotnet makecal.dll --ical` to generate iCalendar (.ics) files
-    1. `dotnet makecal.dll --google --primary` to directly upload timetables to Google Calendar, using users' primary calendars
-    1. `dotnet makecal.dll --google --secondary` to directly upload timetables to Google Calendar, creating new "My timetable" calendars
-    1. `dotnet makecal.dll --microsoft` to directly upload timetables to Microsoft 365, using users' primary calendars **(Preview)**
+    1. `dotnet makecal.dll --google --primary` to directly upload timetables to Google Calendar
+    1. `dotnet makecal.dll --microsoft` to directly upload timetables to Microsoft 365 **(Preview)**
 
 
 ### Input files
 
 #### settings.json
 
-Configure lesson timings, study leave dates and periods to override for all users. Note that times must be in the `Europe/London` timezone.
+Configure lesson timings, study leave dates and periods to override for all users.
 
 ```
 {
@@ -53,10 +52,11 @@ Configure lesson timings, study leave dates and periods to override for all user
 }
 
 ```
+Note that all times will be set in the `Europe/London` timezone.
 
 #### days.csv
 
-Each teaching day in the school year, in `dd-MMM-yy` format, followed by a numerical week indicator (i.e. Week 1 or Week 2). Non-teaching days such as weekends and holidays should be omitted. This file can be created in a spreadsheet app.
+Each teaching day in the school year, in `dd-MMM-yy` format, followed by a numerical week indicator (i.e. Week 1 or Week 2). Non-teaching days such as weekends and holidays should not be included. This file can be created in a spreadsheet app.
 
 ```
 04-Sep-19,1
@@ -127,7 +127,7 @@ If you are using the `--google` flag to directly upload timetables to Google Cal
 
 #### microsoft-key.json
 
-If you are using the `--microsoft` flag to directly upload timetables to Microsoft 365 Calendar, you will need to include this file:
+If you are using the `--microsoft` flag to directly upload timetables to Microsoft 365, you will need to include this file:
 
 ```
 {
@@ -136,14 +136,14 @@ If you are using the `--microsoft` flag to directly upload timetables to Microso
   "tenantId": ""
 }
 ```
-To create these credentials, your domain administrator will need to set up a free App Registration:
+To create these credentials, your domain administrator must set up a free App Registration:
 
-1. [Go to the Azure Portal](https://portal.azure.com/) and sign in with your Microsoft 365 account.
+1. Go to the [Azure Portal](https://portal.azure.com/) and sign in with your Microsoft 365 administrator account.
 1. Use the search bar to go to "App registrations", and click "New registration". Name it "Timetable Calendar Generator", and select "Accounts in this organizational directory only".
 1. Create a `microsoft-key.json` file with the format shown above, and set the `clientId` and `tenantId` as shown on your App Registration homepage.
 1. Click "Certificates & secrets", then "New client secret", and create a secret that never expires. Copy the string from the "Value" column, and use this as your `clientSecret`.
-1. Now click API permissions > Add a permission > Microsoft Graph > Application permissions. Select "Calendars > Calendars.ReadWrite" and "MailboxSettings > MailboxSettings.ReadWrite" (for adding a custom Timetable category to each user's calendar).
-1. Once this permission is added, click the "Grant admin consent" button.
+1. Now click API permissions > Add a permission > Microsoft Graph > Application permissions. Select "Calendars > Calendars.ReadWrite" and "MailboxSettings > MailboxSettings.ReadWrite" (this is needed for adding a custom Timetable category to each user's calendar).
+1. Once these permissions are added, click the "Grant admin consent" button.
 
 ### Output
 
@@ -161,12 +161,12 @@ Creates a new "My timetable" calendar for each user, and fills this with their l
 #### `--google --remove-secondary`
 Removes all "My timetable" calendars. This is useful if you are migrating to `--google --primary`.
 
-#### `--google --microsoft`
+#### `--microsoft`
 Writes each user's lessons directly to their primary Microsoft 365 calendar. The tool does not read or edit any events except for those which it creates itself (these are tagged with the property `timetable-calendar-generator`).
 
 ### Automation
 
-This app runs from the command line and fully supports automation. If you are running SIMS, you can set up a PowerShell script to generate `students.csv` using SIMS Command Reporter and then call `makecal` with your chosen parameters. This script can be run on a scheduled task; for example, weekly.
+This app runs from the command line and supports automation. If you are running SIMS, you can set up a PowerShell script to generate `students.csv` using SIMS Command Reporter and then call `makecal` with your chosen parameters. This script can be run on a scheduled task; for example, weekly.
 
 Note that `teachers.csv` cannot be generated by a script, due to its alternative format. This type of report is used because it includes meetings and other non-teaching periods, whereas regular SIMS reports do not. Teacher timetables do not tend to change very often, and on those occasions the report can be run manually.
 
