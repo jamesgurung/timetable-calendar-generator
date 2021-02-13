@@ -12,7 +12,7 @@ namespace makecal
   {
     private static readonly int maxAttempts = 4;
     private static readonly int retryFirst = 5000;
-    private static readonly int retryExponent = 4;
+    private static readonly int retryMultiplier = 4;
 
     private static readonly int maxPageSize = 2500;
 
@@ -28,7 +28,7 @@ namespace makecal
         }
         catch (Google.GoogleApiException) when (attempt < maxAttempts)
         {
-          var backoff = retryFirst * (int)Math.Pow(retryExponent, attempt - 1);
+          var backoff = retryFirst * (int)Math.Pow(retryMultiplier, attempt - 1);
           await Task.Delay(backoff);
         }
       }

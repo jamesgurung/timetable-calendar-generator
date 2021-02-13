@@ -14,21 +14,20 @@ namespace makecal
     private static readonly string calendarId = "primary";
     private static readonly string appName = "makecal";
     private static readonly string eventColor = "5";
-
     private static readonly string tag = $"{appName}=true";
 
-    private static readonly Event.ExtendedPropertiesData eventProperties = new Event.ExtendedPropertiesData
+    private static readonly Event.ExtendedPropertiesData eventProperties = new()
     {
       Private__ = new Dictionary<string, string> { { appName, "true" } }
     };
-          
-    private static readonly GoogleCalendarEventComparer comparer = new GoogleCalendarEventComparer();
 
-    private CalendarService Service { get; }
+    private static readonly EventComparer<Event> comparer = new(e => e.Start?.DateTime?.ToString("s"), e => e.End?.DateTime?.ToString("s"), e => e.Summary, e => e.Location);
+
+    private readonly CalendarService service;
 
     public GooglePrimaryCalendarWriter(string email, string serviceAccountKey)
     {
-      Service = GetCalendarService(serviceAccountKey, email);
+      service = GetCalendarService(serviceAccountKey, email);
     }
 
     public async Task WriteAsync(IList<CalendarEvent> events)
@@ -60,7 +59,7 @@ namespace makecal
 
     private async Task<IList<Event>> GetExistingEventsAsync()
     {
-      var listRequest = Service.Events.List(calendarId);
+      var listRequest = service.Events.List(calendarId);
       listRequest.PrivateExtendedProperty = tag;
       listRequest.Fields = "items(id,summary,location,start(dateTime),end(dateTime)),nextPageToken";
       return await listRequest.FetchAllWithRetryAsync(after: DateTime.Today);
@@ -68,22 +67,22 @@ namespace makecal
 
     private async Task DeleteEventsAsync(IEnumerable<Event> events)
     {
-      var deleteBatch = new UnlimitedBatch(Service);
+      var deleteBatch = new GoogleUnlimitedBatch(service);
       foreach (var ev in events)
       {
-        deleteBatch.Queue(Service.Events.Delete(calendarId, ev.Id));
+        deleteBatch.Queue(service.Events.Delete(calendarId, ev.Id));
       }
       await deleteBatch.ExecuteWithRetryAsync();
     }
 
     private async Task AddEventsAsync(IEnumerable<Event> events)
     {
-      var insertBatch = new UnlimitedBatch(Service);
+      var insertBatch = new GoogleUnlimitedBatch(service);
       foreach (var ev in events)
       {
         ev.ColorId = eventColor;
         ev.ExtendedProperties = eventProperties;
-        var insertRequest = Service.Events.Insert(ev, calendarId);
+        var insertRequest = service.Events.Insert(ev, calendarId);
         insertRequest.Fields = "id";
         insertBatch.Queue(insertRequest);
       }

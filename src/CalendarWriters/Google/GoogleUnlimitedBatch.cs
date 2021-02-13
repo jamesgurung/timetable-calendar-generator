@@ -7,7 +7,7 @@ using Google.Apis.Services;
 
 namespace makecal
 {
-  public class UnlimitedBatch
+  public class GoogleUnlimitedBatch
   {
     private readonly IClientService _service;
     private readonly IList<BatchRequest> _batches;
@@ -15,7 +15,7 @@ namespace makecal
     public int BatchSizeLimit { get; private set; }
     public int BatchCount => _batches.Count;
 
-    public UnlimitedBatch(IClientService service, int batchSizeLimit = 50)
+    public GoogleUnlimitedBatch(IClientService service, int batchSizeLimit = 50)
     {
       if (batchSizeLimit <= 0)
       {
@@ -57,6 +57,7 @@ namespace makecal
     {
       foreach (var batch in _batches)
       {
+        if (batch.Count == 0) continue;
         await batch.ExecuteWithRetryAsync();
       }
     }

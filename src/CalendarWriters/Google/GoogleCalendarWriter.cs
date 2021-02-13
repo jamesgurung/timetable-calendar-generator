@@ -14,21 +14,20 @@ namespace makecal
     private static readonly string appName = "makecal";
     private static readonly string calendarName = "My timetable";
     private static readonly string calendarColor = "5";
+    private static readonly EventComparer<Event> comparer = new(e => e.Start?.DateTime?.ToString("s"), e => e.End?.DateTime?.ToString("s"), e => e.Summary, e => e.Location);
 
-    private static readonly GoogleCalendarEventComparer comparer = new GoogleCalendarEventComparer();
-
-    private CalendarService Service { get; }
-    private bool RemoveCalendars { get; }
+    private readonly CalendarService service;
+    private readonly bool removeCalendars;
 
     public GoogleCalendarWriter(string email, string serviceAccountKey, bool removeCalendars)
     {
-      Service = GetCalendarService(serviceAccountKey, email);
-      RemoveCalendars = removeCalendars;
+      service = GetCalendarService(serviceAccountKey, email);
+      this.removeCalendars = removeCalendars;
     }
 
     public async Task WriteAsync(IList<CalendarEvent> events)
     {
-      if (RemoveCalendars)
+      if (removeCalendars)
       {
         await DeleteTimetableCalendarAsync();
         return;
@@ -60,7 +59,7 @@ namespace makecal
       {
         return;
       }
-      await Service.Calendars.Delete(calendarId).ExecuteWithRetryAsync();
+      await service.Calendars.Delete(calendarId).ExecuteWithRetryAsync();
     }
 
     private static CalendarService GetCalendarService(string serviceAccountKey, string email)
@@ -76,7 +75,7 @@ namespace makecal
 
     private async Task<string> GetCalendarIdAsync()
     {
-      var listRequest = Service.CalendarList.List();
+      var listRequest = service.CalendarList.List();
       listRequest.Fields = "items(id,summary)";
       var calendars = await listRequest.ExecuteWithRetryAsync();
       return calendars.Items.FirstOrDefault(o => o.Summary == calendarName)?.Id;
@@ -85,10 +84,10 @@ namespace makecal
     private async Task<string> CreateNewCalendarAsync()
     {
       var newCalendar = new Calendar { Summary = calendarName };
-      var insertRequest = Service.Calendars.Insert(newCalendar);
+      var insertRequest = service.Calendars.Insert(newCalendar);
       insertRequest.Fields = "id";
       newCalendar = await insertRequest.ExecuteWithRetryAsync();
-      await Service.CalendarList.SetColor(newCalendar.Id, calendarColor).ExecuteWithRetryAsync();
+      await service.CalendarList.SetColor(newCalendar.Id, calendarColor).ExecuteWithRetryAsync();
       return newCalendar.Id;
     }
 
@@ -98,27 +97,27 @@ namespace makecal
       {
         return new List<Event>();
       }
-      var listRequest = Service.Events.List(calendarId);
+      var listRequest = service.Events.List(calendarId);
       listRequest.Fields = "items(id,summary,location,start(dateTime),end(dateTime)),nextPageToken";
       return await listRequest.FetchAllWithRetryAsync(after: DateTime.Today);
     }
 
     private async Task DeleteEventsAsync(string calendarId, IEnumerable<Event> events)
     {
-      var deleteBatch = new UnlimitedBatch(Service);
+      var deleteBatch = new GoogleUnlimitedBatch(service);
       foreach (var ev in events)
       {
-        deleteBatch.Queue(Service.Events.Delete(calendarId, ev.Id));
+        deleteBatch.Queue(service.Events.Delete(calendarId, ev.Id));
       }
       await deleteBatch.ExecuteWithRetryAsync();
     }
 
     private async Task AddEventsAsync(string calendarId, IEnumerable<Event> events)
     {
-      var insertBatch = new UnlimitedBatch(Service);
+      var insertBatch = new GoogleUnlimitedBatch(service);
       foreach (var ev in events)
       {
-        var insertRequest = Service.Events.Insert(ev, calendarId);
+        var insertRequest = service.Events.Insert(ev, calendarId);
         insertRequest.Fields = "id";
         insertBatch.Queue(insertRequest);
       }
