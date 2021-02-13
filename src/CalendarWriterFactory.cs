@@ -6,10 +6,11 @@ namespace makecal
   public class CalendarWriterFactory
   {
     public OutputType OutputType { get; set; }
-    private string ServiceAccountKey { get; set; }
+    private string GoogleServiceAccountKey { get; set; }
+    private MicrosoftClientKey MicrosoftClientKey { get; set; }
     private string OutputDirectory { get; set; }
 
-    public CalendarWriterFactory(OutputType outputType, string serviceAccountKey)
+    public CalendarWriterFactory(OutputType outputType, string googleServiceAccountKey, MicrosoftClientKey microsoftClientKey)
     {
       OutputType = outputType;
 
@@ -24,7 +25,10 @@ namespace makecal
         case OutputType.GoogleCalendar:
         case OutputType.GoogleCalendarPrimary:
         case OutputType.GoogleCalendarRemoveSecondary:
-          ServiceAccountKey = serviceAccountKey;
+          GoogleServiceAccountKey = googleServiceAccountKey;
+          break;
+        case OutputType.Microsoft365:
+          MicrosoftClientKey = microsoftClientKey;
           break;
       }
     }
@@ -33,11 +37,15 @@ namespace makecal
     {
       if (OutputType == OutputType.GoogleCalendar || OutputType == OutputType.GoogleCalendarRemoveSecondary)
       {
-        return new GoogleCalendarWriter(email, ServiceAccountKey, removeCalendars: OutputType == OutputType.GoogleCalendarRemoveSecondary);
+        return new GoogleCalendarWriter(email, GoogleServiceAccountKey, removeCalendars: OutputType == OutputType.GoogleCalendarRemoveSecondary);
       }
       if (OutputType == OutputType.GoogleCalendarPrimary)
       {
-        return new GooglePrimaryCalendarWriter(email, ServiceAccountKey);
+        return new GooglePrimaryCalendarWriter(email, GoogleServiceAccountKey);
+      }
+      if (OutputType == OutputType.Microsoft365)
+      {
+        return new MicrosoftCalendarWriter(email, MicrosoftClientKey);
       }
 
       var userName = email.Split('@')[0];

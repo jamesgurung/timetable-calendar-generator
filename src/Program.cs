@@ -10,8 +10,8 @@ namespace makecal
   {
     private static async Task Main(string[] args)
     {
-      try
-      {
+      //try
+      //{
         Console.Clear();
         Console.CursorVisible = false;
         Console.WriteLine("TIMETABLE CALENDAR GENERATOR\n");
@@ -20,13 +20,14 @@ namespace makecal
         var outputFormat = argumentParser.Parse(args);
 
         var settings = await InputReader.LoadSettingsAsync();
-        var serviceAccountKey = (outputFormat.Type == OutputType.GoogleCalendar || outputFormat.Type == OutputType.GoogleCalendarPrimary
-          || outputFormat.Type == OutputType.GoogleCalendarRemoveSecondary) ? await InputReader.LoadKeyAsync() : null;
+        var googleKey = (outputFormat.Type == OutputType.GoogleCalendar || outputFormat.Type == OutputType.GoogleCalendarPrimary
+          || outputFormat.Type == OutputType.GoogleCalendarRemoveSecondary) ? await InputReader.LoadGoogleKeyAsync() : null;
+        var microsoftKey = outputFormat.Type == OutputType.Microsoft365 ? await InputReader.LoadMicrosoftKeyAsync() : null;
 
         var people = await InputReader.LoadPeopleAsync();
 
         var calendarGenerator = new CalendarGenerator(settings);
-        var calendarWriterFactory = new CalendarWriterFactory(outputFormat.Type, serviceAccountKey);
+        var calendarWriterFactory = new CalendarWriterFactory(outputFormat.Type, googleKey, microsoftKey);
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
@@ -79,15 +80,15 @@ namespace makecal
 
         Console.SetCursorPosition(0, ConsoleHelper.HeaderHeight + people.Count);
         Console.WriteLine("\nOperation complete.\n");
-      }
-      catch (Exception exc)
-      {
-        ConsoleHelper.WriteError(exc.Message);
-      }
-      finally
-      {
-        Console.CursorVisible = true;
-      }
+      //}
+      //catch (Exception exc)
+      //{
+      //  ConsoleHelper.WriteError(exc.Message);
+      //}
+      //finally
+      //{
+      //  Console.CursorVisible = true;
+      //}
     }
 
   }

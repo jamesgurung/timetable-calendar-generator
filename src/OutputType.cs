@@ -6,6 +6,7 @@
     Ical,
     GoogleCalendar,
     GoogleCalendarPrimary,
-    GoogleCalendarRemoveSecondary
+    GoogleCalendarRemoveSecondary,
+    Microsoft365
   }
 }

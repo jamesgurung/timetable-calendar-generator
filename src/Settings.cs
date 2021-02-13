@@ -9,21 +9,29 @@ namespace makecal
     public IList<LessonTime> LessonTimes { get; set; }
     public LessonTime WeirdFriday4Time { get; set; }
     public IList<StudyLeave> StudyLeave { get; set; }
-    public IList<Override> Overrides
-    {
-      set {
-        OverrideDictionary = value.ToDictionary(o => (o.Date, o.Period), o => o.Title);
-      }
-    }
-    public IList<Rename> Renames
-    {
-      set {
-        RenameDictionary = value.ToDictionary(o => o.OriginalTitle, o => o.NewTitle);
-      }
-    }
+    public IList<Override> Overrides { get; set; }
+    public IList<Rename> Renames { get; set; }
     public IDictionary<DateTime, string> DayTypes { get; set; }
-    public IDictionary<(DateTime, string), string> OverrideDictionary { get; private set; }
-    public IDictionary<string, string> RenameDictionary { get; private set; }
+
+    private IDictionary<(DateTime, string), string> _overrideDictionary = null;
+    public IDictionary<(DateTime, string), string> OverrideDictionary
+    {
+      get
+      {
+        if (_overrideDictionary is null) _overrideDictionary = Overrides?.ToDictionary(o => (o.Date, o.Period), o => o.Title);
+        return _overrideDictionary;
+      }
+    }
+
+    private IDictionary<string, string> _renameDictionary = null;
+    public IDictionary<string, string> RenameDictionary
+    {
+      get
+      {
+        if (_renameDictionary is null) _renameDictionary = Renames?.ToDictionary(o => o.OriginalTitle, o => o.NewTitle);
+        return _renameDictionary;
+      }
+    }
   }
 
   public class StudyLeave

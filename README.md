@@ -14,13 +14,14 @@ This is a cross-platform command line tool for bulk generating student and teach
     1. `dotnet makecal.dll --ical` to generate iCalendar (.ics) files
     1. `dotnet makecal.dll --google --primary` to directly upload timetables to Google Calendar, using users' primary calendars
     1. `dotnet makecal.dll --google --secondary` to directly upload timetables to Google Calendar, creating new "My timetable" calendars
+    1. `dotnet makecal.dll --microsoft` to directly upload timetables to Microsoft 365, using users' primary calendars **(Preview)**
 
 
 ### Input files
 
 #### settings.json
 
-Configure lesson timings, study leave dates and periods to override for all users.
+Configure lesson timings, study leave dates and periods to override for all users. Note that times must be in the `Europe/London` timezone.
 
 ```
 {
@@ -108,14 +109,14 @@ To create this file in SIMS:
 1. Replace staff names in the left-hand column with their email addresses. You may be able to do this with a `VLOOKUP` formula.
 1. Save as `teachers.csv`
 
-#### key.json
+#### google-key.json
 
 If you are using the `--google` flag to directly upload timetables to Google Calendar, you will need to create a free service account key:
 
 1. [Create a new project](https://console.cloud.google.com/projectcreate) on the Google Cloud Platform console.
 1. [Enable the Google Calendar API.](https://console.cloud.google.com/apis/api/calendar-json.googleapis.com/overview) Depending on the size of your school, you may also need to apply for a raised quota. The tool may use up to 1000 API requests per user when it is first run.
 1. [Create a new service account.](https://console.cloud.google.com/apis/credentials/serviceaccountkey) Give it any name and set the role to "Project - Editor". Select "Furnish a new private key (JSON)" and "Enable G Suite Domain-wide Delegation". Set the product name to "Timetable Calendar Generator" and click "Create".
-1. The service account's private key will be downloaded to your computer. Rename it to `key.json` and put it in the `inputs` folder.
+1. The service account's private key will be downloaded to your computer. Rename it to `google-key.json` and put it in the `inputs` folder.
 1. Now delegate domain-wide authority to this service account:
     1. On the Service Accounts overview page, click "View Client ID" and copy the long ID number.
     1. Open your G Suite domain control panel and click on the "Security" icon. This can sometimes be found in the "More controls" option.
@@ -124,6 +125,25 @@ If you are using the `--google` flag to directly upload timetables to Google Cal
     1. In the "One or More API Scopes" field enter `https://www.googleapis.com/auth/calendar`
     1. Click the Authorize button.
 
+#### microsoft-key.json
+
+If you are using the `--microsoft` flag to directly upload timetables to Microsoft 365 Calendar, you will need to include this file:
+
+```
+{
+  "clientId": "",
+  "clientSecret": "",
+  "tenantId": ""
+}
+```
+To create these credentials, your domain administrator will need to set up a free App Registration:
+
+1. [Go to the Azure Portal](https://portal.azure.com/) and sign in with your Microsoft 365 account.
+1. Use the search bar to go to "App registrations", and click "New registration". Name it "Timetable Calendar Generator", and select "Accounts in this organizational directory only".
+1. Create a `microsoft-key.json` file with the format shown above, and set the `clientId` and `tenantId` as shown on your App Registration homepage.
+1. Click "Certificates & secrets", then "New client secret", and create a secret that never expires. Copy the string from the "Value" column, and use this as your `clientSecret`.
+1. Now click API permissions > Add a permission > Microsoft Graph > Application permissions. Select "Calendars > Calendars.ReadWrite" and "MailboxSettings > MailboxSettings.ReadWrite" (for adding a custom Timetable category to each user's calendar).
+1. Once this permission is added, click the "Grant admin consent" button.
 
 ### Output
 
@@ -141,9 +161,12 @@ Creates a new "My timetable" calendar for each user, and fills this with their l
 #### `--google --remove-secondary`
 Removes all "My timetable" calendars. This is useful if you are migrating to `--google --primary`.
 
+#### `--google --microsoft`
+Writes each user's lessons directly to their primary Microsoft 365 calendar. The tool does not read or edit any events except for those which it creates itself (these are tagged with the property `timetable-calendar-generator`).
+
 ### Automation
 
-This app runs from the command line and fully supports automation. If you are running SIMS, you can set up a PowerShell script to generate `students.csv` using SIMS Command Reporter and then call `makecal --google --primary`. This script can be run on a scheduled task; for example, weekly.
+This app runs from the command line and fully supports automation. If you are running SIMS, you can set up a PowerShell script to generate `students.csv` using SIMS Command Reporter and then call `makecal` with your chosen parameters. This script can be run on a scheduled task; for example, weekly.
 
 Note that `teachers.csv` cannot be generated by a script, due to its alternative format. This type of report is used because it includes meetings and other non-teaching periods, whereas regular SIMS reports do not. Teacher timetables do not tend to change very often, and on those occasions the report can be run manually.
 

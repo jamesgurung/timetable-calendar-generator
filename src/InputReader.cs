@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 using KBCsv;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace makecal
 {
   public static class InputReader
   {
     private static readonly string settingsFileName = @"inputs/settings.json";
-    private static readonly string keyFileName = @"inputs/key.json";
+    private static readonly string googleKeyFileName = @"inputs/google-key.json";
+    private static readonly string microsoftKeyFileName = @"inputs/microsoft-key.json";
     private static readonly string daysFileName = @"inputs/days.csv";
     private static readonly string studentsFileName = @"inputs/students.csv";
     private static readonly string teachersFileName = @"inputs/teachers.csv";
@@ -21,14 +21,19 @@ namespace makecal
 
     public static async Task<Settings> LoadSettingsAsync()
     {
+      Settings settings;
       Console.WriteLine($"Reading {settingsFileName}");
-      var settingsText = await File.ReadAllTextAsync(settingsFileName);
-      var settings = JsonConvert.DeserializeObject<Settings>(settingsText, new IsoDateTimeConverter { DateTimeFormat = "dd-MMM-yy" });
+      using (var fs = File.OpenRead(settingsFileName))
+      {
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        options.Converters.Add(new JsonDateConverter());
+        settings = await JsonSerializer.DeserializeAsync<Settings>(fs, options);
+      }
 
       Console.WriteLine($"Reading {daysFileName}");
       settings.DayTypes = new Dictionary<DateTime, string>();
 
-      using (var fs = File.Open(daysFileName, FileMode.Open))
+      using (var fs = File.OpenRead(daysFileName))
       using (var reader = new CsvReader(fs))
       {
         while (reader.HasMoreRecords)
@@ -46,10 +51,18 @@ namespace makecal
       return settings;
     }
 
-    public static async Task<string> LoadKeyAsync()
+    public static async Task<string> LoadGoogleKeyAsync()
     {
-      Console.WriteLine($"Reading {keyFileName}");
-      return await File.ReadAllTextAsync(keyFileName);
+      Console.WriteLine($"Reading {googleKeyFileName}");
+      return await File.ReadAllTextAsync(googleKeyFileName);
+    }
+
+    public static async Task<MicrosoftClientKey> LoadMicrosoftKeyAsync()
+    {
+      Console.WriteLine($"Reading {microsoftKeyFileName}");
+      using var fs = File.OpenRead(microsoftKeyFileName);
+      var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+      return await JsonSerializer.DeserializeAsync<MicrosoftClientKey>(fs, options);
     }
 
     public static async Task<IList<Person>> LoadPeopleAsync()
@@ -96,7 +109,7 @@ namespace makecal
     {
       var students = new List<Person>();
 
-      using (var fs = File.Open(studentsFileName, FileMode.Open))
+      using (var fs = File.OpenRead(studentsFileName))
       using (var reader = new CsvReader(fs))
       {
         Person currentStudent = null;
@@ -153,7 +166,7 @@ namespace makecal
     {
       var teachers = new List<Person>();
 
-      using (var fs = File.Open(teachersFileName, FileMode.Open))
+      using (var fs = File.OpenRead(teachersFileName))
       using (var reader = new CsvReader(fs))
       {
         var periodCodes = await reader.ReadDataRecordAsync();
