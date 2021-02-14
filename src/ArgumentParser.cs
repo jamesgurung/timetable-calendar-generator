@@ -4,7 +4,7 @@ namespace makecal
 {
   public static class ArgumentParser
   {
-    public static (OutputType Type, string Text, int SimultaneousRequests) Parse(string[] args)
+    public static OutputType Parse(string[] args)
     {
       if (args is null || args.Length == 0)
       {
@@ -15,10 +15,10 @@ namespace makecal
 
       return flags switch
       {
-        "--csv" => (OutputType.Csv, "Generating CSV calendars", 4),
-        "--ical" => (OutputType.Ical, "Generating iCal calendars", 4),
-        "--google" => (OutputType.GoogleWorkspace, "Writing to Google Workspace calendars", 40),
-        "--microsoft" => (OutputType.Microsoft365, "Writing to Microsoft 365 calendars", 40),
+        "--csv" => OutputType.Csv,
+        "--ical" => OutputType.Ical,
+        "--google" => OutputType.GoogleWorkspace,
+        "--microsoft" => OutputType.Microsoft365,
         _ => throw new ArgumentException("Flag combination not recognised: " + flags)
       };
     }

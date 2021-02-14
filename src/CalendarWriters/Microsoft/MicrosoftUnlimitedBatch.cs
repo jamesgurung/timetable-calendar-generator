@@ -75,6 +75,8 @@ namespace makecal
           }
         }
 
+        if (current.BatchRequestSteps.Count > 0) throw new Exception("Batch request failed.");
+
       }
     }
   }

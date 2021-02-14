@@ -5,10 +5,12 @@ namespace makecal
 {
   public class CalendarWriterFactory
   {
-    public OutputType OutputType { get; set; }
+    public OutputType OutputType { get; }
     private string GoogleServiceAccountKey { get; }
     private MicrosoftClientKey MicrosoftClientKey { get; }
     private string OutputDirectory { get; }
+    public int SimultaneousRequests { get; }
+    public string DisplayText { get; }
 
     public CalendarWriterFactory(OutputType outputType, string googleServiceAccountKey, MicrosoftClientKey microsoftClientKey)
     {
@@ -17,15 +19,23 @@ namespace makecal
       switch (OutputType)
       {
         case OutputType.Csv:
+          SimultaneousRequests = 4;
+          DisplayText = "Generating CSV calendars";
           OutputDirectory = CreateOutputDirectory("csv");
           break;
         case OutputType.Ical:
+          SimultaneousRequests = 4;
+          DisplayText = "Generating iCal calendars";
           OutputDirectory = CreateOutputDirectory("ical");
           break;
         case OutputType.GoogleWorkspace:
+          SimultaneousRequests = 40;
+          DisplayText = "Writing to Google Workspace calendars";
           GoogleServiceAccountKey = googleServiceAccountKey;
           break;
         case OutputType.Microsoft365:
+          SimultaneousRequests = 25;
+          DisplayText = "Writing to Microsoft 365 calendars";
           MicrosoftClientKey = microsoftClientKey;
           break;
       }

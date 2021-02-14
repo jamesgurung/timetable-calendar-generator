@@ -16,16 +16,16 @@ namespace makecal
         Console.CursorVisible = false;
         Console.WriteLine("TIMETABLE CALENDAR GENERATOR\n");
 
-        var outputFormat = ArgumentParser.Parse(args);
+        var outputType = ArgumentParser.Parse(args);
 
         var settings = await InputReader.LoadSettingsAsync();
-        var googleKey = outputFormat.Type == OutputType.GoogleWorkspace ? await InputReader.LoadGoogleKeyAsync() : null;
-        var microsoftKey = outputFormat.Type == OutputType.Microsoft365 ? await InputReader.LoadMicrosoftKeyAsync() : null;
+        var googleKey = outputType == OutputType.GoogleWorkspace ? await InputReader.LoadGoogleKeyAsync() : null;
+        var microsoftKey = outputType == OutputType.Microsoft365 ? await InputReader.LoadMicrosoftKeyAsync() : null;
 
         var people = await InputReader.LoadPeopleAsync();
 
         var calendarGenerator = new CalendarGenerator(settings);
-        var calendarWriterFactory = new CalendarWriterFactory(outputFormat.Type, googleKey, microsoftKey);
+        var calendarWriterFactory = new CalendarWriterFactory(outputType, googleKey, microsoftKey);
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
@@ -33,10 +33,10 @@ namespace makecal
             Math.Max(ConsoleHelper.HeaderHeight + people.Count + ConsoleHelper.FooterHeight, Console.BufferHeight));
         }
 
-        Console.WriteLine($"\n{outputFormat.Text}:");
+        Console.WriteLine($"\n{calendarWriterFactory.DisplayText}:");
 
         var writeTasks = new List<Task>();
-        using (var throttler = new SemaphoreSlim(outputFormat.SimultaneousRequests))
+        using (var throttler = new SemaphoreSlim(calendarWriterFactory.SimultaneousRequests))
         {
           for (var i = 0; i < people.Count; i++)
           {
