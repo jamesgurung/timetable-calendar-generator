@@ -4,27 +4,24 @@ namespace makecal
 {
   public static class ConsoleHelper
   {
-    public static int HeaderHeight { get; } = 10;
-    public static int FooterHeight { get; } = 3;
+    public static int HeaderHeight => 10;
+    public static int FooterHeight => 3;
 
-    private static readonly int statusCol = 50;
-    private static readonly int statusWidth = 30;
+    private const int StatusCol = 50;
+    private const int StatusWidth = 30;
     private static readonly ConsoleColor defaultBackground = Console.BackgroundColor;
-    private static readonly object consoleLock = new object();
+    private static readonly object consoleLock = new();
 
-    public static int MinConsoleWidth => statusCol + statusWidth;
+    public static int MinConsoleWidth => StatusCol + StatusWidth;
 
     private static void Write(int line, int col, string text, ConsoleColor? colour = null)
     {
       lock (consoleLock)
       {
-        if (colour == null)
-        {
-          colour = defaultBackground;
-        }
+        colour ??= defaultBackground;
         Console.SetCursorPosition(col, line);
         Console.BackgroundColor = defaultBackground;
-        Console.Write(new string(' ', statusWidth));
+        Console.Write(new string(' ', StatusWidth));
         Console.SetCursorPosition(col, line);
         Console.BackgroundColor = colour.Value;
         Console.Write(text);
@@ -39,7 +36,7 @@ namespace makecal
 
     public static void WriteStatus(int line, string text, ConsoleColor? colour = null)
     {
-      Write(line, statusCol, text, colour);
+      Write(line, StatusCol, text, colour);
     }
 
     public static void WriteError(string message)

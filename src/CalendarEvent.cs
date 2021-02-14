@@ -4,9 +4,9 @@ namespace makecal
 {
   public class CalendarEvent
   {
-    public string Title { get; set; }
-    public string Location { get; set; }
-    public DateTime Start { get; set; }
-    public DateTime End { get; set; }
+    public string Title { get; init; }
+    public string Location { get; init; }
+    public DateTime Start { get; init; }
+    public DateTime End { get; init; }
   }
 }

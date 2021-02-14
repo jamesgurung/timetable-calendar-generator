@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -10,17 +9,17 @@ using Microsoft.Identity.Client;
 
 namespace makecal
 {
-  class MicrosoftCalendarWriter : ICalendarWriter
+  public class MicrosoftCalendarWriter : ICalendarWriter
   {
-    private static readonly string tag = "timetable-calendar-generator";
+    private const string Tag = "timetable-calendar-generator";
     private static readonly EventComparer<Event> comparer = new(e => e.Start?.DateTime, e => e.End?.DateTime, e => e.Subject, e => e.Location.DisplayName);
-    private static readonly EventExtensionsCollectionPage extensions = new() { new OpenTypeExtension { ExtensionName = tag } };
-    private static readonly string categoryName = "Timetable";
-    private static readonly CategoryColor categoryColour = CategoryColor.Preset2;
+    private static readonly EventExtensionsCollectionPage extensions = new() { new OpenTypeExtension { ExtensionName = Tag } };
+    private const string CategoryName = "Timetable";
+    private const CategoryColor CategoryColour = CategoryColor.Preset2;
 
-    private readonly GraphServiceClient client;
-    private readonly IUserRequestBuilder userClient;
-    private readonly Serializer serializer = new();
+    private readonly GraphServiceClient _client;
+    private readonly IUserRequestBuilder _userClient;
+    private readonly Serializer _serializer = new();
 
     public MicrosoftCalendarWriter(string email, MicrosoftClientKey clientKey)
     {
@@ -30,8 +29,8 @@ namespace makecal
         .WithClientSecret(clientKey.ClientSecret)
         .WithAuthority(AadAuthorityAudience.AzureAdMyOrg)
         .Build();
-      client = new GraphServiceClient(new ClientCredentialProvider(confidentialClient));
-      userClient = client.Users[email];
+      _client = new GraphServiceClient(new ClientCredentialProvider(confidentialClient));
+      _userClient = _client.Users[email];
     }
 
     public async Task WriteAsync(IList<CalendarEvent> events)
@@ -53,20 +52,20 @@ namespace makecal
 
     private async Task SetupCategoryAsync()
     {
-      var categories = await userClient.Outlook.MasterCategories.Request().GetAsync();
-      if (categories.Any(o => o.DisplayName == categoryName)) return;
-      var category = new OutlookCategory { DisplayName = categoryName, Color = categoryColour };
-      await userClient.Outlook.MasterCategories.Request().AddAsync(category);
+      var categories = await _userClient.Outlook.MasterCategories.Request().GetAsync();
+      if (categories.Any(o => o.DisplayName == CategoryName)) return;
+      var category = new OutlookCategory { DisplayName = CategoryName, Color = CategoryColour };
+      await _userClient.Outlook.MasterCategories.Request().AddAsync(category);
     }
 
     private async Task<IList<Event>> GetExistingEventsAsync()
     {
       var events = new List<Event>();
-      var request = userClient.Calendar.Events.Request();
+      var request = _userClient.Calendar.Events.Request();
       do
       {
         var response = await request.Top(1000)
-          .Filter($"Start/DateTime gt '{DateTime.Today:s}' and Extensions/any(f:f/id eq '{tag}')")
+          .Filter($"Start/DateTime gt '{DateTime.Today:s}' and Extensions/any(f:f/id eq '{Tag}')")
           .Select("Id,Start,End,Subject,Location")
           .GetAsync();
         events.AddRange(response.CurrentPage);
@@ -78,10 +77,10 @@ namespace makecal
 
     private async Task DeleteEventsAsync(IEnumerable<Event> events)
     {
-      var deleteBatch = new MicrosoftUnlimitedBatch(client);
+      var deleteBatch = new MicrosoftUnlimitedBatch(_client);
       foreach (var ev in events)
       {
-        var deleteRequest = userClient.Events[ev.Id].Request().GetHttpRequestMessage();
+        var deleteRequest = _userClient.Events[ev.Id].Request().GetHttpRequestMessage();
         deleteRequest.Method = HttpMethod.Delete;
         deleteBatch.Queue(deleteRequest);
       }
@@ -90,14 +89,14 @@ namespace makecal
 
     private async Task AddEventsAsync(IEnumerable<Event> events)
     {
-      var insertBatch = new MicrosoftUnlimitedBatch(client);
+      var insertBatch = new MicrosoftUnlimitedBatch(_client);
       foreach (var ev in events)
       {
         ev.Extensions = extensions;
-        ev.Categories = new[] { categoryName };
-        var insertRequest = userClient.Calendar.Events.Request().Select("Id").GetHttpRequestMessage();
+        ev.Categories = new[] { CategoryName };
+        var insertRequest = _userClient.Calendar.Events.Request().Select("Id").GetHttpRequestMessage();
         insertRequest.Method = HttpMethod.Post;
-        insertRequest.Content = serializer.SerializeAsJsonContent(ev);
+        insertRequest.Content = _serializer.SerializeAsJsonContent(ev);
         insertBatch.Queue(insertRequest);
       }
       await insertBatch.ExecuteWithRetryAsync();

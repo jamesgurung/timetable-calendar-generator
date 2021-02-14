@@ -2,7 +2,7 @@
 
 namespace makecal
 {
-  public class ArgumentParser
+  public static class ArgumentParser
   {
     public static (OutputType Type, string Text, int SimultaneousRequests) Parse(string[] args)
     {
@@ -11,7 +11,7 @@ namespace makecal
         throw new ArgumentException("You must specify --csv or --ical or --google or --microsoft");
       }
 
-      var flags = args == null ? null : string.Join(' ', args).ToLowerInvariant();
+      var flags = string.Join(' ', args).ToLowerInvariant();
 
       return flags switch
       {

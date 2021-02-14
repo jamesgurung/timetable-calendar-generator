@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace makecal
 {
-  class IcalCalendarWriter : ICalendarWriter
+  public class IcalCalendarWriter : ICalendarWriter
   {
-    private static readonly string dateFormat = "yyyyMMdd'T'HHmmss";
+    private const string DateFormat = "yyyyMMdd'T'HHmmss";
 
     private string OutputFileName { get; }
 
@@ -29,10 +29,10 @@ namespace makecal
       foreach (var calendarEvent in events)
       {
         sb.AppendLine("BEGIN:VEVENT");
-        sb.AppendLine("UID:" + Guid.NewGuid().ToString());
+        sb.AppendLine("UID:" + Guid.NewGuid());
         sb.AppendLine("SUMMARY:" + calendarEvent.Title);
-        sb.AppendLine("DTSTART;TZID=Europe/London:" + calendarEvent.Start.ToString(dateFormat));
-        sb.AppendLine("DTEND;TZID=Europe/London:" + calendarEvent.End.ToString(dateFormat));
+        sb.AppendLine("DTSTART;TZID=Europe/London:" + calendarEvent.Start.ToString(DateFormat));
+        sb.AppendLine("DTEND;TZID=Europe/London:" + calendarEvent.End.ToString(DateFormat));
         if (!string.IsNullOrWhiteSpace(calendarEvent.Location))
         {
           sb.AppendLine("LOCATION:" + calendarEvent.Location);

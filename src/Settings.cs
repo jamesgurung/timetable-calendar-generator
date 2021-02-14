@@ -13,23 +13,21 @@ namespace makecal
     public IList<Rename> Renames { get; set; }
     public IDictionary<DateTime, string> DayTypes { get; set; }
 
-    private IDictionary<(DateTime, string), string> _overrideDictionary = null;
+    private IDictionary<(DateTime, string), string> _overrideDictionary;
     public IDictionary<(DateTime, string), string> OverrideDictionary
     {
       get
       {
-        if (_overrideDictionary is null) _overrideDictionary = Overrides?.ToDictionary(o => (o.Date, o.Period), o => o.Title);
-        return _overrideDictionary;
+        return _overrideDictionary ??= Overrides?.ToDictionary(o => (o.Date, o.Period), o => o.Title);
       }
     }
 
-    private IDictionary<string, string> _renameDictionary = null;
+    private IDictionary<string, string> _renameDictionary;
     public IDictionary<string, string> RenameDictionary
     {
       get
       {
-        if (_renameDictionary is null) _renameDictionary = Renames?.ToDictionary(o => o.OriginalTitle, o => o.NewTitle);
-        return _renameDictionary;
+        return _renameDictionary ??= Renames?.ToDictionary(o => o.OriginalTitle, o => o.NewTitle);
       }
     }
   }

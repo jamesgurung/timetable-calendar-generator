@@ -40,11 +40,10 @@ namespace makecal
         {
           for (var i = 0; i < people.Count; i++)
           {
-            var countLocal = i;
             await throttler.WaitAsync();
-            var person = people[countLocal];
-            var line = countLocal + ConsoleHelper.HeaderHeight;
-            ConsoleHelper.WriteDescription(line, $"({countLocal + 1}/{people.Count}) {person.Email}");
+            var person = people[i];
+            var line = i + ConsoleHelper.HeaderHeight;
+            ConsoleHelper.WriteDescription(line, $"({i + 1}/{people.Count}) {person.Email}");
             ConsoleHelper.WriteStatus(line, "...");
 
             writeTasks.Add(Task.Run(async () =>

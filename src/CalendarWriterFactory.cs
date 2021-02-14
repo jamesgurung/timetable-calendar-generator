@@ -6,9 +6,9 @@ namespace makecal
   public class CalendarWriterFactory
   {
     public OutputType OutputType { get; set; }
-    private string GoogleServiceAccountKey { get; set; }
-    private MicrosoftClientKey MicrosoftClientKey { get; set; }
-    private string OutputDirectory { get; set; }
+    private string GoogleServiceAccountKey { get; }
+    private MicrosoftClientKey MicrosoftClientKey { get; }
+    private string OutputDirectory { get; }
 
     public CalendarWriterFactory(OutputType outputType, string googleServiceAccountKey, MicrosoftClientKey microsoftClientKey)
     {

@@ -6,7 +6,7 @@ using KBCsv;
 
 namespace makecal
 {
-  class CsvCalendarWriter : ICalendarWriter
+  public class CsvCalendarWriter : ICalendarWriter
   {
     private string OutputFileName { get; }
 
@@ -29,12 +29,9 @@ namespace makecal
       ));
       var records = new RecordBase[] { headerRecord }.Union(dataRecords).ToArray();
 
-      using (var streamWriter = new StreamWriter(OutputFileName))
-      using (var writer = new CsvWriter(streamWriter))
-      {
-        writer.ForceDelimit = true;
-        await writer.WriteRecordsAsync(records, 0, records.Length);
-      }
+      await using var streamWriter = new StreamWriter(OutputFileName);
+      using var writer = new CsvWriter(streamWriter) { ForceDelimit = true };
+      await writer.WriteRecordsAsync(records, 0, records.Length);
     }
   }
 }

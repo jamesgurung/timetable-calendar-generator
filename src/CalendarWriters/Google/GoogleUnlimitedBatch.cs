@@ -12,8 +12,7 @@ namespace makecal
     private readonly IClientService _service;
     private readonly IList<BatchRequest> _batches;
 
-    public int BatchSizeLimit { get; private set; }
-    public int BatchCount => _batches.Count;
+    public int BatchSizeLimit { get; }
 
     public GoogleUnlimitedBatch(IClientService service, int batchSizeLimit = 50)
     {
@@ -22,7 +21,7 @@ namespace makecal
         throw new ArgumentOutOfRangeException(nameof(batchSizeLimit));
       }
       _service = service ?? throw new ArgumentNullException(nameof(service));
-      _batches = new List<BatchRequest> { new BatchRequest(_service) };
+      _batches = new List<BatchRequest> { new(_service) };
       BatchSizeLimit = batchSizeLimit;
     }
 
@@ -50,7 +49,7 @@ namespace makecal
 
     public void Queue(IClientServiceRequest request)
     {
-      Queue<object>(request, (content, error, index, message) => { });
+      Queue<object>(request, (_, _, _, _) => { });
     }
 
     public async Task ExecuteWithRetryAsync()

@@ -6,7 +6,7 @@ namespace makecal
 {
   public class CalendarGenerator
   {
-    private static readonly string blankingCode = "Blanking Code";
+    private const string BlankingCode = "Blanking Code";
 
     private Settings Settings { get; }
 
@@ -17,15 +17,13 @@ namespace makecal
 
     public IList<CalendarEvent> Generate(Person person)
     {
-      var myStudyLeave = person.YearGroup == null ? new List<StudyLeave>() : Settings.StudyLeave.Where(o => o.Year == person.YearGroup);
+      var myStudyLeave = person.YearGroup == null ? new List<StudyLeave>() : Settings.StudyLeave.Where(o => o.Year == person.YearGroup).ToList();
       var myLessons = person.Lessons.GroupBy(o => o.PeriodCode).ToDictionary(o => o.Key, o => o.First());
 
       var events = new List<CalendarEvent>();
 
-      foreach (var dayOfCalendar in Settings.DayTypes.Where(o => o.Key >= DateTime.Today))
+      foreach (var (date, dayCode) in Settings.DayTypes.Where(o => o.Key >= DateTime.Today))
       {
-        var date = dayOfCalendar.Key;
-        var dayCode = dayOfCalendar.Value;
         if (myStudyLeave.Any(o => o.StartDate <= date && o.EndDate >= date))
         {
           continue;
@@ -40,12 +38,12 @@ namespace makecal
           }
           var periodName = lessonTime.Lesson;
 
-          if (myLessons.TryGetValue($"{dayCode}:{periodName}", out var lesson) && lesson.Class == blankingCode)
+          if (myLessons.TryGetValue($"{dayCode}:{periodName}", out var lesson) && lesson.Class == BlankingCode)
           {
             continue;
           }
 
-          string title = !string.IsNullOrEmpty(periodName) && char.IsDigit(periodName[0]) ? $"P{periodName}. " : string.Empty;
+          var title = !string.IsNullOrEmpty(periodName) && char.IsDigit(periodName[0]) ? $"P{periodName}. " : string.Empty;
 
           string room;
 
@@ -77,7 +75,7 @@ namespace makecal
               }
               clsName = newTitle;
             }
-            if (clsName == blankingCode)
+            if (clsName == BlankingCode)
             {
               continue;
             }

@@ -10,25 +10,24 @@ namespace makecal
 {
   public static class GoogleCalendarExtensions
   {
-    private static readonly int maxAttempts = 4;
-    private static readonly int retryFirst = 5000;
-    private static readonly int retryMultiplier = 4;
-
-    private static readonly int maxPageSize = 2500;
+    private const int MaxAttempts = 4;
+    private const int RetryFirst = 5000;
+    private const int RetryMultiplier = 4;
+    private const int MaxPageSize = 2500;
 
     private static async Task<TResponse> ExecuteWithRetryAsync<TResponse>(Func<Task<TResponse>> func)
     {
       TResponse response = default;
-      for (var attempt = 1; attempt <= maxAttempts; attempt++)
+      for (var attempt = 1; attempt <= MaxAttempts; attempt++)
       {
         try
         {
           response = await func();
           break;
         }
-        catch (Google.GoogleApiException) when (attempt < maxAttempts)
+        catch (Google.GoogleApiException) when (attempt < MaxAttempts)
         {
-          var backoff = retryFirst * (int)Math.Pow(retryMultiplier, attempt - 1);
+          var backoff = RetryFirst * (int)Math.Pow(RetryMultiplier, attempt - 1);
           await Task.Delay(backoff);
         }
       }
@@ -39,7 +38,7 @@ namespace makecal
     {
       listRequest.TimeMin = after;
       listRequest.TimeMax = before;
-      listRequest.MaxResults = maxPageSize;
+      listRequest.MaxResults = MaxPageSize;
       var pageStreamer = new PageStreamer<Event, EventsResource.ListRequest, Events, string>(
         (request, token) => request.PageToken = token,
         response => response.NextPageToken,

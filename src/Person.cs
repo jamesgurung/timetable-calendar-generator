@@ -6,15 +6,12 @@ namespace makecal
 {
   public class Person
   {
-    private static EmailAddressAttribute validator = new EmailAddressAttribute();
+    private static readonly EmailAddressAttribute validator = new();
 
     private string _email;
     public string Email
     {
-      get
-      {
-        return _email;
-      }
+      get => _email;
       set
       {
         if (string.IsNullOrEmpty(value) || !validator.IsValid(value))
