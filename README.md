@@ -118,8 +118,8 @@ If you are using the `--google` flag to directly upload timetables to Google Cal
 1. [Configure the OAuth consent screen.](https://console.cloud.google.com/apis/credentials/consent) Select "Internal" and set the app name to "Timetable Calendar Generator". Provide the email addresses as required. You do not need to add any scopes on the next screen.
 1. [Create a new service account.](https://console.cloud.google.com/iam-admin/serviceaccounts) Give it any name and set the role to "Project - Editor". Skip the "Grant users access" step.
 1. Once the service account is created, click Edit > Add key > Create new key > JSON. The service account's private key will be downloaded to your computer. Rename it to `google-key.json` and put it in the `inputs` folder.
-1. Tick "Enable G Suite domain-wide delegation", and save.
 1. Now delegate domain-wide authority to this service account:
+    1. Still on the Edit page, tick "Enable G Suite domain-wide delegation", and save.
     1. On the Service Accounts overview page, click "View Client ID" and copy the long ID number.
     1. Open your Google Workspace [Admin console](https://admin.google.com/) and go to Main menu > Security > API controls.
     1. In the "Domain wide delegation" pane, select "Manage Domain Wide Delegation", and then "Add new".
