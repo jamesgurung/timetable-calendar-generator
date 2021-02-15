@@ -64,6 +64,7 @@ namespace makecal
       var request = _userClient.Calendar.Events.Request();
       do
       {
+        request.Headers.Add(new HeaderOption("Prefer", "outlook.timezone=\"Europe/London\""));
         var response = await request.Top(1000)
           .Filter($"Start/DateTime gt '{DateTime.Today:s}' and Extensions/any(f:f/id eq '{Tag}')")
           .Select("Id,Start,End,Subject,Location")
