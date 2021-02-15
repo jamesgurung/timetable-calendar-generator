@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,6 +36,7 @@ namespace makecal
 
         Console.WriteLine($"\n{calendarWriterFactory.DisplayText}:");
 
+        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
         var writeTasks = new List<Task>();
         using (var throttler = new SemaphoreSlim(calendarWriterFactory.SimultaneousRequests))
         {

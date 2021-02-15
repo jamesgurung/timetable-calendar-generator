@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -49,35 +50,65 @@ namespace makecal
     {
       foreach (var batch in _batches)
       {
+        if (batch.BatchRequestSteps.Count == 0) continue;
         var current = batch;
 
         for (var attempt = 1; attempt <= MaxAttempts; attempt++) {
-          if (current.BatchRequestSteps.Count == 0) break;
-          if (attempt > 1)
+          int firstFailure = 0;
+          List<KeyValuePair<string, HttpResponseMessage>> responses = null;
+          try
           {
-            var backoff = RetryFirst * (int)Math.Pow(RetryMultiplier, attempt - 1);
-            await Task.Delay(backoff);
+            firstFailure = 0;
+            var result = await _service.Batch.Request().PostAsync(current);
+            responses = (await result.GetResponsesAsync()).ToList();
+            firstFailure = responses.FindIndex(o => !o.Value.IsSuccessStatusCode);
+            if (firstFailure < 0) break;
+            throw new Exception("Batch requests failed.");
           }
-          var result = await _service.Batch.Request().PostAsync(current);
-          var responses = await result.GetResponsesAsync();
-
-          current = new BatchRequestContent();
-          var i = 0;
-          foreach (var (stepKey, stepResponse) in responses)
+          catch when (attempt < 3)
           {
-            if (!stepResponse.IsSuccessStatusCode)
+            var retry = new BatchRequestContent();
+            var i = 0;
+            foreach (var step in current.BatchRequestSteps.Values.Skip(firstFailure))
             {
-              var step = new BatchRequestStep(i.ToString(), batch.BatchRequestSteps[stepKey].Request, i == 0 ? null : new List<string> { (i - 1).ToString() });
-              current.AddBatchRequestStep(step);
+              var clone = await CloneRequestAsync(step.Request);
+              var retryStep = new BatchRequestStep(i.ToString(), clone, i == 0 ? null : new List<string> { (i - 1).ToString() });
+              retry.AddBatchRequestStep(retryStep);
               i++;
             }
-            stepResponse.Dispose();
+            var backoff = RetryFirst * (int)Math.Pow(RetryMultiplier, attempt - 1);
+            await Task.Delay(backoff);
+            current = retry;
+          }
+          finally
+          {
+            if (responses is not null)
+            {
+              foreach (var response in responses) response.Value?.Dispose();
+            }
           }
         }
 
-        if (current.BatchRequestSteps.Count > 0) throw new Exception("Batch request failed.");
-
       }
+    }
+
+    private static async Task<HttpRequestMessage> CloneRequestAsync(HttpRequestMessage req)
+    {
+      var clone = new HttpRequestMessage(req.Method, req.RequestUri) {Content = await CloneContentAsync(req.Content).ConfigureAwait(false), Version = req.Version};
+      foreach (var (key, value) in req.Options) clone.Options.Set(new HttpRequestOptionsKey<object>(key), value);
+      foreach (var (key, value) in req.Headers) clone.Headers.TryAddWithoutValidation(key, value);
+      return clone;
+    }
+
+    private static async Task<HttpContent> CloneContentAsync(HttpContent content)
+    {
+      if (content is null) return null;
+      var ms = new MemoryStream();
+      await content.CopyToAsync(ms).ConfigureAwait(false);
+      ms.Position = 0;
+      var clone = new StreamContent(ms);
+      foreach (var (key, value) in content.Headers) clone.Headers.Add(key, value);
+      return clone;
     }
   }
 }

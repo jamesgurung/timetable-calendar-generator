@@ -29,8 +29,8 @@ namespace makecal
         return false;
       }
       return
-        Start(x)[..19] == Start(y)[..19] &&
-        End(y)[..19] == End(y)[..19] &&
+        Start(x)?[..19] == Start(y)?[..19] &&
+        End(y)?[..19] == End(y)?[..19] &&
         GetOriginalTitle(Title(x)) == GetOriginalTitle(Title(y)) &&
         (Location(x) == Location(y) || (string.IsNullOrEmpty(Location(x)) && string.IsNullOrEmpty(Location(y))));
     }

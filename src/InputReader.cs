@@ -130,10 +130,12 @@ namespace makecal
           var newEmail = record[StudentFields.Email].ToLower();
           if (currentStudent?.Email != newEmail)
           {
+            var year = record[StudentFields.Year];
+            if (year.StartsWith("Year ")) year = year[5..];
             currentStudent = new Person
             {
               Email = newEmail,
-              YearGroup = int.Parse(record[StudentFields.Year]),
+              YearGroup = int.Parse(year),
               Lessons = new List<Lesson>()
             };
             currentSubject = null;
