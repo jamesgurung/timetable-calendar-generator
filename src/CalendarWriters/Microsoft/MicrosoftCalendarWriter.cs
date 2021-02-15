@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -12,10 +13,17 @@ namespace makecal
   public class MicrosoftCalendarWriter : ICalendarWriter
   {
     private const string Tag = "timetable-calendar-generator";
-    private static readonly EventComparer<Event> comparer = new(e => e.Start?.DateTime, e => e.End?.DateTime, e => e.Subject, e => e.Location.DisplayName);
-    private static readonly EventExtensionsCollectionPage extensions = new() { new OpenTypeExtension { ExtensionName = Tag } };
     private const string CategoryName = "Timetable";
     private const CategoryColor CategoryColour = CategoryColor.Preset2;
+
+    private static readonly EventExtensionsCollectionPage extensions = new() { new OpenTypeExtension { ExtensionName = Tag } };
+
+    private static readonly EventComparer<Event> comparer = new(
+      e => e.Start?.DateTime is null ? null : DateTime.ParseExact(e.Start.DateTime[..19], "s", CultureInfo.InvariantCulture),
+      e => e.End?.DateTime is null ? null : DateTime.ParseExact(e.End.DateTime[..19], "s", CultureInfo.InvariantCulture),
+      e => e.Subject,
+      e => e.Location.DisplayName
+    );
 
     private readonly GraphServiceClient _client;
     private readonly IUserRequestBuilder _userClient;

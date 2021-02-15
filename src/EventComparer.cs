@@ -5,12 +5,12 @@ namespace makecal
 {
   public class EventComparer<TEvent> : IEqualityComparer<TEvent>
   {
-    private Func<TEvent, string> Start { get; }
-    private Func<TEvent, string> End { get; }
+    private Func<TEvent, DateTime?> Start { get; }
+    private Func<TEvent, DateTime?> End { get; }
     private Func<TEvent, string> Title { get; }
     private Func<TEvent, string> Location { get; }
 
-    public EventComparer(Func<TEvent, string> start, Func<TEvent, string> end, Func<TEvent, string> title, Func<TEvent, string> location)
+    public EventComparer(Func<TEvent, DateTime?> start, Func<TEvent, DateTime?> end, Func<TEvent, string> title, Func<TEvent, string> location)
     {
       Start = start;
       End = end;
@@ -29,8 +29,8 @@ namespace makecal
         return false;
       }
       return
-        Start(x)?[..19] == Start(y)?[..19] &&
-        End(y)?[..19] == End(y)?[..19] &&
+        Start(x) == Start(y) &&
+        End(x) == End(y) &&
         GetOriginalTitle(Title(x)) == GetOriginalTitle(Title(y)) &&
         (Location(x) == Location(y) || (string.IsNullOrEmpty(Location(x)) && string.IsNullOrEmpty(Location(y))));
     }
@@ -45,8 +45,8 @@ namespace makecal
       {
         var hash = 17;
         hash = hash * 23 + (GetOriginalTitle(Title(ev))?.GetHashCode() ?? 0);
-        hash = hash * 23 + (Start(ev)[..19]?.GetHashCode() ?? 0);
-        hash = hash * 23 + (End(ev)[..19]?.GetHashCode() ?? 0);
+        hash = hash * 23 + (Start(ev)?.GetHashCode() ?? 0);
+        hash = hash * 23 + (End(ev)?.GetHashCode() ?? 0);
         hash = hash * 23 + (Location(ev) ?? string.Empty).GetHashCode();
         return hash;
       }

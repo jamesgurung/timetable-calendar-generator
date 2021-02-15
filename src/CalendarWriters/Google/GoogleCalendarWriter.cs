@@ -20,7 +20,7 @@ namespace makecal
       Private__ = new Dictionary<string, string> { { AppName, "true" } }
     };
 
-    private static readonly EventComparer<Event> comparer = new(e => e.Start?.DateTime?.ToString("s"), e => e.End?.DateTime?.ToString("s"), e => e.Summary, e => e.Location);
+    private static readonly EventComparer<Event> comparer = new(e => e.Start?.DateTime, e => e.End?.DateTime, e => e.Summary, e => e.Location);
 
     private readonly CalendarService _service;
 
