@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using KBCsv;
@@ -17,7 +19,6 @@ namespace makecal
     private const string TeachersFileName = @"inputs/teachers.csv";
 
     private const char ReplacementCharacter = '\ufffd';
-    
 
     public static async Task<Settings> LoadSettingsAsync()
     {
@@ -45,7 +46,7 @@ namespace makecal
           {
             continue;
           }
-          var date = DateTime.ParseExact(record[0], "dd-MMM-yy", null);
+          var date = DateTime.ParseExact(record[0], "yyyy-MM-dd", CultureInfo.InvariantCulture);
           var weekType = record.Count > 1 ? record[1] : string.Empty;
           settings.DayTypes.Add(date, weekType + date.DayOfWeek.ToString("G")[..3]);
         }
@@ -115,6 +116,7 @@ namespace makecal
       using var reader = new CsvReader(fs);
       Person currentStudent = null;
       string currentSubject = null;
+      int? currentStudentYear = null;
 
       while (reader.HasMoreRecords)
       {
@@ -127,15 +129,14 @@ namespace makecal
 
         if (!string.IsNullOrEmpty(record[StudentFields.Email]))
         {
-          var newEmail = record[StudentFields.Email].ToLower();
+          var newEmail = record[StudentFields.Email].ToLowerInvariant();
           if (currentStudent?.Email != newEmail)
           {
-            var year = record[StudentFields.Year];
-            if (year.StartsWith("Year ")) year = year[5..];
+            var yearString = record[StudentFields.Year];
+            currentStudentYear = int.Parse(yearString.StartsWith("Year ") ? yearString[5..] : yearString);
             currentStudent = new Person
             {
               Email = newEmail,
-              YearGroup = int.Parse(year),
               Lessons = new List<Lesson>()
             };
             currentSubject = null;
@@ -148,17 +149,18 @@ namespace makecal
           currentSubject = record[StudentFields.Subject];
         }
 
-        if (currentStudent == null || currentSubject == null)
+        if (currentStudent is null || currentSubject is null)
         {
           throw new InvalidOperationException("Incorrectly formatted timetable (students).");
         }
 
-        currentStudent.Lessons.Add(new Lesson
+        currentStudent.Lessons.Add(new()
         {
           PeriodCode = record[StudentFields.Period],
           Class = currentSubject,
           Room = record[StudentFields.Room],
-          Teacher = record[StudentFields.Teacher]
+          Teacher = record[StudentFields.Teacher],
+          YearGroup = currentStudentYear
         });
       }
 
@@ -181,7 +183,7 @@ namespace makecal
           throw new InvalidOperationException("Incorrectly formatted timetable (teachers).");
         }
         var rooms = await reader.ReadDataRecordAsync();
-        var currentTeacher = new Person { Email = timetable[0].ToLower(), Lessons = new List<Lesson>() };
+        var currentTeacher = new Person { Email = timetable[0].ToLowerInvariant(), Lessons = new List<Lesson>() };
 
         for (var i = 1; i < timetable.Count; i++)
         {
@@ -189,10 +191,12 @@ namespace makecal
           {
             continue;
           }
-          currentTeacher.Lessons.Add(new Lesson
+          var classCode = timetable[i].Trim().TrimEnd(new[] { ReplacementCharacter });
+          currentTeacher.Lessons.Add(new()
           {
             PeriodCode = periodCodes[i],
-            Class = timetable[i].Trim().TrimEnd(new[] { ReplacementCharacter }),
+            Class = classCode,
+            YearGroup = GetYearFromClassName(classCode),
             Room = rooms[i].Trim().TrimEnd(new[] { ReplacementCharacter })
           });
         }
@@ -201,6 +205,12 @@ namespace makecal
       }
 
       return teachers;
+    }
+
+    private static int? GetYearFromClassName(string className)
+    {
+      var yearDigits = className.TakeWhile(char.IsDigit).ToArray();
+      return yearDigits.Length == 0 ? null : int.Parse(new string(yearDigits));
     }
 
   }

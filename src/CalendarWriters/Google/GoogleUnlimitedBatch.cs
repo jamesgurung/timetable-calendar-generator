@@ -27,12 +27,12 @@ namespace makecal
 
     public void Queue<TResponse>(IClientServiceRequest request, BatchRequest.OnResponse<TResponse> callback) where TResponse : class
     {
-      if (request == null)
+      if (request is null)
       {
         throw new ArgumentNullException(nameof(request));
       }
 
-      if (callback == null)
+      if (callback is null)
       {
         throw new ArgumentNullException(nameof(callback));
       }

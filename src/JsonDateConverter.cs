@@ -9,12 +9,12 @@ namespace makecal
   {
     public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-      return DateTime.ParseExact(reader.GetString() ?? string.Empty, "dd-MMM-yy", CultureInfo.InvariantCulture);
+      return DateTime.ParseExact(reader.GetString() ?? string.Empty, "yyyy-MM-dd", CultureInfo.InvariantCulture);
     }
 
     public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
     {
-      writer.WriteStringValue(value.ToString("dd-MMM-yy"));
+      writer.WriteStringValue(value.ToString("yyyy-MM-dd"));
     }
   }
 }

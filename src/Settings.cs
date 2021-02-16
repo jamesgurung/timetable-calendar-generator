@@ -6,8 +6,7 @@ namespace makecal
 {
   public class Settings
   {
-    public IList<LessonTime> LessonTimes { get; set; }
-    public LessonTime WeirdFriday4Time { get; set; }
+    public IList<Timing> Timings { get; set; }
     public IList<StudyLeave> StudyLeave { get; set; }
     public IList<Override> Overrides { get; set; }
     public IList<Rename> Renames { get; set; }
@@ -34,7 +33,7 @@ namespace makecal
 
   public class StudyLeave
   {
-    public int Year { get; set; }
+    public IList<int> YearGroups { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
   }
@@ -52,8 +51,9 @@ namespace makecal
     public string NewTitle { get; set; }
   }
 
-  public class LessonTime
+  public class Timing
   {
+    public string Period { get; set; }
     public string StartTime
     {
       set {
@@ -65,6 +65,7 @@ namespace makecal
     public int StartHour { get; private set; }
     public int StartMinute { get; private set; }
     public int Duration { get; set; }
-    public string Lesson { get; set; }
+    public IList<int> YearGroups { get; set; }
+    public IList<string> Days { get; set; }
   }
 }

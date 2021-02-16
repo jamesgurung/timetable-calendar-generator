@@ -17,26 +17,16 @@ namespace makecal
 
     public IList<CalendarEvent> Generate(Person person)
     {
-      var myStudyLeave = person.YearGroup == null ? new List<StudyLeave>() : Settings.StudyLeave.Where(o => o.Year == person.YearGroup).ToList();
       var myLessons = person.Lessons.GroupBy(o => o.PeriodCode).ToDictionary(o => o.Key, o => o.First());
 
       var events = new List<CalendarEvent>();
 
       foreach (var (date, dayCode) in Settings.DayTypes.Where(o => o.Key >= DateTime.Today))
       {
-        if (myStudyLeave.Any(o => o.StartDate <= date && o.EndDate >= date))
+        for (var period = 0; period < Settings.Timings.Count; period++)
         {
-          continue;
-        }
-
-        for (var period = 0; period < Settings.LessonTimes.Count; period++)
-        {
-          var lessonTime = Settings.LessonTimes[period];
-          if (Settings.WeirdFriday4Time != null && date.DayOfWeek == DayOfWeek.Friday && lessonTime.Lesson == "4")
-          {
-            lessonTime = Settings.WeirdFriday4Time;
-          }
-          var periodName = lessonTime.Lesson;
+          var lessonTime = Settings.Timings[period];
+          var periodName = lessonTime.Period;
 
           if (myLessons.TryGetValue($"{dayCode}:{periodName}", out var lesson) && lesson.Class == BlankingCode)
           {
@@ -56,15 +46,11 @@ namespace makecal
             title += overrideTitle;
             room = null;
           }
-          else if (lesson != null)
+          else if (lesson is not null)
           {
-            if (person.YearGroup == null)
+            if (lesson.YearGroup is not null && Settings.StudyLeave.Any(o => o.YearGroups.Contains(lesson.YearGroup.Value) && o.StartDate <= date && o.EndDate >= date))
             {
-              var classYearGroup = lesson.YearGroup;
-              if (classYearGroup != null && Settings.StudyLeave.Any(o => o.Year == classYearGroup && o.StartDate <= date && o.EndDate >= date))
-              {
-                continue;
-              }
+              continue;
             }
             var clsName = lesson.Class;
             if (Settings.RenameDictionary.TryGetValue(clsName, out var newTitle))

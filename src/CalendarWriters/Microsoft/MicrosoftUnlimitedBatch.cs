@@ -28,7 +28,7 @@ namespace makecal
 
     public void Queue(HttpRequestMessage request)
     {
-      if (request == null)
+      if (request is null)
       {
         throw new ArgumentNullException(nameof(request));
       }

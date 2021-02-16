@@ -21,7 +21,6 @@ namespace makecal
         _email = value;
       }
     }
-    public int? YearGroup { get; set; }
     public List<Lesson> Lessons { get; set; }
   }
 }

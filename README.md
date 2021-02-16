@@ -20,56 +20,55 @@ This is a cross-platform command line tool for bulk generating student and teach
 
 #### settings.json
 
-Configure lesson timings, study leave dates and periods to override for all users.
+Configure lesson timings, study leave dates, periods to override, and lesson renames.
 
 ```
 {
-  "lessonTimes":
+  "timings":
   [
-    { "lesson": "1", "startTime": "08:50", "duration": 60 },
-    { "lesson": "2", "startTime": "09:55", "duration": 60 },
-    { "lesson": "3", "startTime": "11:15", "duration": 60 },
-    { "lesson": "4", "startTime": "12:20", "duration": 60 },
-    { "lesson": "5", "startTime": "14:00", "duration": 60 },
-    { "lesson": "6", "startTime": "15:05", "duration": 60 }
+    { "period": "Tut", "startTime": "08:00", "duration": 45, "yearGroups": [11] },
+    { "period": "Tut", "startTime": "08:30", "duration": 15 },
+    { "period": "1", "startTime": "08:50", "duration": 60 },
+    { "period": "2", "startTime": "09:55", "duration": 60 },
+    { "period": "3", "startTime": "11:15", "duration": 60 },
+    { "period": "4", "startTime": "12:20", "duration": 80, "days": ["1Fri", "2Fri"] },
+    { "period": "4", "startTime": "12:20", "duration": 60 },
+    { "period": "5", "startTime": "14:00", "duration": 60 }
   ],
   "studyLeave":
   [
-    { "year": 11, "startDate": "07-Jun-21", "endDate": "28-Jul-21" },
-    { "year": 13, "startDate": "07-Jun-21", "endDate": "28-Jul-21" }
+    { "yearGroups": [11, 13], "startDate": "2021-07-07", "endDate": "2021-07-28" }
   ],
   "overrides":
   [
-    { "date": "03-Sep-20", "period": "1", "title": "Tutorial" },
-    { "date": "18-Dec-20", "period": "3", "title": "Whole school assembly" },
-    { "date": "18-Dec-20", "period": "4", "title": "" },
-    { "date": "18-Dec-20", "period": "5", "title": "" }
+    { "date": "2020-12-18", "period": "4", "title": "Whole school assembly" },
+    { "date": "2020-12-18", "period": "5", "title": "" }
   ],
   "renames":
   [
     { "originalTitle": "PPA", "newTitle": "" }
   ]
 }
-
 ```
-Note that all times will be set in the `Europe/London` timezone.
+If you specify multiple timings for the same `period`, the app will use the first match. This allows for customised timings for certain `yearGroups` or `days` of the week. Make sure a fallback entry (with no filters) is always provided.
+
+Overriding or renaming a lesson to a blank string (`""`) will prevent a calendar event from being created at that time.
 
 #### days.csv
 
-Each teaching day in the school year, in `dd-MMM-yy` format, followed by a week indicator (i.e. Week 1 or Week 2). Non-teaching days such as weekends and holidays should be excluded. This file can be created in a spreadsheet app.
+List each teaching day in the school year, in `yyyy-MM-dd` format, followed by a week indicator (i.e. Week 1 or Week 2). Non-teaching days such as weekends and holidays should be excluded. This file can be created in a spreadsheet app.
 
 ```
-04-Sep-19,1
-05-Sep-19,1
-06-Sep-19,1
-09-Sep-19,2
+2020-09-03,1
+2020-09-04,1
+2020-09-07,2
 ...
 ```
 For schools which use a one-week timetable, the second column should be omitted so the file only contains a list of working days.
 
 #### students.csv
 
-This can be run as a spreadsheet report from your MIS and then exported to CSV. Periods must be in the format `1Mon:2` (meaning Week 1 Monday Period 2). Whitespace not required.
+This can be run as a spreadsheet report from your MIS and then exported to CSV. Periods must be in the format `1Mon:2` (meaning Week 1 Monday Period 2). Whitespace is not required.
 
 ```
 Email               , Year , Subject  , Period , Room , Teacher
@@ -85,7 +84,7 @@ SIMS users can download the report [SIMS-StudentTimetables.RptDef](https://githu
 
 #### teachers.csv
 
-This takes a different format. There is a column for each period in the timetable, and two rows for each teacher: the first containing class codes, and the second containing room numbers. Whitespace not required.
+This takes a different format. There is a column for each period in the timetable, and two rows for each teacher: the first containing class codes, and the second containing room numbers. Whitespace is not required.
 
 ```
 Email               , 1Mon:1   , 1Mon:2   , 1Mon:3   , ...
@@ -129,7 +128,7 @@ If you are using the `--google` flag to directly upload timetables to Google Cal
 
 #### microsoft-key.json
 
-If you are using the `--microsoft` flag to directly upload timetables to Microsoft 365, you will need to include this file:
+This file is required if you are using the `--microsoft` flag to directly upload timetables to Microsoft 365.
 
 ```
 {
@@ -138,7 +137,7 @@ If you are using the `--microsoft` flag to directly upload timetables to Microso
   "tenantId": ""
 }
 ```
-To create these credentials, your domain administrator must set up a free App Registration:
+To create these credentials, your domain administrator wil need to set up a free App Registration:
 
 1. Go to the [Azure Portal](https://portal.azure.com/) and sign in with your Microsoft 365 administrator account.
 1. Use the search bar to go to "App registrations", and click "New registration". Name it "Timetable Calendar Generator", and select "Accounts in this organizational directory only".
@@ -154,11 +153,13 @@ The output depends on which flags are set:
 #### `--csv` or `--ical`
 Creates a "calendars" folder containing a CSV or ICS calendar file for each user. These files can be shared along with [instructions for importing to Google Calendar](import-tutorial.md) or any other calendar system.
 
+iCal files are set to the `Europe/London` timezone.
+
 #### `--google`
 Writes each user's lessons directly to their Google Workspace calendar. The tool does not read or edit any events except for those which it creates itself (these are tagged with the extended property `makecal=true`).
 
 #### `--microsoft`
-Writes each user's lessons directly to their Microsoft 365 calendar. The tool does not read or edit any events except for those which it creates itself (these are tagged with the open extension `timetable-calendar-generator`).
+Writes each user's lessons directly to their Microsoft 365 calendar, in the `Europe/London` timezone. The tool does not read or edit any events except for those which it creates itself (these are tagged with the open extension `timetable-calendar-generator`).
 
 ### Automation
 
