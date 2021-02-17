@@ -12,8 +12,8 @@ This is a cross-platform command line tool for bulk generating student and teach
 1. Open a command line and run one of the following commands:
     1. `dotnet makecal.dll --csv` to generate comma-separated (.csv) calendar files
     1. `dotnet makecal.dll --ical` to generate iCalendar (.ics) files
-    1. `dotnet makecal.dll --google` to directly upload timetables to Google Workspace calendars
-    1. `dotnet makecal.dll --microsoft` to directly upload timetables to Microsoft 365 calendars
+    1. `dotnet makecal.dll --google` to directly sync timetables to Google Workspace calendars
+    1. `dotnet makecal.dll --microsoft` to directly sync timetables to Microsoft 365 calendars
 
 
 ### Input files
@@ -160,10 +160,10 @@ The output depends on which flags are set:
 Creates a "calendars" folder containing a CSV or ICS calendar file for each user. These files can be shared along with [instructions for importing to Google Calendar](import-tutorial.md) or any other calendar system. Note that the iCal format requires a timezone, and this is set to `Europe/London`.
 
 #### `--google`
-Writes each user's lessons directly to their Google Workspace calendar. The tool does not read or edit any events except for those which it creates itself (these are tagged with the extended property `makecal=true`).
+Synchronises each user's lessons directly to their Google Workspace calendar. The tool does not read or edit any events except for those which it creates itself (these are tagged with the extended property `makecal=true`).
 
 #### `--microsoft`
-Writes each user's lessons directly to their Microsoft 365 calendar. The tool does not read or edit any events except for those which it creates itself (these are tagged with the open extension `timetable-calendar-generator`). The Microsoft Graph API requires a timezone, and this is set to `Europe/London`.
+Synchronises each user's lessons directly to their Microsoft 365 calendar. The tool does not read or edit any events except for those which it creates itself (these are tagged with the open extension `timetable-calendar-generator`). The Microsoft Graph API requires a timezone, and this is set to `Europe/London`.
 
 ### Automation
 
