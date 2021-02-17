@@ -1,37 +1,36 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace makecal
 {
   public class Settings
   {
     public IList<Timing> Timings { get; set; }
-    public IList<StudyLeave> StudyLeave { get; set; }
-    public IList<Override> Overrides { get; set; }
+    public IList<Absence> Absences { get; set; } = new List<Absence>();
+    public IList<Override> Overrides { get; set; } = new List<Override>();
     public IList<Rename> Renames { get; set; }
+
+    [JsonIgnore]
     public IDictionary<DateTime, string> DayTypes { get; set; }
 
-    private IDictionary<(DateTime, string), string> _overrideDictionary;
-    public IDictionary<(DateTime, string), string> OverrideDictionary
-    {
-      get
-      {
-        return _overrideDictionary ??= Overrides?.ToDictionary(o => (o.Date, o.Period), o => o.Title);
-      }
-    }
-
     private IDictionary<string, string> _renameDictionary;
+    [JsonIgnore]
     public IDictionary<string, string> RenameDictionary
     {
-      get
-      {
-        return _renameDictionary ??= Renames?.ToDictionary(o => o.OriginalTitle, o => o.NewTitle);
-      }
+      get => _renameDictionary ??= Renames?.ToDictionary(o => o.OriginalTitle, o => o.NewTitle) ?? new();
+    }
+
+    private IList<IGrouping<string, Timing>> _timingsByPeriod;
+    [JsonIgnore]
+    public IList<IGrouping<string, Timing>> TimingsByPeriod
+    {
+      get => _timingsByPeriod ??= Timings.GroupBy(o => o.Period).ToList();
     }
   }
 
-  public class StudyLeave
+  public class Absence
   {
     public IList<int> YearGroups { get; set; }
     public DateTime StartDate { get; set; }
@@ -43,6 +42,7 @@ namespace makecal
     public DateTime Date { get; set; }
     public string Period { get; set; }
     public string Title { get; set; }
+    public IList<int> YearGroups { get; set; }
   }
 
   public class Rename
@@ -54,6 +54,10 @@ namespace makecal
   public class Timing
   {
     public string Period { get; set; }
+    public int Duration { get; set; }
+    public IList<int> YearGroups { get; set; }
+    public IList<string> Days { get; set; }
+
     public string StartTime
     {
       set {
@@ -62,10 +66,10 @@ namespace makecal
         StartMinute = int.Parse(parts[1]);
       }
     }
+
+    [JsonIgnore]
     public int StartHour { get; private set; }
+    [JsonIgnore]
     public int StartMinute { get; private set; }
-    public int Duration { get; set; }
-    public IList<int> YearGroups { get; set; }
-    public IList<string> Days { get; set; }
   }
 }

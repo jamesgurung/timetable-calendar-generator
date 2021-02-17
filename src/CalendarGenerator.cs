@@ -6,8 +6,6 @@ namespace makecal
 {
   public class CalendarGenerator
   {
-    private const string BlankingCode = "Blanking Code";
-
     private Settings Settings { get; }
 
     public CalendarGenerator(Settings settings)
@@ -23,58 +21,54 @@ namespace makecal
 
       foreach (var (date, dayCode) in Settings.DayTypes.Where(o => o.Key >= DateTime.Today))
       {
-        for (var period = 0; period < Settings.Timings.Count; period++)
+        foreach (var periodTimings in Settings.TimingsByPeriod)
         {
-          var lessonTime = Settings.Timings[period];
-          var periodName = lessonTime.Period;
+          var period = periodTimings.Key;
 
-          if (myLessons.TryGetValue($"{dayCode}:{periodName}", out var lesson) && lesson.Class == BlankingCode)
+          myLessons.TryGetValue($"{dayCode}:{period}", out var lesson);
+          var yearGroup = person.YearGroup ?? lesson?.YearGroup ?? default;
+
+          var overridePeriod = Settings.Overrides.FirstOrDefault(o => o.Date == date && o.Period == period && (o.YearGroups?.Contains(yearGroup) ?? true));
+
+          string title, room;
+
+          if (overridePeriod is not null)
           {
-            continue;
-          }
-
-          var title = !string.IsNullOrEmpty(periodName) && char.IsDigit(periodName[0]) ? $"P{periodName}. " : string.Empty;
-
-          string room;
-
-          if (Settings.OverrideDictionary.TryGetValue((date, periodName), out var overrideTitle))
-          {
-            if (string.IsNullOrEmpty(overrideTitle))
-            {
-              continue;
-            }
-            title += overrideTitle;
+            if (string.IsNullOrEmpty(overridePeriod.Title)) continue;
+            title = overridePeriod.Title;
             room = null;
           }
           else if (lesson is not null)
           {
-            if (lesson.YearGroup is not null && Settings.StudyLeave.Any(o => o.YearGroups.Contains(lesson.YearGroup.Value) && o.StartDate <= date && o.EndDate >= date))
-            {
-              continue;
-            }
+            if (Settings.Absences.Any(o => o.YearGroups.Contains(yearGroup) && o.StartDate <= date && o.EndDate >= date)) continue;
+
             var clsName = lesson.Class;
             if (Settings.RenameDictionary.TryGetValue(clsName, out var newTitle))
             {
-              if (string.IsNullOrEmpty(newTitle))
-              {
-                continue;
-              }
+              if (string.IsNullOrEmpty(newTitle)) continue;
               clsName = newTitle;
             }
-            if (clsName == BlankingCode)
-            {
-              continue;
-            }
-            title += string.IsNullOrEmpty(lesson.Teacher) ? clsName : $"{clsName} ({lesson.Teacher})";
+            title = string.IsNullOrEmpty(lesson.Teacher) ? clsName : $"{clsName} ({lesson.Teacher})";
             room = lesson.Room;
           }
           else
           {
             continue;
           }
+
+          var lessonTime = periodTimings.FirstOrDefault(timingEntry => (timingEntry.YearGroups?.Contains(yearGroup) ?? true) && (timingEntry.Days?.Contains(dayCode) ?? true));
+
+          if (lessonTime is null)
+          {
+            throw new Exception($"Period {period} requires fallback timings.");
+          }
           
           var start = new DateTime(date.Year, date.Month, date.Day, lessonTime.StartHour, lessonTime.StartMinute, 0);
           var end = start.AddMinutes(lessonTime.Duration);
+
+          if (char.IsDigit(period[0])) {
+            title =  $"P{period}. {title}";
+          }
 
           var calendarEvent = new CalendarEvent
           {

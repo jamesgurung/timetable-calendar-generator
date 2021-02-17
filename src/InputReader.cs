@@ -31,7 +31,7 @@ namespace makecal
         settings = await JsonSerializer.DeserializeAsync<Settings>(fs, options);
       }
 
-      if (settings is null) throw new Exception("Invalid settings file.");
+      if (settings?.Timings is null || settings.Timings.Count == 0) throw new Exception("Invalid settings file.");
 
       Console.WriteLine($"Reading {DaysFileName}");
       settings.DayTypes = new Dictionary<DateTime, string>();
@@ -116,7 +116,6 @@ namespace makecal
       using var reader = new CsvReader(fs);
       Person currentStudent = null;
       string currentSubject = null;
-      int? currentStudentYear = null;
 
       while (reader.HasMoreRecords)
       {
@@ -133,10 +132,10 @@ namespace makecal
           if (currentStudent?.Email != newEmail)
           {
             var yearString = record[StudentFields.Year];
-            currentStudentYear = int.Parse(yearString.StartsWith("Year ") ? yearString[5..] : yearString);
             currentStudent = new Person
             {
               Email = newEmail,
+              YearGroup = int.Parse(yearString.StartsWith("Year ") ? yearString[5..] : yearString),
               Lessons = new List<Lesson>()
             };
             currentSubject = null;
@@ -159,8 +158,7 @@ namespace makecal
           PeriodCode = record[StudentFields.Period],
           Class = currentSubject,
           Room = record[StudentFields.Room],
-          Teacher = record[StudentFields.Teacher],
-          YearGroup = currentStudentYear
+          Teacher = record[StudentFields.Teacher]
         });
       }
 

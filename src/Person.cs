@@ -22,5 +22,6 @@ namespace makecal
       }
     }
     public List<Lesson> Lessons { get; set; }
+    public int? YearGroup { get; set; }
   }
 }
