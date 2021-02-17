@@ -23,7 +23,7 @@ This is a cross-platform command line tool for bulk generating student and teach
 This file is required to configure:
 
 * Daily **`timings`**, which can be customised for specific `days` and/or `yearGroups`
-* Year group **`absences`** (e.g. for study leave or a staggered start of term)
+* Year group **`absences`** (e.g. for study leave or staggered start days)
 * Period **`overrides`** (e.g. whole-school tutorials or early finishes)
 * Lesson **`renames`**
 
@@ -56,7 +56,7 @@ This file is required to configure:
   ]
 }
 ```
-If you specify multiple timings for the same `period`, then when creating each event the app will use the first entry which matches any `days` and `yearGroups` filters. Make sure a fallback entry (with no filters) is always provided.
+If you specify multiple timings for the same `period`, then when creating each event the app will use the first entry matching any `days` and `yearGroups` filters. Make sure a fallback entry (with no filters) is always provided.
 
 Overriding or renaming a lesson to a blank string (`""`) will prevent a calendar event from being created at that time.
 
@@ -143,7 +143,7 @@ This file is required if you are using the `--microsoft` flag to directly upload
   "tenantId": ""
 }
 ```
-To create these credentials, your domain administrator wil need to set up a free App Registration:
+To create these credentials, your domain administrator will need to set up a free App Registration:
 
 1. Go to the [Azure Portal](https://portal.azure.com/) and sign in with your Microsoft 365 administrator account.
 1. Use the search bar to go to "App registrations", and click "New registration". Name it "Timetable Calendar Generator", and select "Accounts in this organizational directory only".
