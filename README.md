@@ -20,11 +20,12 @@ This is a cross-platform command line tool for bulk generating student and teach
 
 #### settings.json
 
-Configure:
-* Daily timings
-* Dates when some year groups are absent (e.g. for study leave or staggered starts)
-* Periods to override for all users
-* Lesson renames
+This file is required to configure:
+
+* Daily **`timings`**, which can be customised for specific `days` and/or `yearGroups`
+* Year group **`absences`** (e.g. for study leave or a staggered start of term)
+* Period **`overrides`** (e.g. whole-school tutorials or early finishes)
+* Lesson **`renames`**
 
 ```
 {
@@ -55,7 +56,7 @@ Configure:
   ]
 }
 ```
-If you specify multiple timings for the same `period`, the app will use the first match. This allows for customised timings for certain `yearGroups` or `days` of the week. Make sure a fallback entry (with no filters) is always provided.
+If you specify multiple timings for the same `period`, then when creating each event the app will use the first entry which matches any `days` and `yearGroups` filters. Make sure a fallback entry (with no filters) is always provided.
 
 Overriding or renaming a lesson to a blank string (`""`) will prevent a calendar event from being created at that time.
 
@@ -106,10 +107,10 @@ To create this file in SIMS:
 1. If needed, click the "Flip" button in the top-left corner. Teacher names should appear going down the page.
 1. On the far right of the screen, click the button for "Show/Hide Cell Settings".
 1. At the bottom of the Cell Settings pane, set "Number of Rows" to 2.
-1. In the middle of the pane, there is a split box which says "ClassRM" in the top half. Click and drag the "RM" part into the lower half of that box.
+1. In the middle of the pane, there is a split box. Click and drag "Class#" to the top half, and "RM" to the lower half.
 1. Back at the top-left of the screen, click "Export".
 1. Change "HTML" to "Excel" and click OK.
-1. When the spreadsheet opens, delete rows 1-4 which contain the title.
+1. When the spreadsheet opens, delete rows 1-4 which contain the header.
 1. Replace staff names in the left-hand column with their email addresses. You may be able to do this with a `VLOOKUP` formula.
 1. Save as `teachers.csv`
 
@@ -156,15 +157,13 @@ To create these credentials, your domain administrator wil need to set up a free
 The output depends on which flags are set:
 
 #### `--csv` or `--ical`
-Creates a "calendars" folder containing a CSV or ICS calendar file for each user. These files can be shared along with [instructions for importing to Google Calendar](import-tutorial.md) or any other calendar system.
-
-iCal files are set to the `Europe/London` timezone.
+Creates a "calendars" folder containing a CSV or ICS calendar file for each user. These files can be shared along with [instructions for importing to Google Calendar](import-tutorial.md) or any other calendar system. Note that the iCal format requires a timezone, and this is set to `Europe/London`.
 
 #### `--google`
 Writes each user's lessons directly to their Google Workspace calendar. The tool does not read or edit any events except for those which it creates itself (these are tagged with the extended property `makecal=true`).
 
 #### `--microsoft`
-Writes each user's lessons directly to their Microsoft 365 calendar, in the `Europe/London` timezone. The tool does not read or edit any events except for those which it creates itself (these are tagged with the open extension `timetable-calendar-generator`).
+Writes each user's lessons directly to their Microsoft 365 calendar. The tool does not read or edit any events except for those which it creates itself (these are tagged with the open extension `timetable-calendar-generator`). The Microsoft Graph API requires a timezone, and this is set to `Europe/London`.
 
 ### Automation
 
