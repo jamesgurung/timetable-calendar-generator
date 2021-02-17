@@ -23,7 +23,7 @@ This is a cross-platform command line tool for bulk generating student and teach
 This file is required to configure:
 
 * Daily **`timings`**, which can be customised for specific `days` and/or `yearGroups`
-* Year group **`absences`** (e.g. for study leave or staggered start days)
+* Year group **`absences`** (e.g. for study leave or a staggered start of term)
 * Period **`overrides`** (e.g. whole-school tutorials or early finishes)
 * Lesson **`renames`**
 
@@ -46,7 +46,7 @@ This file is required to configure:
   ],
   "overrides":
   [
-    { "date": "2021-09-02", "period": "1", "yearGroups": [8, 9, 10, 12], "title": "" }
+    { "date": "2021-09-02", "period": "1", "yearGroups": [8, 9, 10, 12], "title": "" },
     { "date": "2021-12-17", "period": "4", "title": "Whole school assembly" },
     { "date": "2021-12-17", "period": "5", "title": "" }
   ],
@@ -116,7 +116,7 @@ To create this file in SIMS:
 
 #### google-key.json
 
-If you are using the `--google` flag to directly upload timetables to Google Calendar, your domain administrator will need to create a free service account key:
+If you are using the `--google` flag to directly sync timetables to Google Calendar, your domain administrator will need to create a free service account key:
 
 1. [Create a new project](https://console.cloud.google.com/projectcreate) on the Google Cloud Platform console.
 1. [Enable the Google Calendar API.](https://console.cloud.google.com/apis/library/calendar-json.googleapis.com) Depending on the size of your school, you may also need to apply for a raised quota. The tool may use up to 1000 API requests per user when it is first run.
@@ -134,7 +134,7 @@ If you are using the `--google` flag to directly upload timetables to Google Cal
 
 #### microsoft-key.json
 
-This file is required if you are using the `--microsoft` flag to directly upload timetables to Microsoft 365.
+This file is required if you are using the `--microsoft` flag to directly sync timetables to Microsoft 365.
 
 ```
 {

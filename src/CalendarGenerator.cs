@@ -26,7 +26,7 @@ namespace makecal
           var period = periodTimings.Key;
 
           myLessons.TryGetValue($"{dayCode}:{period}", out var lesson);
-          var yearGroup = person.YearGroup ?? lesson?.YearGroup ?? default;
+          var yearGroup = person.YearGroup ?? lesson?.YearGroup;
 
           var overridePeriod = Settings.Overrides.FirstOrDefault(o => o.Date == date && o.Period == period && (o.YearGroups?.Contains(yearGroup) ?? true));
 
@@ -40,7 +40,7 @@ namespace makecal
           }
           else if (lesson is not null)
           {
-            if (Settings.Absences.Any(o => o.YearGroups.Contains(yearGroup) && o.StartDate <= date && o.EndDate >= date)) continue;
+            if (yearGroup is not null && Settings.Absences.Any(o => o.YearGroups.Contains(yearGroup.Value) && o.StartDate <= date && o.EndDate >= date)) continue;
 
             var clsName = lesson.Class;
             if (Settings.RenameDictionary.TryGetValue(clsName, out var newTitle))

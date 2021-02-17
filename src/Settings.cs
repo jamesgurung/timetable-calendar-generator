@@ -42,7 +42,7 @@ namespace makecal
     public DateTime Date { get; set; }
     public string Period { get; set; }
     public string Title { get; set; }
-    public IList<int> YearGroups { get; set; }
+    public IList<int?> YearGroups { get; set; }
   }
 
   public class Rename
@@ -55,7 +55,7 @@ namespace makecal
   {
     public string Period { get; set; }
     public int Duration { get; set; }
-    public IList<int> YearGroups { get; set; }
+    public IList<int?> YearGroups { get; set; }
     public IList<string> Days { get; set; }
 
     public string StartTime

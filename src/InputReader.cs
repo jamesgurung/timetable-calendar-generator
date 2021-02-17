@@ -207,7 +207,7 @@ namespace makecal
 
     private static int? GetYearFromClassName(string className)
     {
-      var yearDigits = className.TakeWhile(char.IsDigit).ToArray();
+      var yearDigits = className.TakeWhile(c => c >= '0' && c <= '9').ToArray();
       return yearDigits.Length == 0 ? null : int.Parse(new string(yearDigits));
     }
 
