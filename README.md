@@ -1,6 +1,6 @@
 # Timetable Calendar Generator :calendar:
 
-This is a cross-platform command line tool for bulk generating student and teacher timetables. It can create calendar files in comma-separated (.csv) or iCal (.ics) format, or upload directly to Google Workspace or Microsoft 365.
+This is a cross-platform command line tool for bulk generating student and teacher timetables. It can create calendar files in comma-separated (.csv) or iCal (.ics) format, or **sync directly to Google Workspace or Microsoft 365 calendars**.
 
 ![Student timetable](resources/example.png)
 
