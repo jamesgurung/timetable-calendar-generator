@@ -121,7 +121,7 @@ If you are using the `--google` flag to directly sync timetables to Google Calen
 1. [Create a new project](https://console.cloud.google.com/projectcreate) on the Google Cloud Platform console.
 1. [Enable the Google Calendar API.](https://console.cloud.google.com/apis/library/calendar-json.googleapis.com) Depending on the size of your school, you may also need to apply for a raised quota. The tool may use up to 1000 API requests per user when it is first run.
 1. [Configure the OAuth consent screen.](https://console.cloud.google.com/apis/credentials/consent) Select "Internal" and set the app name to "Timetable Calendar Generator". Provide the email addresses as required. You do not need to add any scopes on the next screen.
-1. [Create a new service account.](https://console.cloud.google.com/iam-admin/serviceaccounts) Give it any name and set the role to "Project - Editor". Skip the "Grant users access" step.
+1. [Create a new service account.](https://console.cloud.google.com/iam-admin/serviceaccounts) Give it any name, and skip both "Grant access" steps.
 1. Once the service account is created, click Edit > Add key > Create new key > JSON. The service account's private key will be downloaded to your computer. Rename it to `google-key.json` and put it in the `inputs` folder.
 1. Now delegate domain-wide authority to this service account:
     1. Still on the Edit page, tick "Enable G Suite domain-wide delegation", and save.
