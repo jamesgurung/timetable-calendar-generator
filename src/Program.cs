@@ -50,9 +50,10 @@ namespace makecal
 
             writeTasks.Add(Task.Run(async () =>
             {
+              ICalendarWriter calendarWriter = null;
               try
               {
-                var calendarWriter = calendarWriterFactory.GetCalendarWriter(person.Email);
+                calendarWriter = calendarWriterFactory.GetCalendarWriter(person.Email);
                 var events = calendarGenerator.Generate(person);
                 await calendarWriter.WriteAsync(events);
                 ConsoleHelper.WriteStatus(line, "Done.");
@@ -63,6 +64,7 @@ namespace makecal
               }
               finally
               {
+                (calendarWriter as IDisposable)?.Dispose();
                 throttler.Release();
               }
             }));

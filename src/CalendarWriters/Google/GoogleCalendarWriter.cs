@@ -9,7 +9,7 @@ using Google.Apis.Services;
 
 namespace makecal
 {
-  public class GoogleCalendarWriter : ICalendarWriter
+  public class GoogleCalendarWriter : ICalendarWriter, IDisposable
   {
     private const string CalendarId = "primary";
     private const string AppName = "makecal";
@@ -87,5 +87,7 @@ namespace makecal
       }
       await insertBatch.ExecuteWithRetryAsync();
     }
+
+    public void Dispose() => _service?.Dispose();
   }
 }
