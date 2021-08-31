@@ -8,7 +8,7 @@ using Google.Apis.Requests;
 
 namespace makecal
 {
-  public static class GoogleCalendarExtensions
+  internal static class GoogleCalendarExtensions
   {
     private const int MaxAttempts = 4;
     private const int RetryFirst = 5000;

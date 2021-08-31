@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.Json.Serialization;
 
@@ -62,9 +63,10 @@ namespace makecal
     {
       set {
         var parts = value.Split(':');
-        StartHour = int.Parse(parts[0]);
-        StartMinute = int.Parse(parts[1]);
+        StartHour = int.Parse(parts[0], CultureInfo.InvariantCulture);
+        StartMinute = int.Parse(parts[1], CultureInfo.InvariantCulture);
       }
+      get => $"{StartHour:00}:{StartMinute:00}";
     }
 
     [JsonIgnore]

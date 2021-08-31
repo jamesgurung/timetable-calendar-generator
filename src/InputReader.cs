@@ -135,7 +135,7 @@ namespace makecal
             currentStudent = new Person
             {
               Email = newEmail,
-              YearGroup = int.Parse(yearString.StartsWith("Year ") ? yearString[5..] : yearString),
+              YearGroup = int.Parse(yearString.StartsWith("Year ", StringComparison.Ordinal) ? yearString[5..] : yearString, CultureInfo.InvariantCulture),
               Lessons = new List<Lesson>()
             };
             currentSubject = null;

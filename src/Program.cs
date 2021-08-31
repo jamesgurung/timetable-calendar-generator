@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
+[assembly:CLSCompliant(true)]
 namespace makecal
 {
   public static class Program

@@ -11,14 +11,14 @@ namespace makecal
         throw new ArgumentException("You must specify --csv or --ical or --google or --microsoft");
       }
 
-      var flags = string.Join(' ', args).ToLowerInvariant();
+      var flags = string.Join(' ', args).ToUpperInvariant();
 
       return flags switch
       {
-        "--csv" => OutputType.Csv,
-        "--ical" => OutputType.Ical,
-        "--google" => OutputType.GoogleWorkspace,
-        "--microsoft" => OutputType.Microsoft365,
+        "--CSV" => OutputType.Csv,
+        "--ICAL" => OutputType.Ical,
+        "--GOOGLE" => OutputType.GoogleWorkspace,
+        "--MICROSOFT" => OutputType.Microsoft365,
         _ => throw new ArgumentException("Flag combination not recognised: " + flags)
       };
     }

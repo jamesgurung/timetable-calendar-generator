@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "makecal": {
+      "commandName": "Project",
+      "commandLineArgs": "--microsoft"
+    }
+  }
+}

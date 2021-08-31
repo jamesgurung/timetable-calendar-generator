@@ -23,6 +23,7 @@ namespace makecal
     private static readonly EventComparer<Event> comparer = new(e => e.Start?.DateTime, e => e.End?.DateTime, e => e.Summary, e => e.Location);
 
     private readonly CalendarService _service;
+    private bool _disposedValue;
 
     public GoogleCalendarWriter(string email, string serviceAccountKey)
     {
@@ -88,6 +89,22 @@ namespace makecal
       await insertBatch.ExecuteWithRetryAsync();
     }
 
-    public void Dispose() => _service?.Dispose();
+    protected virtual void Dispose(bool disposing)
+    {
+      if (!_disposedValue)
+      {
+        if (disposing)
+        {
+          _service?.Dispose();
+        }
+        _disposedValue = true;
+      }
+    }
+
+    public void Dispose()
+    {
+      Dispose(disposing: true);
+      GC.SuppressFinalize(this);
+    }
   }
 }

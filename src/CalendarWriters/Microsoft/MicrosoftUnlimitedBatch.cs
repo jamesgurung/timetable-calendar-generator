@@ -8,9 +8,9 @@ using Microsoft.Graph;
 
 namespace makecal
 {
-  public class MicrosoftUnlimitedBatch
+  internal class MicrosoftUnlimitedBatch
   {
-    private readonly IGraphServiceClient _service;
+    private readonly GraphServiceClient _service;
     private readonly IList<BatchRequestContent> _batches;
 
     private int _counter;
@@ -20,7 +20,7 @@ namespace makecal
     private const int RetryFirst = 5000;
     private const int RetryMultiplier = 4;
 
-    public MicrosoftUnlimitedBatch(IGraphServiceClient service)
+    public MicrosoftUnlimitedBatch(GraphServiceClient service)
     {
       _service = service ?? throw new ArgumentNullException(nameof(service));
       _batches = new List<BatchRequestContent> { new() };

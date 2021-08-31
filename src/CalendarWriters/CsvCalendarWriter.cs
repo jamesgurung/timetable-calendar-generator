@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,10 +22,10 @@ namespace makecal
       var dataRecords = events.Select(o => new DataRecord(
         null,
         o.Title,
-        o.Start.ToString("M/d/yyyy"),
-        o.Start.ToString("H:mm:ss"),
-        o.End.ToString("M/d/yyyy"),
-        o.End.ToString("H:mm:ss"),
+        o.Start.ToString("M/d/yyyy", CultureInfo.InvariantCulture),
+        o.Start.ToString("H:mm:ss", CultureInfo.InvariantCulture),
+        o.End.ToString("M/d/yyyy", CultureInfo.InvariantCulture),
+        o.End.ToString("H:mm:ss", CultureInfo.InvariantCulture),
         o.Location ?? string.Empty
       ));
       var records = new RecordBase[] { headerRecord }.Union(dataRecords).ToArray();

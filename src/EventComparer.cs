@@ -35,19 +35,19 @@ namespace makecal
         (Location(x) == Location(y) || (string.IsNullOrEmpty(Location(x)) && string.IsNullOrEmpty(Location(y))));
     }
 
-    public int GetHashCode(TEvent ev)
+    public int GetHashCode(TEvent obj)
     {
-      if (ev is null)
+      if (obj is null)
       {
-        throw new ArgumentNullException(nameof(ev));
+        throw new ArgumentNullException(nameof(obj));
       }
       unchecked
       {
         var hash = 17;
-        hash = hash * 23 + (GetOriginalTitle(Title(ev))?.GetHashCode() ?? 0);
-        hash = hash * 23 + (Start(ev)?.GetHashCode() ?? 0);
-        hash = hash * 23 + (End(ev)?.GetHashCode() ?? 0);
-        hash = hash * 23 + (Location(ev) ?? string.Empty).GetHashCode();
+        hash = hash * 23 + (GetOriginalTitle(Title(obj))?.GetHashCode(StringComparison.Ordinal) ?? 0);
+        hash = hash * 23 + (Start(obj)?.GetHashCode() ?? 0);
+        hash = hash * 23 + (End(obj)?.GetHashCode() ?? 0);
+        hash = hash * 23 + (Location(obj) ?? string.Empty).GetHashCode(StringComparison.Ordinal);
         return hash;
       }
     }
@@ -55,7 +55,7 @@ namespace makecal
     private static string GetOriginalTitle(string title)
     {
       if (title is null) return null;
-      var index = title.IndexOf('-');
+      var index = title.IndexOf('-', StringComparison.Ordinal);
       return index < 0 ? title : title[..index].TrimEnd(' ');
     }
   }

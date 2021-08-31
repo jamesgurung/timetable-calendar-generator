@@ -7,7 +7,7 @@ using Google.Apis.Services;
 
 namespace makecal
 {
-  public class GoogleUnlimitedBatch
+  internal class GoogleUnlimitedBatch
   {
     private readonly IClientService _service;
     private readonly IList<BatchRequest> _batches;
