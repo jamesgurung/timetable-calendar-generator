@@ -69,14 +69,13 @@ namespace makecal
     private async Task<IList<Event>> GetExistingEventsAsync()
     {
       var events = new List<Event>();
-      var request = _userClient.Calendar.Events.Request();
+      var request = _userClient.Calendar.Events.Request()
+        .Filter($"Start/DateTime gt '{DateTime.Today:s}' and Extensions/any(f:f/id eq '{Tag}')")
+        .Select("Id,Start,End,Subject,Location");
       do
       {
         request.Headers.Add(new HeaderOption("Prefer", "outlook.timezone=\"Europe/London\""));
-        var response = await request.Top(1000)
-          .Filter($"Start/DateTime gt '{DateTime.Today:s}' and Extensions/any(f:f/id eq '{Tag}')")
-          .Select("Id,Start,End,Subject,Location")
-          .GetAsync();
+        var response = await request.GetAsync();
         events.AddRange(response.CurrentPage);
         request = response.NextPageRequest;
       } while (request is not null);
