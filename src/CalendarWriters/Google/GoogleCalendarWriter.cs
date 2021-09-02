@@ -14,6 +14,7 @@ namespace makecal
     private const string CalendarId = "primary";
     private const string AppName = "makecal";
     private const string EventColour = "5";
+    private const string DutyEventColour = "8";
 
     private static readonly Event.ExtendedPropertiesData eventProperties = new()
     {
@@ -80,7 +81,8 @@ namespace makecal
       var insertBatch = new GoogleUnlimitedBatch(_service);
       foreach (var ev in events)
       {
-        ev.ColorId = EventColour;
+        var isDuty = ev.Summary.Contains("duty", StringComparison.OrdinalIgnoreCase) || ev.Summary.Contains("duties", StringComparison.OrdinalIgnoreCase);
+        ev.ColorId = isDuty ? DutyEventColour : EventColour;
         ev.ExtendedProperties = eventProperties;
         var insertRequest = _service.Events.Insert(ev, CalendarId);
         insertRequest.Fields = "id";

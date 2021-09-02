@@ -15,6 +15,8 @@ namespace makecal
     private const string Tag = "timetable-calendar-generator";
     private const string CategoryName = "Timetable";
     private const CategoryColor CategoryColour = CategoryColor.Preset2;
+    private const string DutyCategoryName = "Duty";
+    private const CategoryColor DutyCategoryColour = CategoryColor.Preset10;
 
     private static readonly EventExtensionsCollectionPage extensions = new() { new OpenTypeExtension { ExtensionName = Tag } };
 
@@ -61,9 +63,16 @@ namespace makecal
     private async Task SetupCategoryAsync()
     {
       var categories = await _userClient.Outlook.MasterCategories.Request().GetAsync();
-      if (categories.Any(o => o.DisplayName == CategoryName)) return;
-      var category = new OutlookCategory { DisplayName = CategoryName, Color = CategoryColour };
-      await _userClient.Outlook.MasterCategories.Request().AddAsync(category);
+      if (!categories.Any(o => o.DisplayName == CategoryName))
+      {
+        var category = new OutlookCategory { DisplayName = CategoryName, Color = CategoryColour };
+        await _userClient.Outlook.MasterCategories.Request().AddAsync(category);
+      }
+      if (!categories.Any(o => o.DisplayName == DutyCategoryName))
+      {
+        var dutyCategory = new OutlookCategory { DisplayName = DutyCategoryName, Color = DutyCategoryColour };
+        await _userClient.Outlook.MasterCategories.Request().AddAsync(dutyCategory);
+      }
     }
 
     private async Task<IList<Event>> GetExistingEventsAsync()
@@ -101,7 +110,8 @@ namespace makecal
       foreach (var ev in events)
       {
         ev.Extensions = extensions;
-        ev.Categories = new[] { CategoryName };
+        var isDuty = ev.Subject.Contains("duty", StringComparison.OrdinalIgnoreCase) || ev.Subject.Contains("duties", StringComparison.OrdinalIgnoreCase);
+        ev.Categories = new[] { isDuty ? DutyCategoryName : CategoryName };
         var insertRequest = _userClient.Calendar.Events.Request().Select("Id").GetHttpRequestMessage();
         insertRequest.Method = HttpMethod.Post;
         insertRequest.Content = _serializer.SerializeAsJsonContent(ev);
