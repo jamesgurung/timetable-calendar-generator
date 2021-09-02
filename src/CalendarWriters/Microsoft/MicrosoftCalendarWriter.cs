@@ -68,17 +68,17 @@ namespace makecal
     private async Task SetupCategoryAsync()
     {
       var categories = await _userClient.Outlook.MasterCategories.Request().GetAsync();
-      if (!categories.Any(o => o.DisplayName == CategoryName))
+      if (!categories.Any(o => o.DisplayName.ToLowerInvariant() == CategoryName.ToLowerInvariant()))
       {
         var category = new OutlookCategory { DisplayName = CategoryName, Color = CategoryColour };
         await _userClient.Outlook.MasterCategories.Request().AddAsync(category);
       }
-      if (!categories.Any(o => o.DisplayName == DutyCategoryName))
+      if (!categories.Any(o => o.DisplayName.ToLowerInvariant() == DutyCategoryName.ToLowerInvariant()))
       {
         var dutyCategory = new OutlookCategory { DisplayName = DutyCategoryName, Color = DutyCategoryColour };
         await _userClient.Outlook.MasterCategories.Request().AddAsync(dutyCategory);
       }
-      if (!categories.Any(o => o.DisplayName == MeetingCategoryName))
+      if (!categories.Any(o => o.DisplayName.ToLowerInvariant() == MeetingCategoryName.ToLowerInvariant()))
       {
         var meetingCategory = new OutlookCategory { DisplayName = MeetingCategoryName, Color = MeetingCategoryColour };
         await _userClient.Outlook.MasterCategories.Request().AddAsync(meetingCategory);
