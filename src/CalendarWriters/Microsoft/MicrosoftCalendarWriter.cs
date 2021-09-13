@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Graph;
 using Microsoft.Graph.Auth;
-using Microsoft.Identity.Client;
+using Azure.Identity;
 
 namespace makecal
 {
@@ -38,13 +38,8 @@ namespace makecal
 
     public MicrosoftCalendarWriter(string email, MicrosoftClientKey clientKey)
     {
-      var confidentialClient = ConfidentialClientApplicationBuilder
-        .Create(clientKey.ClientId)
-        .WithTenantId(clientKey.TenantId)
-        .WithClientSecret(clientKey.ClientSecret)
-        .WithAuthority(AadAuthorityAudience.AzureAdMyOrg)
-        .Build();
-      _client = new GraphServiceClient(new ClientCredentialProvider(confidentialClient));
+      var credential = new ClientSecretCredential(clientKey.TenantId, clientKey.ClientId, clientKey.ClientSecret);
+      _client = new GraphServiceClient(credential);
       _userClient = _client.Users[email];
     }
 
@@ -123,6 +118,7 @@ namespace makecal
         var isDuty = ev.Subject.Contains("duty", StringComparison.OrdinalIgnoreCase) || ev.Subject.Contains("duties", StringComparison.OrdinalIgnoreCase);
         var isMeeting = ev.Subject.Contains("meet", StringComparison.OrdinalIgnoreCase) || ev.Subject.Contains("line management", StringComparison.OrdinalIgnoreCase);
         ev.Categories = new[] { isDuty ? DutyCategoryName : (isMeeting ? MeetingCategoryName : CategoryName) };
+        ev.IsReminderOn = false;
         var insertRequest = _userClient.Calendar.Events.Request().Select("Id").GetHttpRequestMessage();
         insertRequest.Method = HttpMethod.Post;
         insertRequest.Content = _serializer.SerializeAsJsonContent(ev);
