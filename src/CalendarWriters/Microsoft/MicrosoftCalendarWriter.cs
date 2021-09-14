@@ -4,9 +4,9 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Azure.Identity;
 using Microsoft.Graph;
 using Microsoft.Graph.Auth;
-using Azure.Identity;
 
 namespace makecal
 {
