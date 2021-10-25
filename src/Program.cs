@@ -6,85 +6,83 @@ using System.Threading;
 using System.Threading.Tasks;
 
 [assembly:CLSCompliant(true)]
-namespace makecal
+namespace TimetableCalendarGenerator;
+
+public static class Program
 {
-  public static class Program
+  private static async Task Main(string[] args)
   {
-    private static async Task Main(string[] args)
+    try
     {
-      try
+      Console.Clear();
+      Console.CursorVisible = false;
+      Console.WriteLine("TIMETABLE CALENDAR GENERATOR\n");
+
+      var outputType = ArgumentParser.Parse(args);
+
+      var settings = await InputReader.LoadSettingsAsync();
+      var googleKey = outputType == OutputType.GoogleWorkspace ? await InputReader.LoadGoogleKeyAsync() : null;
+      var microsoftKey = outputType == OutputType.Microsoft365 ? await InputReader.LoadMicrosoftKeyAsync() : null;
+
+      var people = await InputReader.LoadPeopleAsync();
+
+      var calendarGenerator = new CalendarGenerator(settings);
+      var calendarWriterFactory = new CalendarWriterFactory(outputType, googleKey, microsoftKey);
+
+      if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
       {
-        Console.Clear();
-        Console.CursorVisible = false;
-        Console.WriteLine("TIMETABLE CALENDAR GENERATOR\n");
+        Console.SetBufferSize(Math.Max(ConsoleHelper.MinConsoleWidth, Console.BufferWidth),
+          Math.Max(ConsoleHelper.HeaderHeight + people.Count + ConsoleHelper.FooterHeight, Console.BufferHeight));
+      }
 
-        var outputType = ArgumentParser.Parse(args);
+      Console.WriteLine($"\n{calendarWriterFactory.DisplayText}:");
 
-        var settings = await InputReader.LoadSettingsAsync();
-        var googleKey = outputType == OutputType.GoogleWorkspace ? await InputReader.LoadGoogleKeyAsync() : null;
-        var microsoftKey = outputType == OutputType.Microsoft365 ? await InputReader.LoadMicrosoftKeyAsync() : null;
-
-        var people = await InputReader.LoadPeopleAsync();
-
-        var calendarGenerator = new CalendarGenerator(settings);
-        var calendarWriterFactory = new CalendarWriterFactory(outputType, googleKey, microsoftKey);
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+      var writeTasks = new List<Task>();
+      using (var throttler = new SemaphoreSlim(calendarWriterFactory.SimultaneousRequests))
+      {
+        for (var i = 0; i < people.Count; i++)
         {
-          Console.SetBufferSize(Math.Max(ConsoleHelper.MinConsoleWidth, Console.BufferWidth),
-            Math.Max(ConsoleHelper.HeaderHeight + people.Count + ConsoleHelper.FooterHeight, Console.BufferHeight));
-        }
+          await throttler.WaitAsync();
+          var person = people[i];
+          var line = i + ConsoleHelper.HeaderHeight;
+          ConsoleHelper.WriteDescription(line, $"({i + 1}/{people.Count}) {person.Email}");
+          ConsoleHelper.WriteStatus(line, "...");
 
-        Console.WriteLine($"\n{calendarWriterFactory.DisplayText}:");
-
-        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-        var writeTasks = new List<Task>();
-        using (var throttler = new SemaphoreSlim(calendarWriterFactory.SimultaneousRequests))
-        {
-          for (var i = 0; i < people.Count; i++)
+          writeTasks.Add(Task.Run(async () =>
           {
-            await throttler.WaitAsync();
-            var person = people[i];
-            var line = i + ConsoleHelper.HeaderHeight;
-            ConsoleHelper.WriteDescription(line, $"({i + 1}/{people.Count}) {person.Email}");
-            ConsoleHelper.WriteStatus(line, "...");
-
-            writeTasks.Add(Task.Run(async () =>
+            ICalendarWriter calendarWriter = null;
+            try
             {
-              ICalendarWriter calendarWriter = null;
-              try
-              {
-                calendarWriter = calendarWriterFactory.GetCalendarWriter(person.Email);
-                var events = calendarGenerator.Generate(person);
-                await calendarWriter.WriteAsync(events);
-                ConsoleHelper.WriteStatus(line, "Done.");
-              }
-              catch (Exception exc)
-              {
-                ConsoleHelper.WriteStatus(line, $"Failed. {exc.Message}", ConsoleColor.Red);
-              }
-              finally
-              {
-                (calendarWriter as IDisposable)?.Dispose();
-                throttler.Release();
-              }
-            }));
-          }
-          await Task.WhenAll(writeTasks);
+              calendarWriter = calendarWriterFactory.GetCalendarWriter(person.Email);
+              var events = calendarGenerator.Generate(person);
+              await calendarWriter.WriteAsync(events);
+              ConsoleHelper.WriteStatus(line, "Done.");
+            }
+            catch (Exception exc)
+            {
+              ConsoleHelper.WriteStatus(line, $"Failed. {exc.Message}", ConsoleColor.Red);
+            }
+            finally
+            {
+              (calendarWriter as IDisposable)?.Dispose();
+              throttler.Release();
+            }
+          }));
         }
+        await Task.WhenAll(writeTasks);
+      }
 
-        Console.SetCursorPosition(0, ConsoleHelper.HeaderHeight + people.Count);
-        Console.WriteLine("\nOperation complete.\n");
-      }
-      catch (Exception exc)
-      {
-        ConsoleHelper.WriteError(exc.Message);
-      }
-      finally
-      {
-        Console.CursorVisible = true;
-      }
+      Console.SetCursorPosition(0, ConsoleHelper.HeaderHeight + people.Count);
+      Console.WriteLine("\nOperation complete.\n");
     }
-
+    catch (Exception exc)
+    {
+      ConsoleHelper.WriteError(exc.Message);
+    }
+    finally
+    {
+      Console.CursorVisible = true;
+    }
   }
+
 }

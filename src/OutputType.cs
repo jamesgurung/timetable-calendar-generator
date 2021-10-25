@@ -1,10 +1,9 @@
-﻿namespace makecal
+﻿namespace TimetableCalendarGenerator;
+
+public enum OutputType
 {
-  public enum OutputType
-  {
-    Csv,
-    Ical,
-    GoogleWorkspace,
-    Microsoft365
-  }
+  Csv,
+  Ical,
+  GoogleWorkspace,
+  Microsoft365
 }

@@ -1,12 +1,11 @@
-﻿namespace makecal
+﻿namespace TimetableCalendarGenerator;
+
+public static class StudentFields
 {
-  public static class StudentFields
-  {
-    public static readonly int Email = 0;
-    public static readonly int Year = 1;
-    public static readonly int Subject = 2;
-    public static readonly int Period = 3;
-    public static readonly int Room = 4;
-    public static readonly int Teacher = 5;
-  }
+  public const int Email = 0;
+  public const int Year = 1;
+  public const int Subject = 2;
+  public const int Period = 3;
+  public const int Room = 4;
+  public const int Teacher = 5;
 }

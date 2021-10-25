@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace makecal
+namespace TimetableCalendarGenerator;
+
+public interface ICalendarWriter
 {
-  public interface ICalendarWriter
-  {
-    Task WriteAsync(IList<CalendarEvent> events);
-  }
+  Task WriteAsync(IList<CalendarEvent> events);
 }

@@ -5,15 +5,15 @@
     <LangVersion>preview</LangVersion>
     <UseAppHost>true</UseAppHost>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <RootNamespace>TimetableCalendarGenerator</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DebugType>None</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Azure.Identity" Version="1.5.0-beta.4" />
+    <PackageReference Include="Azure.Identity" Version="1.5.0" />
     <PackageReference Include="Google.Apis.Calendar.v3" Version="1.55.0.2410" />
     <PackageReference Include="KBCsv" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Graph.Beta" Version="4.12.0-preview" />
-    <PackageReference Include="Microsoft.Graph.Auth" Version="1.0.0-preview.7" />
+    <PackageReference Include="Microsoft.Graph.Beta" Version="4.17.0-preview" />
   </ItemGroup>
 </Project>
