@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace TimetableCalendarGenerator;
+﻿namespace TimetableCalendarGenerator;
 
 public class EventComparer<TEvent> : IEqualityComparer<TEvent>
 {

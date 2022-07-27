@@ -1,5 +1,3 @@
-using System;
-
 namespace TimetableCalendarGenerator;
 
 public static class ConsoleHelper

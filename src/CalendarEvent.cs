@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TimetableCalendarGenerator;
+﻿namespace TimetableCalendarGenerator;
 
 public class CalendarEvent
 {
