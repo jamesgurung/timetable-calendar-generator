@@ -41,7 +41,8 @@ public class GoogleCalendarWriter : ICalendarWriter, IDisposable
       End = new EventDateTime { DateTime = o.End }
     }).ToList();
 
-    await DeleteEventsAsync(existingEvents.Except(expectedEvents, comparer));
+    await DeleteEventsAsync(existingEvents.Except(expectedEvents, comparer)
+      .Union(existingEvents.GroupBy(o => o, comparer).Where(g => g.Count() > 1).SelectMany(g => g.Skip(1)), comparer));
     await AddEventsAsync(expectedEvents.Except(existingEvents, comparer));
   }
 

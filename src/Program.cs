@@ -26,6 +26,7 @@ public static class Program
 
       if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
       {
+        Console.SetWindowSize(Math.Min(ConsoleHelper.MinConsoleWidth, Console.LargestWindowWidth), Math.Min(50, Console.LargestWindowHeight));
         Console.SetBufferSize(Math.Max(ConsoleHelper.MinConsoleWidth, Console.BufferWidth),
           Math.Max(ConsoleHelper.HeaderHeight + people.Count + ConsoleHelper.FooterHeight, Console.BufferHeight));
       }
@@ -55,7 +56,8 @@ public static class Program
             }
             catch (Exception exc)
             {
-              ConsoleHelper.WriteStatus(line, $"Failed. {exc.Message}", ConsoleColor.Red);
+              var msg = (exc is Microsoft.Graph.ServiceException graphExc) ? graphExc.Error.Message : exc.Message;
+              ConsoleHelper.WriteStatus(line, msg, ConsoleColor.Red);
             }
             finally
             {

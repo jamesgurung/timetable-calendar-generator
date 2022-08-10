@@ -6,7 +6,7 @@ public static class ConsoleHelper
   public static int FooterHeight => 3;
 
   private const int StatusCol = 50;
-  private const int StatusWidth = 30;
+  private const int StatusWidth = 80;
   private static readonly ConsoleColor defaultBackground = Console.BackgroundColor;
   private static readonly object consoleLock = new();
 
@@ -34,7 +34,7 @@ public static class ConsoleHelper
 
   public static void WriteStatus(int line, string text, ConsoleColor? colour = null)
   {
-    Write(line, StatusCol, text, colour);
+    Write(line, StatusCol, text[..Math.Min(text.Length, StatusWidth)], colour);
   }
 
   public static void WriteError(string message)
