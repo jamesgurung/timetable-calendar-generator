@@ -21,9 +21,7 @@ public static class InputReader
     Console.WriteLine($"Reading {SettingsFileName}");
     await using (var fs = File.OpenRead(SettingsFileName))
     {
-      var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-      options.Converters.Add(new JsonDateConverter());
-      settings = await JsonSerializer.DeserializeAsync<Settings>(fs, options);
+      settings = await JsonSerializer.DeserializeAsync(fs, SourceGenerationContext.Default.Settings);
     }
 
     if (settings?.Timings is null || settings.Timings.Count == 0) throw new InvalidOperationException("Invalid settings file.");
@@ -59,8 +57,7 @@ public static class InputReader
   {
     Console.WriteLine($"Reading {MicrosoftKeyFileName}");
     await using var fs = File.OpenRead(MicrosoftKeyFileName);
-    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-    return await JsonSerializer.DeserializeAsync<MicrosoftClientKey>(fs, options);
+    return await JsonSerializer.DeserializeAsync(fs, SourceGenerationContext.Default.MicrosoftClientKey);
   }
 
   public static async Task<IList<Person>> LoadPeopleAsync()

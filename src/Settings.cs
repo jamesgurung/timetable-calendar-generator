@@ -31,12 +31,15 @@ public class Settings
 public class Absence
 {
   public IList<int> YearGroups { get; set; }
+  [JsonConverter(typeof(JsonDateConverter))]
   public DateTime StartDate { get; set; }
+  [JsonConverter(typeof(JsonDateConverter))]
   public DateTime EndDate { get; set; }
 }
 
 public class Override
 {
+  [JsonConverter(typeof(JsonDateConverter))]
   public DateTime Date { get; set; }
   public string Period { get; set; }
   public string Title { get; set; }
@@ -72,3 +75,13 @@ public class Timing
   [JsonIgnore]
   public int StartMinute { get; private set; }
 }
+
+[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
+[JsonConverter(typeof(JsonDateConverter))]
+[JsonSerializable(typeof(Settings))]
+[JsonSerializable(typeof(Absence))]
+[JsonSerializable(typeof(Override))]
+[JsonSerializable(typeof(Rename))]
+[JsonSerializable(typeof(Timing))]
+[JsonSerializable(typeof(MicrosoftClientKey))]
+internal partial class SourceGenerationContext : JsonSerializerContext { }
