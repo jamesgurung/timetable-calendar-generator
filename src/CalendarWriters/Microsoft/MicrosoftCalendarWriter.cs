@@ -112,7 +112,8 @@ public class MicrosoftCalendarWriter : ICalendarWriter
     {
       ev.Extensions = extensions;
       var isDuty = ev.Subject.Contains("duty", StringComparison.OrdinalIgnoreCase) || ev.Subject.Contains("duties", StringComparison.OrdinalIgnoreCase);
-      var isMeeting = ev.Subject.Contains("meet", StringComparison.OrdinalIgnoreCase) || ev.Subject.Contains("line management", StringComparison.OrdinalIgnoreCase);
+      var isMeeting = ev.Subject.Contains("meet", StringComparison.OrdinalIgnoreCase) || ev.Subject.Contains("line management", StringComparison.OrdinalIgnoreCase)
+        || ev.Subject.Contains("brief", StringComparison.OrdinalIgnoreCase);
       ev.Categories = new[] { isDuty ? DutyCategoryName : (isMeeting ? MeetingCategoryName : CategoryName) };
       ev.IsReminderOn = isDuty;
       var insertRequest = _userClient.Calendar.Events.Request().Select("Id").GetHttpRequestMessage();
