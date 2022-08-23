@@ -2,6 +2,7 @@
 using Google.Apis.Calendar.v3;
 using Google.Apis.Calendar.v3.Data;
 using Google.Apis.Services;
+using System.Linq;
 
 namespace TimetableCalendarGenerator;
 
@@ -41,9 +42,12 @@ public class GoogleCalendarWriter : ICalendarWriter, IDisposable
       End = new EventDateTime { DateTime = o.End }
     }).ToList();
 
-    await DeleteEventsAsync(existingEvents.Except(expectedEvents, comparer)
-      .Union(existingEvents.GroupBy(o => o, comparer).Where(g => g.Count() > 1).SelectMany(g => g.Skip(1)), comparer));
-    await AddEventsAsync(expectedEvents.Except(existingEvents, comparer));
+    var removedEvents = existingEvents.Except(expectedEvents, comparer);
+    var duplicateEvents = existingEvents.GroupBy(o => o, comparer).Where(g => g.Count() > 1).SelectMany(g => g.Skip(1));
+    var eventsToDelete = removedEvents.Union(duplicateEvents, comparer).OrderBy(o => o.Start?.DateTime);
+
+    await DeleteEventsAsync(eventsToDelete);
+    await AddEventsAsync(expectedEvents.Except(existingEvents, comparer).OrderBy(o => o.Start?.DateTime));
   }
 
   private static CalendarService GetCalendarService(string serviceAccountKey, string email)

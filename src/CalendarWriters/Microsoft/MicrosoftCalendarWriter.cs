@@ -1,6 +1,8 @@
 ﻿using System.Globalization;
-using Azure.Identity;
 using Microsoft.Graph;
+using Microsoft.Graph.Beta;
+using Microsoft.Graph.Beta.Models;
+using Microsoft.Graph.Beta.Users.Item;
 
 namespace TimetableCalendarGenerator;
 
@@ -17,24 +19,15 @@ public class MicrosoftCalendarWriter : ICalendarWriter
   private const string MeetingCategoryName = "Meeting";
   private const CategoryColor MeetingCategoryColour = CategoryColor.Preset4;
 
-  private static readonly EventExtensionsCollectionPage extensions = new() { new OpenTypeExtension { ExtensionName = Tag } };
-
-  private static readonly EventComparer<Event> comparer = new(
-    e => e.Start?.DateTime is null ? null : DateTime.ParseExact(e.Start.DateTime[..19], "s", CultureInfo.InvariantCulture),
-    e => e.End?.DateTime is null ? null : DateTime.ParseExact(e.End.DateTime[..19], "s", CultureInfo.InvariantCulture),
-    e => e.Subject,
-    e => e.Location.DisplayName
-  );
+  private static readonly EventComparer<CalendarEvent> comparer = new(e => e.Start, e => e.End, e => e.Title, e => e.Location);
 
   private readonly GraphServiceClient _client;
-  private readonly IUserRequestBuilder _userClient;
-  private readonly Serializer _serializer = new();
+  private readonly UserItemRequestBuilder _userClient;
 
-  public MicrosoftCalendarWriter(string email, MicrosoftClientKey clientKey)
+  [CLSCompliant(false)]
+  public MicrosoftCalendarWriter(string email, GraphServiceClient client)
   {
-    ArgumentNullException.ThrowIfNull(clientKey);
-    var credential = new ClientSecretCredential(clientKey.TenantId, clientKey.ClientId, clientKey.ClientSecret);
-    _client = new GraphServiceClient(credential);
+    _client = client;
     _userClient = _client.Users[email];
   }
 
@@ -42,85 +35,103 @@ public class MicrosoftCalendarWriter : ICalendarWriter
   {
     await SetupCategoryAsync();
     var existingEvents = await GetExistingEventsAsync();
-      
-    var expectedEvents = events.Select(o => new Event
-    {
-      Subject = o.Title,
-      Location = new Location { DisplayName = o.Location },
-      Start = new DateTimeTimeZone { DateTime = o.Start.ToString("s"), TimeZone = "Europe/London" },
-      End = new DateTimeTimeZone { DateTime = o.End.ToString("s"), TimeZone = "Europe/London" }
-    }).ToList();
 
-    await DeleteEventsAsync(existingEvents.Except(expectedEvents, comparer)
-      .Union(existingEvents.GroupBy(o => o, comparer).Where(g => g.Count() > 1).SelectMany(g => g.Skip(1)), comparer));
-    await AddEventsAsync(expectedEvents.Except(existingEvents, comparer));
+    var removedEvents = existingEvents.Except(events, comparer);
+    var duplicateEvents = existingEvents.GroupBy(o => o, comparer).Where(g => g.Count() > 1).SelectMany(g => g.Skip(1));
+    var eventsToDelete = removedEvents.Union(duplicateEvents, comparer).Cast<CalendarEventWithId>().OrderBy(o => o.Start);
+
+    await DeleteEventsAsync(eventsToDelete.Select(o => o.Id).ToList());
+    await AddEventsAsync(events.Except(existingEvents, comparer).OrderBy(o => o.Start));
   }
 
   private async Task SetupCategoryAsync()
   {
-    var categories = await _userClient.Outlook.MasterCategories.Request().GetAsync();
-    if (!categories.Any(o => string.Equals(o.DisplayName, CategoryName, StringComparison.OrdinalIgnoreCase)))
+    var categories = await _userClient.Outlook.MasterCategories.GetAsync(config =>
+    {
+      config.QueryParameters.Top = 999;
+      config.QueryParameters.Select = new[] { "DisplayName" };
+    });
+    if (!categories.Value.Any(o => string.Equals(o.DisplayName, CategoryName, StringComparison.OrdinalIgnoreCase)))
     {
       var category = new OutlookCategory { DisplayName = CategoryName, Color = CategoryColour };
-      await _userClient.Outlook.MasterCategories.Request().AddAsync(category);
+      await _userClient.Outlook.MasterCategories.PostAsync(category);
     }
-    if (!categories.Any(o => string.Equals(o.DisplayName, DutyCategoryName, StringComparison.OrdinalIgnoreCase)))
+    if (!categories.Value.Any(o => string.Equals(o.DisplayName, DutyCategoryName, StringComparison.OrdinalIgnoreCase)))
     {
       var dutyCategory = new OutlookCategory { DisplayName = DutyCategoryName, Color = DutyCategoryColour };
-      await _userClient.Outlook.MasterCategories.Request().AddAsync(dutyCategory);
+      await _userClient.Outlook.MasterCategories.PostAsync(dutyCategory);
     }
-    if (!categories.Any(o => string.Equals(o.DisplayName, MeetingCategoryName, StringComparison.OrdinalIgnoreCase)))
+    if (!categories.Value.Any(o => string.Equals(o.DisplayName, MeetingCategoryName, StringComparison.OrdinalIgnoreCase)))
     {
       var meetingCategory = new OutlookCategory { DisplayName = MeetingCategoryName, Color = MeetingCategoryColour };
-      await _userClient.Outlook.MasterCategories.Request().AddAsync(meetingCategory);
+      await _userClient.Outlook.MasterCategories.PostAsync(meetingCategory);
     }
   }
 
-  private async Task<IList<Event>> GetExistingEventsAsync()
+  private async Task<IList<CalendarEventWithId>> GetExistingEventsAsync()
   {
     var events = new List<Event>();
-    var request = _userClient.Calendar.Events.Request()
-      .Filter($"Start/DateTime gt '{DateTime.Today:s}' and Extensions/any(f:f/id eq '{Tag}')")
-      .Select("Id,Start,End,Subject,Location");
-    do
+    var response = await _userClient.Calendar.Events.GetAsync(config =>
     {
-      request.Headers.Add(new HeaderOption("Prefer", "outlook.timezone=\"Europe/London\""));
-      var response = await request.GetAsync();
-      events.AddRange(response.CurrentPage);
-      request = response.NextPageRequest;
-    } while (request is not null);
-
-    return events;
+      config.QueryParameters.Top = 999;
+      config.Headers.Add("Prefer", "outlook.timezone=\"Europe/London\"");
+      config.QueryParameters.Filter = $"Start/DateTime gt '{DateTime.Today:s}' and Extensions/any(f:f/id eq '{Tag}')";
+      config.QueryParameters.Select = new[] { "Id", "Start", "End", "Subject", "Location" };
+    });
+    var iterator = PageIterator<Event, EventCollectionResponse>.CreatePageIterator(_client, response,
+      ev => { events.Add(ev); return true; },
+      config => { config.Headers.Add("Prefer", "outlook.timezone=\"Europe/London\""); return config; }
+    );
+    await iterator.IterateAsync();
+    return events.Select(ev => new CalendarEventWithId() {
+      Id = ev.Id,
+      Title = ev.Subject,
+      Location = ev.Location.DisplayName,
+      Start = ev.Start?.DateTime is null ? default : DateTime.ParseExact(ev.Start.DateTime[..19], "s", CultureInfo.InvariantCulture),
+      End = ev.End?.DateTime is null ? default : DateTime.ParseExact(ev.End.DateTime[..19], "s", CultureInfo.InvariantCulture)
+    }).ToList();
   }
 
-  private async Task DeleteEventsAsync(IEnumerable<Event> events)
+  private async Task DeleteEventsAsync(IEnumerable<string> eventIds)
   {
-    using var deleteBatch = new MicrosoftUnlimitedBatch(_client);
-    foreach (var ev in events)
+    if (!eventIds.Any()) return;
+    using var deleteBatch = new MicrosoftUnlimitedBatch<string>(_client, id => _userClient.Events[id].CreateDeleteRequestInformation());
+    foreach (var id in eventIds)
     {
-      var deleteRequest = _userClient.Events[ev.Id].Request().GetHttpRequestMessage();
-      deleteRequest.Method = HttpMethod.Delete;
-      deleteBatch.Queue(deleteRequest);
+      deleteBatch.Queue(id);
     }
     await deleteBatch.ExecuteWithRetryAsync();
   }
 
-  private async Task AddEventsAsync(IEnumerable<Event> events)
+  private async Task AddEventsAsync(IEnumerable<CalendarEvent> events)
   {
-    using var insertBatch = new MicrosoftUnlimitedBatch(_client);
+    if (!events.Any()) return;
+    using var insertBatch = new MicrosoftUnlimitedBatch<CalendarEvent>(_client, o =>
+    {
+      var isDuty = o.Title.Contains("duty", StringComparison.OrdinalIgnoreCase) || o.Title.Contains("duties", StringComparison.OrdinalIgnoreCase);
+      var isMeeting = o.Title.Contains("meet", StringComparison.OrdinalIgnoreCase) || o.Title.Contains("line management", StringComparison.OrdinalIgnoreCase)
+        || o.Title.Contains("brief", StringComparison.OrdinalIgnoreCase);
+      var ev = new Event
+      {
+        Subject = o.Title,
+        Location = new Location { DisplayName = o.Location },
+        Start = new DateTimeTimeZone { DateTime = o.Start.ToString("s"), TimeZone = "Europe/London" },
+        End = new DateTimeTimeZone { DateTime = o.End.ToString("s"), TimeZone = "Europe/London" },
+        Extensions = new() { new OpenTypeExtension { ExtensionName = Tag } },
+        Categories = new() { isDuty ? DutyCategoryName : (isMeeting ? MeetingCategoryName : CategoryName) },
+        IsReminderOn = isDuty
+      };
+      return _userClient.Calendar.Events.CreatePostRequestInformation(ev);
+    });
     foreach (var ev in events)
     {
-      ev.Extensions = extensions;
-      var isDuty = ev.Subject.Contains("duty", StringComparison.OrdinalIgnoreCase) || ev.Subject.Contains("duties", StringComparison.OrdinalIgnoreCase);
-      var isMeeting = ev.Subject.Contains("meet", StringComparison.OrdinalIgnoreCase) || ev.Subject.Contains("line management", StringComparison.OrdinalIgnoreCase)
-        || ev.Subject.Contains("brief", StringComparison.OrdinalIgnoreCase);
-      ev.Categories = new[] { isDuty ? DutyCategoryName : (isMeeting ? MeetingCategoryName : CategoryName) };
-      ev.IsReminderOn = isDuty;
-      var insertRequest = _userClient.Calendar.Events.Request().Select("Id").GetHttpRequestMessage();
-      insertRequest.Method = HttpMethod.Post;
-      insertRequest.Content = _serializer.SerializeAsJsonContent(ev);
-      insertBatch.Queue(insertRequest);
+      insertBatch.Queue(ev);
     }
     await insertBatch.ExecuteWithRetryAsync();
+  }
+
+  private class CalendarEventWithId : CalendarEvent
+  {
+    public string Id { get; set; }
   }
 }

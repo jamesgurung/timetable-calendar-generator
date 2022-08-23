@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using Microsoft.Graph.Beta.Models.ODataErrors;
+using System.Runtime.InteropServices;
 
 [assembly:CLSCompliant(true)]
 namespace TimetableCalendarGenerator;
@@ -56,7 +57,7 @@ public static class Program
             }
             catch (Exception exc)
             {
-              var msg = (exc is Microsoft.Graph.ServiceException graphExc) ? graphExc.Error.Message : exc.Message;
+              var msg = (exc is ODataError odataError) ? odataError.Error.Message : exc.Message;
               ConsoleHelper.WriteStatus(line, msg, ConsoleColor.Red);
             }
             finally

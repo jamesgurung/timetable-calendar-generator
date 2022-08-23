@@ -15,13 +15,15 @@ public static class InputReader
 
   private const char ReplacementCharacter = '\ufffd';
 
+  private static readonly SourceGenerationContext jsonCtx = new(new() { PropertyNameCaseInsensitive = true });
+
   public static async Task<Settings> LoadSettingsAsync()
   {
     Settings settings;
     Console.WriteLine($"Reading {SettingsFileName}");
     await using (var fs = File.OpenRead(SettingsFileName))
     {
-      settings = await JsonSerializer.DeserializeAsync(fs, SourceGenerationContext.Default.Settings);
+      settings = await JsonSerializer.DeserializeAsync(fs, jsonCtx.Settings);
     }
 
     if (settings?.Timings is null || settings.Timings.Count == 0) throw new InvalidOperationException("Invalid settings file.");
@@ -57,7 +59,7 @@ public static class InputReader
   {
     Console.WriteLine($"Reading {MicrosoftKeyFileName}");
     await using var fs = File.OpenRead(MicrosoftKeyFileName);
-    return await JsonSerializer.DeserializeAsync(fs, SourceGenerationContext.Default.MicrosoftClientKey);
+    return await JsonSerializer.DeserializeAsync(fs, jsonCtx.MicrosoftClientKey);
   }
 
   public static async Task<IList<Person>> LoadPeopleAsync()

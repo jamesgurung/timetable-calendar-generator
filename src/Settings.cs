@@ -76,12 +76,7 @@ public class Timing
   public int StartMinute { get; private set; }
 }
 
-[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
-[JsonConverter(typeof(JsonDateConverter))]
 [JsonSerializable(typeof(Settings))]
-[JsonSerializable(typeof(Absence))]
-[JsonSerializable(typeof(Override))]
-[JsonSerializable(typeof(Rename))]
-[JsonSerializable(typeof(Timing))]
 [JsonSerializable(typeof(MicrosoftClientKey))]
+[JsonConverter(typeof(JsonDateConverter))]
 internal partial class SourceGenerationContext : JsonSerializerContext { }

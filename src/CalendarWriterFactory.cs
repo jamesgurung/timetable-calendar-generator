@@ -1,10 +1,13 @@
-﻿namespace TimetableCalendarGenerator;
+﻿using Azure.Identity;
+using Microsoft.Graph.Beta;
+
+namespace TimetableCalendarGenerator;
 
 public class CalendarWriterFactory
 {
   private OutputType OutputType { get; }
   private string GoogleServiceAccountKey { get; }
-  private MicrosoftClientKey MicrosoftClientKey { get; }
+  private GraphServiceClient MicrosoftClient { get; }
   private string OutputDirectory { get; }
   public int SimultaneousRequests { get; }
   public string DisplayText { get; }
@@ -33,7 +36,8 @@ public class CalendarWriterFactory
       case OutputType.Microsoft365:
         SimultaneousRequests = 25;
         DisplayText = "Writing to Microsoft 365 calendars";
-        MicrosoftClientKey = microsoftClientKey;
+        var credential = new ClientSecretCredential(microsoftClientKey.TenantId, microsoftClientKey.ClientId, microsoftClientKey.ClientSecret);
+        MicrosoftClient = new GraphServiceClient(credential);
         break;
     }
   }
@@ -46,7 +50,7 @@ public class CalendarWriterFactory
       case OutputType.GoogleWorkspace:
         return new GoogleCalendarWriter(email, GoogleServiceAccountKey);
       case OutputType.Microsoft365:
-        return new MicrosoftCalendarWriter(email, MicrosoftClientKey);
+        return new MicrosoftCalendarWriter(email, MicrosoftClient);
       default:
         var userName = email.Split('@')[0];
         var outputFileName = Path.Combine(OutputDirectory, userName);
