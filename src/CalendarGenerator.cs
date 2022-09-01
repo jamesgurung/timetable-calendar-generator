@@ -1,4 +1,6 @@
-﻿namespace TimetableCalendarGenerator;
+﻿using Microsoft.Graph.Beta.Models;
+
+namespace TimetableCalendarGenerator;
 
 public class CalendarGenerator
 {
@@ -27,26 +29,26 @@ public class CalendarGenerator
 
         var overridePeriod = Settings.Overrides.FirstOrDefault(o => o.Date == date && o.Period == period && (o.YearGroups?.Contains(yearGroup) ?? true));
 
-        string title, room;
-
+        string title = null, room = null;
+        
         if (overridePeriod is not null)
         {
-          if (string.IsNullOrEmpty(overridePeriod.Title)) continue;
-          title = overridePeriod.Title;
-          room = null;
+          if (overridePeriod.CopyFromPeriod is not null && myLessons.TryGetValue($"{dayCode}:{overridePeriod.CopyFromPeriod}", out var lessonToCopy))
+          {
+            (title, room) = GetTitleAndRoom(lessonToCopy, person.YearGroup ?? lessonToCopy.YearGroup, date);
+            if (title is not null && person.YearGroup is null) yearGroup = lessonToCopy.YearGroup;
+          }
+          if (title is null)
+          {
+            if (string.IsNullOrEmpty(overridePeriod.Title)) continue;
+            title = overridePeriod.Title;
+            room = null;
+          }
         }
         else if (lesson is not null)
         {
-          if (yearGroup is not null && Settings.Absences.Any(o => o.YearGroups.Contains(yearGroup.Value) && o.StartDate <= date && o.EndDate >= date)) continue;
-
-          var clsName = lesson.Class;
-          if (Settings.RenameDictionary.TryGetValue(clsName, out var newTitle))
-          {
-            if (string.IsNullOrEmpty(newTitle)) continue;
-            clsName = newTitle;
-          }
-          title = string.IsNullOrEmpty(lesson.Teacher) ? clsName : $"{clsName} ({lesson.Teacher})";
-          room = lesson.Room;
+          (title, room) = GetTitleAndRoom(lesson, yearGroup, date);
+          if (title is null) continue;
         }
         else
         {
@@ -66,6 +68,10 @@ public class CalendarGenerator
         if (char.IsDigit(period[0])) {
           title =  $"P{period}. {title}";
         }
+        else if (period == "AM" || period == "PM")
+        {
+          title = $"{period}. {title}";
+        }
 
         var calendarEvent = new CalendarEvent
         {
@@ -79,5 +85,18 @@ public class CalendarGenerator
     }
 
     return events;
+  }
+  
+  private (string Title, string Room) GetTitleAndRoom(Lesson lesson, int? yearGroup, DateTime date)
+  {
+    if (yearGroup is not null && Settings.Absences.Any(o => o.YearGroups.Contains(yearGroup.Value) && o.StartDate <= date && o.EndDate >= date)) return (null, null);
+
+    var clsName = lesson.Class;
+    if (Settings.RenameDictionary.TryGetValue(clsName, out var newTitle))
+    {
+      if (string.IsNullOrEmpty(newTitle)) return (null, null);
+      clsName = newTitle;
+    }
+    return (string.IsNullOrEmpty(lesson.Teacher) ? clsName : $"{clsName} ({lesson.Teacher})", lesson.Room);
   }
 }

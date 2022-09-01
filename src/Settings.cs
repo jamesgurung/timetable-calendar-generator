@@ -44,6 +44,7 @@ public class Override
   public string Period { get; set; }
   public string Title { get; set; }
   public IList<int?> YearGroups { get; set; }
+  public string CopyFromPeriod { get; set; }
 }
 
 public class Rename

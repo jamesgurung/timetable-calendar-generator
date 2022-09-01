@@ -47,13 +47,14 @@ This file is required to configure:
   ],
   "absences":
   [
-    { "yearGroups": [11, 13], "startDate": "2022-07-04", "endDate": "2022-07-29" }
+    { "yearGroups": [11, 13], "startDate": "2023-05-27", "endDate": "2023-08-01" }
   ],
   "overrides":
   [
-    { "date": "2021-09-02", "period": "1", "yearGroups": [8, 9, 10, 12], "title": "" },
-    { "date": "2021-12-17", "period": "4", "title": "Whole school assembly" },
-    { "date": "2021-12-17", "period": "5", "title": "" }
+    { "date": "2022-09-07", "period": "1", "yearGroups": [8, 9, 10, 12], "title": "" },
+    { "date": "2022-09-08", "period": "1", "copyFromPeriod": "AM" },
+    { "date": "2022-12-16", "period": "4", "title": "Whole school assembly" },
+    { "date": "2022-12-16", "period": "5", "title": "" }
   ],
   "renames":
   [
@@ -63,16 +64,17 @@ This file is required to configure:
 ```
 If you specify multiple timings for the same `period`, then when creating each event the app will use the first entry matching any `days` and `yearGroups` filters. Make sure a fallback entry (with no filters) is always provided.
 
-Overriding or renaming a lesson to a blank string (`""`) will prevent a calendar event from being created at that time.
+Overriding or renaming a lesson to a blank string (`""`) will prevent a calendar event from being created at that time. The `copyFromPeriod` option can be used to clone another lesson in the same day, for example to create an extended tutor period.
 
 #### days.csv
 
 List each teaching day in the school year, in `yyyy-MM-dd` format, followed by a week indicator (i.e. Week 1 or Week 2). Non-teaching days such as weekends and holidays should be excluded. This file can be created in a spreadsheet app.
 
 ```
-2021-09-02,1
-2021-09-03,1
-2021-09-06,2
+2022-09-07,1
+2022-09-08,1
+2022-09-09,1
+2022-09-12,2
 ...
 ```
 For schools which use a one-week timetable, the second column should be omitted so the file only contains a list of working days.
