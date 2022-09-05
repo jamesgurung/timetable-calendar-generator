@@ -16,7 +16,7 @@ This is a cross-platform command line tool for bulk generating student and teach
 
 ### Usage on other platforms
 
-1. Ensure you have the [.NET 6 runtime](https://dotnet.microsoft.com/download/dotnet/6.0) installed (on the download page, look for the latest ".NET Runtime 6.0.x" heading in the right-hand column).
+1. Ensure you have the [.NET 7 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/7.0) installed (on the download page, look for the latest ".NET Runtime 7.0.x" heading in the right-hand column).
 1. Download and extract the `xplat` ZIP package from our [Releases page](https://github.com/jamesgurung/timetable-calendar-generator/releases).
 1. In the "inputs" directory, add the input files defined below.
 1. Run commands in the format: `dotnet makecal.dll --csv`
@@ -52,7 +52,7 @@ This file is required to configure:
   "overrides":
   [
     { "date": "2022-09-07", "period": "1", "yearGroups": [8, 9, 10, 12], "title": "" },
-    { "date": "2022-09-08", "period": "1", "copyFromPeriod": "AM" },
+    { "date": "2022-09-08", "period": "1", "copyFromPeriod": "Tut" },
     { "date": "2022-12-16", "period": "4", "title": "Whole school assembly" },
     { "date": "2022-12-16", "period": "5", "title": "" }
   ],

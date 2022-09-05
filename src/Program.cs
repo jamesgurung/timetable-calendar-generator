@@ -27,7 +27,7 @@ public static class Program
 
       if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
       {
-        Console.SetWindowSize(Math.Min(ConsoleHelper.MinConsoleWidth, Console.LargestWindowWidth), Math.Min(50, Console.LargestWindowHeight));
+        Console.SetWindowSize(Math.Min(ConsoleHelper.MinConsoleWidth, Console.LargestWindowWidth), Math.Min(45, Console.LargestWindowHeight));
         Console.SetBufferSize(Math.Max(ConsoleHelper.MinConsoleWidth, Console.BufferWidth),
           Math.Max(ConsoleHelper.HeaderHeight + people.Count + ConsoleHelper.FooterHeight, Console.BufferHeight));
       }

@@ -86,7 +86,8 @@ public class GoogleCalendarWriter : ICalendarWriter, IDisposable
     {
       var isDuty = ev.Summary.Contains("duty", StringComparison.OrdinalIgnoreCase) || ev.Summary.Contains("duties", StringComparison.OrdinalIgnoreCase);
       var isMeeting = ev.Summary.Contains("meet", StringComparison.OrdinalIgnoreCase) || ev.Summary.Contains("line management", StringComparison.OrdinalIgnoreCase)
-        || ev.Summary.Contains("brief", StringComparison.OrdinalIgnoreCase);
+        || ev.Summary.Contains("brief", StringComparison.OrdinalIgnoreCase) || ev.Summary.Contains("mentor", StringComparison.OrdinalIgnoreCase)
+        || ev.Summary.Contains("lmm", StringComparison.OrdinalIgnoreCase);
       ev.ColorId = isDuty ? DutyEventColour : (isMeeting ? MeetingEventColour : EventColour);
       ev.Reminders = new Event.RemindersData { UseDefault = isDuty };
       ev.ExtendedProperties = eventProperties;

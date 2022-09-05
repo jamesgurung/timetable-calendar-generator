@@ -110,7 +110,8 @@ public class MicrosoftCalendarWriter : ICalendarWriter
     {
       var isDuty = o.Title.Contains("duty", StringComparison.OrdinalIgnoreCase) || o.Title.Contains("duties", StringComparison.OrdinalIgnoreCase);
       var isMeeting = o.Title.Contains("meet", StringComparison.OrdinalIgnoreCase) || o.Title.Contains("line management", StringComparison.OrdinalIgnoreCase)
-        || o.Title.Contains("brief", StringComparison.OrdinalIgnoreCase);
+        || o.Title.Contains("brief", StringComparison.OrdinalIgnoreCase) || o.Title.Contains("mentor", StringComparison.OrdinalIgnoreCase)
+        || o.Title.Contains("LMM", StringComparison.OrdinalIgnoreCase);
       var ev = new Event
       {
         Subject = o.Title,
