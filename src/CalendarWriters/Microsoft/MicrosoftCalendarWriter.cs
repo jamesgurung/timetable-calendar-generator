@@ -34,14 +34,21 @@ public class MicrosoftCalendarWriter : ICalendarWriter
   public async Task WriteAsync(IList<CalendarEvent> events)
   {
     await SetupCategoryAsync();
-    var existingEvents = await GetExistingEventsAsync();
+    IList<CalendarEvent> eventsToAdd;
+    do
+    {
+      var existingEvents = await GetExistingEventsAsync();
+      var removedEvents = existingEvents.Except(events, comparer);
+      var duplicateEvents = existingEvents.GroupBy(o => o, comparer).Where(g => g.Count() > 1).SelectMany(g => g.Skip(1));
+      var eventsToDelete = removedEvents.Union(duplicateEvents, comparer).Cast<CalendarEventWithId>().OrderBy(o => o.Start).Select(o => o.Id);
+      eventsToAdd = events.Except(existingEvents, comparer).OrderBy(o => o.Start).ToList();
 
-    var removedEvents = existingEvents.Except(events, comparer);
-    var duplicateEvents = existingEvents.GroupBy(o => o, comparer).Where(g => g.Count() > 1).SelectMany(g => g.Skip(1));
-    var eventsToDelete = removedEvents.Union(duplicateEvents, comparer).Cast<CalendarEventWithId>().OrderBy(o => o.Start);
-
-    await DeleteEventsAsync(eventsToDelete.Select(o => o.Id).ToList());
-    await AddEventsAsync(events.Except(existingEvents, comparer).OrderBy(o => o.Start));
+      await DeleteEventsAsync(eventsToDelete);
+      await AddEventsAsync(eventsToAdd);
+    }
+    while (eventsToAdd.Count > 0);
+    /* Graph API sometimes returns 503 Service Unavailable errors but adds the events anyway.
+     * This can result in events being added twice, so we re-run the sync to remove duplicates. */
   }
 
   private async Task SetupCategoryAsync()
