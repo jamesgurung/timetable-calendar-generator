@@ -11,7 +11,7 @@ internal class MicrosoftUnlimitedBatch<T> : IDisposable
   private readonly Func<T, RequestInformation> _requestInfoFunction;
   private readonly Dictionary<string, T> _originalData = new();
 
-  private bool disposedValue;
+  private bool _disposedValue;
 
   private const int BatchSizeLimit = 4; // Mailbox concurrency limit
   private const int MaxAttempts = 4;
@@ -58,7 +58,7 @@ internal class MicrosoftUnlimitedBatch<T> : IDisposable
         {
           var result = await _service.Batch.PostAsync(current);
           responses = (await result.GetResponsesAsync()).ToList();
-          var failures = responses.Where(o => !o.Value.IsSuccessStatusCode);
+          var failures = responses.Where(o => !o.Value.IsSuccessStatusCode).ToList();
           stepsToRetry = failures.Select(o => o.Key).ToList();
           if (!stepsToRetry.Any())
           {
@@ -94,21 +94,19 @@ internal class MicrosoftUnlimitedBatch<T> : IDisposable
 
   protected virtual void Dispose(bool disposing)
   {
-    if (!disposedValue)
+    if (_disposedValue) return;
+    if (disposing)
     {
-      if (disposing)
+      if (_batches is not null)
       {
-        if (_batches is not null)
+        foreach (var batchRequestContent in _batches)
         {
-          foreach (var batchRequestContent in _batches)
-          {
-            batchRequestContent?.Dispose();
-          }
+          batchRequestContent?.Dispose();
         }
       }
-
-      disposedValue = true;
     }
+
+    _disposedValue = true;
   }
 
   public void Dispose()

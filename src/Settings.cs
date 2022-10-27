@@ -15,17 +15,11 @@ public class Settings
 
   private IDictionary<string, string> _renameDictionary;
   [JsonIgnore]
-  public IDictionary<string, string> RenameDictionary
-  {
-    get => _renameDictionary ??= Renames?.ToDictionary(o => o.OriginalTitle, o => o.NewTitle) ?? new();
-  }
+  public IDictionary<string, string> RenameDictionary => _renameDictionary ??= Renames?.ToDictionary(o => o.OriginalTitle, o => o.NewTitle) ?? new();
 
   private IList<IGrouping<string, Timing>> _timingsByPeriod;
   [JsonIgnore]
-  public IList<IGrouping<string, Timing>> TimingsByPeriod
-  {
-    get => _timingsByPeriod ??= Timings.GroupBy(o => o.Period).ToList();
-  }
+  public IList<IGrouping<string, Timing>> TimingsByPeriod => _timingsByPeriod ??= Timings.GroupBy(o => o.Period).ToList();
 }
 
 public class Absence

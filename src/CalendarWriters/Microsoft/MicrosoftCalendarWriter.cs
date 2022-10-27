@@ -19,7 +19,7 @@ public class MicrosoftCalendarWriter : ICalendarWriter
   private const string MeetingCategoryName = "Meeting";
   private const CategoryColor MeetingCategoryColour = CategoryColor.Preset4;
 
-  private static readonly EventComparer<CalendarEvent> comparer = new(e => e.Start, e => e.End, e => e.Title, e => e.Location);
+  private static readonly EventComparer<CalendarEvent> Comparer = new(e => e.Start, e => e.End, e => e.Title, e => e.Location);
 
   private readonly GraphServiceClient _client;
   private readonly UserItemRequestBuilder _userClient;
@@ -38,10 +38,10 @@ public class MicrosoftCalendarWriter : ICalendarWriter
     do
     {
       var existingEvents = await GetExistingEventsAsync();
-      var removedEvents = existingEvents.Except(events, comparer);
-      var duplicateEvents = existingEvents.GroupBy(o => o, comparer).Where(g => g.Count() > 1).SelectMany(g => g.Skip(1));
-      var eventsToDelete = removedEvents.Union(duplicateEvents, comparer).Cast<CalendarEventWithId>().OrderBy(o => o.Start).Select(o => o.Id);
-      eventsToAdd = events.Except(existingEvents, comparer).OrderBy(o => o.Start).ToList();
+      var removedEvents = existingEvents.Except(events, Comparer);
+      var duplicateEvents = existingEvents.GroupBy(o => o, Comparer).Where(g => g.Count() > 1).SelectMany(g => g.Skip(1));
+      var eventsToDelete = removedEvents.Union(duplicateEvents, Comparer).Cast<CalendarEventWithId>().OrderBy(o => o.Start).Select(o => o.Id).ToList();
+      eventsToAdd = events.Except(existingEvents, Comparer).OrderBy(o => o.Start).ToList();
 
       await DeleteEventsAsync(eventsToDelete);
       await AddEventsAsync(eventsToAdd);
@@ -90,7 +90,7 @@ public class MicrosoftCalendarWriter : ICalendarWriter
       config => { config.Headers.Add("Prefer", "outlook.timezone=\"Europe/London\""); return config; }
     );
     await iterator.IterateAsync();
-    return events.Select(ev => new CalendarEventWithId() {
+    return events.Select(ev => new CalendarEventWithId {
       Id = ev.Id,
       Title = ev.Subject,
       Location = ev.Location.DisplayName,
@@ -99,7 +99,7 @@ public class MicrosoftCalendarWriter : ICalendarWriter
     }).ToList();
   }
 
-  private async Task DeleteEventsAsync(IEnumerable<string> eventIds)
+  private async Task DeleteEventsAsync(IList<string> eventIds)
   {
     if (!eventIds.Any()) return;
     using var deleteBatch = new MicrosoftUnlimitedBatch<string>(_client, id => _userClient.Events[id].CreateDeleteRequestInformation());
@@ -110,7 +110,7 @@ public class MicrosoftCalendarWriter : ICalendarWriter
     await deleteBatch.ExecuteWithRetryAsync();
   }
 
-  private async Task AddEventsAsync(IEnumerable<CalendarEvent> events)
+  private async Task AddEventsAsync(IList<CalendarEvent> events)
   {
     if (!events.Any()) return;
     using var insertBatch = new MicrosoftUnlimitedBatch<CalendarEvent>(_client, o =>
@@ -140,6 +140,6 @@ public class MicrosoftCalendarWriter : ICalendarWriter
 
   private class CalendarEventWithId : CalendarEvent
   {
-    public string Id { get; set; }
+    public string Id { get; init; }
   }
 }

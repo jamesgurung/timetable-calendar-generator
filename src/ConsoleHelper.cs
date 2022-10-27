@@ -7,23 +7,23 @@ public static class ConsoleHelper
 
   private const int StatusCol = 50;
   private const int StatusWidth = 80;
-  private static readonly ConsoleColor defaultBackground = Console.BackgroundColor;
-  private static readonly object consoleLock = new();
+  private static readonly ConsoleColor DefaultBackground = Console.BackgroundColor;
+  private static readonly object ConsoleLock = new();
 
   public static int MinConsoleWidth => StatusCol + StatusWidth;
 
   private static void Write(int line, int col, string text, ConsoleColor? colour = null)
   {
-    lock (consoleLock)
+    lock (ConsoleLock)
     {
-      colour ??= defaultBackground;
+      colour ??= DefaultBackground;
       Console.SetCursorPosition(col, line);
-      Console.BackgroundColor = defaultBackground;
+      Console.BackgroundColor = DefaultBackground;
       Console.Write(new string(' ', StatusWidth));
       Console.SetCursorPosition(col, line);
       Console.BackgroundColor = colour.Value;
       Console.Write(text);
-      Console.BackgroundColor = defaultBackground;
+      Console.BackgroundColor = DefaultBackground;
     }
   }
 
@@ -39,7 +39,7 @@ public static class ConsoleHelper
 
   public static void WriteError(string message)
   {
-    lock (consoleLock)
+    lock (ConsoleLock)
     {
       Console.WriteLine();
       var backgroundColor = Console.BackgroundColor;

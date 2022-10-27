@@ -2,7 +2,6 @@
 using Google.Apis.Calendar.v3;
 using Google.Apis.Calendar.v3.Data;
 using Google.Apis.Services;
-using System.Linq;
 
 namespace TimetableCalendarGenerator;
 
@@ -15,12 +14,12 @@ public class GoogleCalendarWriter : ICalendarWriter, IDisposable
   private const string DutyEventColour = "8";
   private const string MeetingEventColour = "2";
 
-  private static readonly Event.ExtendedPropertiesData eventProperties = new()
+  private static readonly Event.ExtendedPropertiesData EventProperties = new()
   {
     Private__ = new Dictionary<string, string> { { AppName, "true" } }
   };
 
-  private static readonly EventComparer<Event> comparer = new(e => e.Start?.DateTime, e => e.End?.DateTime, e => e.Summary, e => e.Location);
+  private static readonly EventComparer<Event> Comparer = new(e => e.Start?.DateTime, e => e.End?.DateTime, e => e.Summary, e => e.Location);
 
   private readonly CalendarService _service;
   private bool _disposedValue;
@@ -42,12 +41,12 @@ public class GoogleCalendarWriter : ICalendarWriter, IDisposable
       End = new EventDateTime { DateTime = o.End }
     }).ToList();
 
-    var removedEvents = existingEvents.Except(expectedEvents, comparer);
-    var duplicateEvents = existingEvents.GroupBy(o => o, comparer).Where(g => g.Count() > 1).SelectMany(g => g.Skip(1));
-    var eventsToDelete = removedEvents.Union(duplicateEvents, comparer).OrderBy(o => o.Start?.DateTime);
+    var removedEvents = existingEvents.Except(expectedEvents, Comparer);
+    var duplicateEvents = existingEvents.GroupBy(o => o, Comparer).Where(g => g.Count() > 1).SelectMany(g => g.Skip(1));
+    var eventsToDelete = removedEvents.Union(duplicateEvents, Comparer).OrderBy(o => o.Start?.DateTime);
 
     await DeleteEventsAsync(eventsToDelete);
-    await AddEventsAsync(expectedEvents.Except(existingEvents, comparer).OrderBy(o => o.Start?.DateTime));
+    await AddEventsAsync(expectedEvents.Except(existingEvents, Comparer).OrderBy(o => o.Start?.DateTime));
   }
 
   private static CalendarService GetCalendarService(string serviceAccountKey, string email)
@@ -90,7 +89,7 @@ public class GoogleCalendarWriter : ICalendarWriter, IDisposable
         || ev.Summary.Contains("lmm", StringComparison.OrdinalIgnoreCase);
       ev.ColorId = isDuty ? DutyEventColour : (isMeeting ? MeetingEventColour : EventColour);
       ev.Reminders = new Event.RemindersData { UseDefault = isDuty };
-      ev.ExtendedProperties = eventProperties;
+      ev.ExtendedProperties = EventProperties;
       var insertRequest = _service.Events.Insert(ev, CalendarId);
       insertRequest.Fields = "id";
       insertBatch.Queue(insertRequest);
@@ -100,14 +99,12 @@ public class GoogleCalendarWriter : ICalendarWriter, IDisposable
 
   protected virtual void Dispose(bool disposing)
   {
-    if (!_disposedValue)
+    if (_disposedValue) return;
+    if (disposing)
     {
-      if (disposing)
-      {
-        _service?.Dispose();
-      }
-      _disposedValue = true;
+      _service?.Dispose();
     }
+    _disposedValue = true;
   }
 
   public void Dispose()

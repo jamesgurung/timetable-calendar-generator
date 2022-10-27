@@ -6,16 +6,16 @@ namespace TimetableCalendarGenerator;
 
 public static class InputReader
 {
-  private const string SettingsFileName = @"inputs/settings.json";
-  private const string GoogleKeyFileName = @"inputs/google-key.json";
-  private const string MicrosoftKeyFileName = @"inputs/microsoft-key.json";
-  private const string DaysFileName = @"inputs/days.csv";
-  private const string StudentsFileName = @"inputs/students.csv";
-  private const string TeachersFileName = @"inputs/teachers.csv";
+  private const string SettingsFileName = "inputs/settings.json";
+  private const string GoogleKeyFileName = "inputs/google-key.json";
+  private const string MicrosoftKeyFileName = "inputs/microsoft-key.json";
+  private const string DaysFileName = "inputs/days.csv";
+  private const string StudentsFileName = "inputs/students.csv";
+  private const string TeachersFileName = "inputs/teachers.csv";
 
   private const char ReplacementCharacter = '\ufffd';
 
-  private static readonly SourceGenerationContext jsonCtx = new(new() { PropertyNameCaseInsensitive = true });
+  private static readonly SourceGenerationContext JsonCtx = new(new() { PropertyNameCaseInsensitive = true });
 
   public static async Task<Settings> LoadSettingsAsync()
   {
@@ -23,7 +23,7 @@ public static class InputReader
     Console.WriteLine($"Reading {SettingsFileName}");
     await using (var fs = File.OpenRead(SettingsFileName))
     {
-      settings = await JsonSerializer.DeserializeAsync(fs, jsonCtx.Settings);
+      settings = await JsonSerializer.DeserializeAsync(fs, JsonCtx.Settings);
     }
 
     if (settings?.Timings is null || settings.Timings.Count == 0) throw new InvalidOperationException("Invalid settings file.");
@@ -59,7 +59,7 @@ public static class InputReader
   {
     Console.WriteLine($"Reading {MicrosoftKeyFileName}");
     await using var fs = File.OpenRead(MicrosoftKeyFileName);
-    return await JsonSerializer.DeserializeAsync(fs, jsonCtx.MicrosoftClientKey);
+    return await JsonSerializer.DeserializeAsync(fs, JsonCtx.MicrosoftClientKey);
   }
 
   public static async Task<IList<Person>> LoadPeopleAsync()
@@ -201,7 +201,7 @@ public static class InputReader
 
   private static int? GetYearFromClassName(string className)
   {
-    var yearDigits = className.TakeWhile(c => c >= '0' && c <= '9').ToArray();
+    var yearDigits = className.TakeWhile(c => c is >= '0' and <= '9').ToArray();
     return yearDigits.Length == 0 ? null : int.Parse(new string(yearDigits), CultureInfo.InvariantCulture);
   }
 

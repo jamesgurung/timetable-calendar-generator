@@ -1,6 +1,4 @@
-﻿using Microsoft.Graph.Beta.Models;
-
-namespace TimetableCalendarGenerator;
+﻿namespace TimetableCalendarGenerator;
 
 public class CalendarGenerator
 {
@@ -68,7 +66,7 @@ public class CalendarGenerator
         if (char.IsDigit(period[0])) {
           title =  $"P{period}. {title}";
         }
-        else if (period == "AM" || period == "PM")
+        else if (period is "AM" or "PM")
         {
           title = $"{period}. {title}";
         }
