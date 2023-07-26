@@ -25,7 +25,7 @@ internal class MicrosoftUnlimitedBatch<T> : IDisposable
     _requestInfoFunction = requestInfoFunction;
   }
 
-  public void Queue(T request)
+  public async Task QueueAsync(T request)
   {
     if (request is null)
     {
@@ -39,7 +39,7 @@ internal class MicrosoftUnlimitedBatch<T> : IDisposable
       _batches.Add(currentBatch);
     }
 
-    var id = currentBatch.AddBatchRequestStep(_requestInfoFunction(request));
+    var id = currentBatch.AddBatchRequestStep(await _service.RequestAdapter.ConvertToNativeRequestAsync<HttpRequestMessage>(_requestInfoFunction(request)));
     _originalData.Add(id, request);
   }
 
@@ -60,7 +60,7 @@ internal class MicrosoftUnlimitedBatch<T> : IDisposable
           responses = (await result.GetResponsesAsync()).ToList();
           var failures = responses.Where(o => !o.Value.IsSuccessStatusCode).ToList();
           stepsToRetry = failures.Select(o => o.Key).ToList();
-          if (!stepsToRetry.Any())
+          if (stepsToRetry.Count == 0)
           {
             current.Dispose();
             break;
@@ -75,7 +75,7 @@ internal class MicrosoftUnlimitedBatch<T> : IDisposable
           foreach (var stepId in stepsToRetry)
           {
             var data = _originalData[stepId];
-            var newId = current.AddBatchRequestStep(_requestInfoFunction(data));
+            var newId = current.AddBatchRequestStep(await _service.RequestAdapter.ConvertToNativeRequestAsync<HttpRequestMessage>(_requestInfoFunction(data)));
             _originalData.Add(newId, data);
           }
           await Task.Delay(wait);

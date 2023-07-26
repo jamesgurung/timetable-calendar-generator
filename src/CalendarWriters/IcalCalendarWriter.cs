@@ -3,16 +3,11 @@ using System.Text;
 
 namespace TimetableCalendarGenerator;
 
-public class IcalCalendarWriter : ICalendarWriter
+public class IcalCalendarWriter(string outputFileName) : ICalendarWriter
 {
   private const string DateFormat = "yyyyMMdd'T'HHmmss";
 
-  private string OutputFileName { get; }
-
-  public IcalCalendarWriter(string outputFileName)
-  {
-    OutputFileName = outputFileName;
-  }
+  private string OutputFileName { get; } = outputFileName;
 
   public async Task WriteAsync(IList<CalendarEvent> events)
   {

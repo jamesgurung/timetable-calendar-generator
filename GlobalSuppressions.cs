@@ -25,4 +25,13 @@
   Justification = "Emails are case insensitive", Scope = "type", Target = "~T:TimetableCalendarGenerator.InputReader")]
 
 [assembly: SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope",
-  Justification = "Object lifecycle and disposal is managed by the class", Scope = "type", Target = "~T:TimetableCalendarGenerator.MicrosoftUnlimitedBatch")]
+  Justification = "Object lifecycle and disposal is managed by the class", Scope = "type", Target = "~T:TimetableCalendarGenerator.MicrosoftUnlimitedBatch`1")]
+
+[assembly: SuppressMessage("Naming", "CA1724:Type names should not match namespaces",
+  Justification = "Clashes are not ambiguous.")]
+
+[assembly: SuppressMessage("Maintainability", "CA1508:Avoid dead conditional code",
+  Justification = "Analyser error", Scope = "member", Target = "~M:TimetableCalendarGenerator.CalendarGenerator.Generate(TimetableCalendarGenerator.Person)")]
+
+[assembly: SuppressMessage("Performance", "CA1852:Seal internal types",
+  Justification = "Analyser error", Scope = "type", Target = "~T:TimetableCalendarGenerator.MicrosoftUnlimitedBatch`1")]

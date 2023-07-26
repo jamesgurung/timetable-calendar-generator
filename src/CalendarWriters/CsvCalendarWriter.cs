@@ -3,14 +3,9 @@ using KBCsv;
 
 namespace TimetableCalendarGenerator;
 
-public class CsvCalendarWriter : ICalendarWriter
+public class CsvCalendarWriter(string outputFileName) : ICalendarWriter
 {
-  private string OutputFileName { get; }
-
-  public CsvCalendarWriter(string outputFileName)
-  {
-    OutputFileName = outputFileName;
-  }
+  private string OutputFileName { get; } = outputFileName;
 
   public async Task WriteAsync(IList<CalendarEvent> events)
   {

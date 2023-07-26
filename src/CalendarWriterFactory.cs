@@ -36,6 +36,7 @@ public class CalendarWriterFactory
       case OutputType.Microsoft365:
         SimultaneousRequests = 25;
         DisplayText = "Writing to Microsoft 365 calendars";
+        ArgumentNullException.ThrowIfNull(microsoftClientKey);
         var credential = new ClientSecretCredential(microsoftClientKey.TenantId, microsoftClientKey.ClientId, microsoftClientKey.ClientSecret);
         MicrosoftClient = new GraphServiceClient(credential);
         break;

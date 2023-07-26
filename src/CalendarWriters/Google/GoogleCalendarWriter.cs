@@ -5,7 +5,7 @@ using Google.Apis.Services;
 
 namespace TimetableCalendarGenerator;
 
-public class GoogleCalendarWriter : ICalendarWriter, IDisposable
+public class GoogleCalendarWriter(string email, string serviceAccountKey) : ICalendarWriter, IDisposable
 {
   private const string CalendarId = "primary";
   private const string AppName = "makecal";
@@ -19,15 +19,10 @@ public class GoogleCalendarWriter : ICalendarWriter, IDisposable
     Private__ = new Dictionary<string, string> { { AppName, "true" } }
   };
 
-  private static readonly EventComparer<Event> Comparer = new(e => e.Start?.DateTime, e => e.End?.DateTime, e => e.Summary, e => e.Location);
+  private static readonly EventComparer<Event> Comparer = new(e => e.Start?.DateTimeDateTimeOffset, e => e.End?.DateTimeDateTimeOffset, e => e.Summary, e => e.Location);
 
-  private readonly CalendarService _service;
+  private readonly CalendarService _service = GetCalendarService(serviceAccountKey, email);
   private bool _disposedValue;
-
-  public GoogleCalendarWriter(string email, string serviceAccountKey)
-  {
-    _service = GetCalendarService(serviceAccountKey, email);
-  }
 
   public async Task WriteAsync(IList<CalendarEvent> events)
   {
@@ -37,16 +32,16 @@ public class GoogleCalendarWriter : ICalendarWriter, IDisposable
     {
       Summary = o.Title,
       Location = o.Location,
-      Start = new EventDateTime { DateTime = o.Start },
-      End = new EventDateTime { DateTime = o.End }
+      Start = new EventDateTime { DateTimeDateTimeOffset = o.Start },
+      End = new EventDateTime { DateTimeDateTimeOffset = o.End }
     }).ToList();
 
     var removedEvents = existingEvents.Except(expectedEvents, Comparer);
     var duplicateEvents = existingEvents.GroupBy(o => o, Comparer).Where(g => g.Count() > 1).SelectMany(g => g.Skip(1));
-    var eventsToDelete = removedEvents.Union(duplicateEvents, Comparer).OrderBy(o => o.Start?.DateTime);
+    var eventsToDelete = removedEvents.Union(duplicateEvents, Comparer).OrderBy(o => o.Start?.DateTimeDateTimeOffset);
 
     await DeleteEventsAsync(eventsToDelete);
-    await AddEventsAsync(expectedEvents.Except(existingEvents, Comparer).OrderBy(o => o.Start?.DateTime));
+    await AddEventsAsync(expectedEvents.Except(existingEvents, Comparer).OrderBy(o => o.Start?.DateTimeDateTimeOffset));
   }
 
   private static CalendarService GetCalendarService(string serviceAccountKey, string email)

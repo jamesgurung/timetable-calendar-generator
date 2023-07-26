@@ -34,6 +34,7 @@ public static class ConsoleHelper
 
   public static void WriteStatus(int line, string text, ConsoleColor? colour = null)
   {
+    ArgumentNullException.ThrowIfNull(text);
     Write(line, StatusCol, text[..Math.Min(text.Length, StatusWidth)], colour);
   }
 

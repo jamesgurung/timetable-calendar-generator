@@ -1,13 +1,8 @@
 ﻿namespace TimetableCalendarGenerator;
 
-public class CalendarGenerator
+public class CalendarGenerator(Settings settings)
 {
-  private Settings Settings { get; }
-
-  public CalendarGenerator(Settings settings)
-  {
-    Settings = settings;
-  }
+  private Settings Settings { get; } = settings;
 
   public IList<CalendarEvent> Generate(Person person)
   {
@@ -53,13 +48,9 @@ public class CalendarGenerator
           continue;
         }
 
-        var lessonTime = periodTimings.FirstOrDefault(timingEntry => (timingEntry.YearGroups?.Contains(yearGroup) ?? true) && (timingEntry.Days?.Contains(dayCode) ?? true));
+        var lessonTime = periodTimings.FirstOrDefault(timingEntry => (timingEntry.YearGroups?.Contains(yearGroup) ?? true) && (timingEntry.Days?.Contains(dayCode) ?? true))
+          ?? throw new InvalidOperationException($"Period {period} requires fallback timings.");
 
-        if (lessonTime is null)
-        {
-          throw new InvalidOperationException($"Period {period} requires fallback timings.");
-        }
-          
         var start = new DateTime(date.Year, date.Month, date.Day, lessonTime.StartHour, lessonTime.StartMinute, 0);
         var end = start.AddMinutes(lessonTime.Duration);
 

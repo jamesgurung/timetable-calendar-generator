@@ -3,19 +3,16 @@ using Google.Apis.Services;
 
 namespace TimetableCalendarGenerator;
 
-internal class GoogleUnlimitedBatch
+internal sealed class GoogleUnlimitedBatch
 {
   private readonly IClientService _service;
-  private readonly IList<BatchRequest> _batches;
+  private readonly List<BatchRequest> _batches;
 
   public int BatchSizeLimit { get; }
 
   public GoogleUnlimitedBatch(IClientService service, int batchSizeLimit = 50)
   {
-    if (batchSizeLimit <= 0)
-    {
-      throw new ArgumentOutOfRangeException(nameof(batchSizeLimit));
-    }
+    ArgumentOutOfRangeException.ThrowIfNegativeOrZero(batchSizeLimit);
     _service = service ?? throw new ArgumentNullException(nameof(service));
     _batches = new List<BatchRequest> { new(_service) };
     BatchSizeLimit = batchSizeLimit;
@@ -23,15 +20,8 @@ internal class GoogleUnlimitedBatch
 
   public void Queue<TResponse>(IClientServiceRequest request, BatchRequest.OnResponse<TResponse> callback) where TResponse : class
   {
-    if (request is null)
-    {
-      throw new ArgumentNullException(nameof(request));
-    }
-
-    if (callback is null)
-    {
-      throw new ArgumentNullException(nameof(callback));
-    }
+    ArgumentNullException.ThrowIfNull(request);
+    ArgumentNullException.ThrowIfNull(callback);
 
     var currentBatch = _batches.Last();
     if (currentBatch.Count == BatchSizeLimit)

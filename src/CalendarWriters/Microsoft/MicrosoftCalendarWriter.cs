@@ -20,6 +20,8 @@ public class MicrosoftCalendarWriter : ICalendarWriter
   private const CategoryColor MeetingCategoryColour = CategoryColor.Preset4;
 
   private static readonly EventComparer<CalendarEvent> Comparer = new(e => e.Start, e => e.End, e => e.Title, e => e.Location);
+  private static readonly string[] DisplayName = new[] { "DisplayName" };
+  private static readonly string[] SelectFields = new[] { "Id", "Start", "End", "Subject", "Location" };
 
   private readonly GraphServiceClient _client;
   private readonly UserItemRequestBuilder _userClient;
@@ -56,7 +58,7 @@ public class MicrosoftCalendarWriter : ICalendarWriter
     var categories = await _userClient.Outlook.MasterCategories.GetAsync(config =>
     {
       config.QueryParameters.Top = 999;
-      config.QueryParameters.Select = new[] { "DisplayName" };
+      config.QueryParameters.Select = DisplayName;
     });
     if (!categories.Value.Any(o => string.Equals(o.DisplayName, CategoryName, StringComparison.OrdinalIgnoreCase)))
     {
@@ -83,7 +85,7 @@ public class MicrosoftCalendarWriter : ICalendarWriter
       config.QueryParameters.Top = 999;
       config.Headers.Add("Prefer", "outlook.timezone=\"Europe/London\"");
       config.QueryParameters.Filter = $"Start/DateTime gt '{DateTime.Today:s}' and Extensions/any(f:f/id eq '{Tag}')";
-      config.QueryParameters.Select = new[] { "Id", "Start", "End", "Subject", "Location" };
+      config.QueryParameters.Select = SelectFields;
     });
     var iterator = PageIterator<Event, EventCollectionResponse>.CreatePageIterator(_client, response,
       ev => { events.Add(ev); return true; },
@@ -102,10 +104,10 @@ public class MicrosoftCalendarWriter : ICalendarWriter
   private async Task DeleteEventsAsync(IList<string> eventIds)
   {
     if (!eventIds.Any()) return;
-    using var deleteBatch = new MicrosoftUnlimitedBatch<string>(_client, id => _userClient.Events[id].CreateDeleteRequestInformation());
+    using var deleteBatch = new MicrosoftUnlimitedBatch<string>(_client, id => _userClient.Events[id].ToDeleteRequestInformation());
     foreach (var id in eventIds)
     {
-      deleteBatch.Queue(id);
+      await deleteBatch.QueueAsync(id);
     }
     await deleteBatch.ExecuteWithRetryAsync();
   }
@@ -129,16 +131,16 @@ public class MicrosoftCalendarWriter : ICalendarWriter
         Categories = new() { isDuty ? DutyCategoryName : (isMeeting ? MeetingCategoryName : CategoryName) },
         IsReminderOn = isDuty
       };
-      return _userClient.Calendar.Events.CreatePostRequestInformation(ev);
+      return _userClient.Calendar.Events.ToPostRequestInformation(ev);
     });
     foreach (var ev in events)
     {
-      insertBatch.Queue(ev);
+      await insertBatch.QueueAsync(ev);
     }
     await insertBatch.ExecuteWithRetryAsync();
   }
 
-  private class CalendarEventWithId : CalendarEvent
+  private sealed class CalendarEventWithId : CalendarEvent
   {
     public string Id { get; init; }
   }

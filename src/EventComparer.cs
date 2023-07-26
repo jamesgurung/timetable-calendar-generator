@@ -1,19 +1,11 @@
 ﻿namespace TimetableCalendarGenerator;
 
-public class EventComparer<TEvent> : IEqualityComparer<TEvent>
+public class EventComparer<TEvent>(Func<TEvent, DateTimeOffset?> start, Func<TEvent, DateTimeOffset?> end, Func<TEvent, string> title, Func<TEvent, string> location) : IEqualityComparer<TEvent>
 {
-  private Func<TEvent, DateTime?> Start { get; }
-  private Func<TEvent, DateTime?> End { get; }
-  private Func<TEvent, string> Title { get; }
-  private Func<TEvent, string> Location { get; }
-
-  public EventComparer(Func<TEvent, DateTime?> start, Func<TEvent, DateTime?> end, Func<TEvent, string> title, Func<TEvent, string> location)
-  {
-    Start = start;
-    End = end;
-    Title = title;
-    Location = location;
-  }
+  private Func<TEvent, DateTimeOffset?> Start { get; } = start;
+  private Func<TEvent, DateTimeOffset?> End { get; } = end;
+  private Func<TEvent, string> Title { get; } = title;
+  private Func<TEvent, string> Location { get; } = location;
 
   public bool Equals(TEvent x, TEvent y)
   {

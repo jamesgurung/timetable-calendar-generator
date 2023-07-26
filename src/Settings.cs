@@ -74,4 +74,4 @@ public class Timing
 [JsonSerializable(typeof(Settings))]
 [JsonSerializable(typeof(MicrosoftClientKey))]
 [JsonConverter(typeof(JsonDateConverter))]
-internal partial class SourceGenerationContext : JsonSerializerContext { }
+internal sealed partial class SourceGenerationContext : JsonSerializerContext { }
