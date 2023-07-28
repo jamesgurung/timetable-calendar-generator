@@ -1,5 +1,4 @@
 ﻿using Microsoft.Graph.Beta.Models.ODataErrors;
-using System.Runtime.InteropServices;
 
 [assembly:CLSCompliant(true)]
 namespace TimetableCalendarGenerator;
@@ -10,42 +9,32 @@ public static class Program
   {
     try
     {
-      Console.Clear();
       Console.CursorVisible = false;
-      Console.WriteLine("TIMETABLE CALENDAR GENERATOR\n");
 
       var outputType = ArgumentParser.Parse(args);
-
       var settings = await InputReader.LoadSettingsAsync();
       var googleKey = outputType == OutputType.GoogleWorkspace ? await InputReader.LoadGoogleKeyAsync() : null;
       var microsoftKey = outputType == OutputType.Microsoft365 ? await InputReader.LoadMicrosoftKeyAsync() : null;
-
       var people = await InputReader.LoadPeopleAsync();
 
       var calendarGenerator = new CalendarGenerator(settings);
       var calendarWriterFactory = new CalendarWriterFactory(outputType, googleKey, microsoftKey);
+      Console.WriteLine(calendarWriterFactory.DisplayText);
 
-      if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-      {
-        Console.SetWindowSize(Math.Min(ConsoleHelper.MinConsoleWidth, Console.LargestWindowWidth), Math.Min(45, Console.LargestWindowHeight));
-        Console.SetBufferSize(Math.Max(ConsoleHelper.MinConsoleWidth, Console.BufferWidth),
-          Math.Max(ConsoleHelper.HeaderHeight + people.Count + ConsoleHelper.FooterHeight, Console.BufferHeight));
-      }
+      var numberColumnWidth = (int)Math.Log10(people.Count) * 2 + 5;
+      var maxNameWidth = people.Max(o => o.Email.Length) + numberColumnWidth + 2;
+      ConsoleHelper.ConfigureSize(people.Count, maxNameWidth);
 
-      Console.WriteLine($"\n{calendarWriterFactory.DisplayText}:");
-
-      var writeTasks = new List<Task>();
+      var writeTasks = new List<Task>(people.Count);
       using (var throttler = new SemaphoreSlim(calendarWriterFactory.SimultaneousRequests))
       {
         for (var i = 0; i < people.Count; i++)
         {
           await throttler.WaitAsync();
-          var person = people[i];
-          var line = i + ConsoleHelper.HeaderHeight;
-          ConsoleHelper.WriteDescription(line, $"({i + 1}/{people.Count}) {person.Email}");
-          ConsoleHelper.WriteStatus(line, "...");
+          ConsoleHelper.WriteName(i, $"({i + 1}/{people.Count})".PadRight(numberColumnWidth) + $" {people[i].Email}");
+          ConsoleHelper.WriteStatus(i, "...");
 
-          writeTasks.Add(Task.Run(async () =>
+          async Task WriteCalendarAsync(int index, Person person)
           {
             ICalendarWriter calendarWriter = null;
             try
@@ -53,34 +42,34 @@ public static class Program
               calendarWriter = calendarWriterFactory.GetCalendarWriter(person.Email);
               var events = calendarGenerator.Generate(person);
               await calendarWriter.WriteAsync(events);
-              ConsoleHelper.WriteStatus(line, "Done.");
+              ConsoleHelper.WriteStatus(index, "Done.");
             }
             catch (Exception exc)
             {
               var msg = (exc is ODataError odataError) ? odataError.Error.Message : exc.Message;
-              ConsoleHelper.WriteStatus(line, msg, ConsoleColor.Red);
+              ConsoleHelper.WriteStatus(index, msg, ConsoleColor.DarkRed);
             }
             finally
             {
               (calendarWriter as IDisposable)?.Dispose();
               throttler.Release();
             }
-          }));
+          }
+
+          writeTasks.Add(WriteCalendarAsync(i, people[i]));
         }
         await Task.WhenAll(writeTasks);
       }
 
-      Console.SetCursorPosition(0, ConsoleHelper.HeaderHeight + people.Count);
-      Console.WriteLine("\nOperation complete.\n");
+      ConsoleHelper.WriteFinishLine("Operation complete.");
     }
     catch (Exception exc)
     {
-      ConsoleHelper.WriteError(exc.Message);
+      ConsoleHelper.WriteFinishLine($"Error: {exc.Message}", ConsoleColor.DarkRed);
     }
     finally
     {
       Console.CursorVisible = true;
     }
   }
-
 }

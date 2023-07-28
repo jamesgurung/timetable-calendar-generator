@@ -1,53 +1,82 @@
+using System.Runtime.InteropServices;
+
 namespace TimetableCalendarGenerator;
 
 public static class ConsoleHelper
 {
-  public static int HeaderHeight => 10;
-  public static int FooterHeight => 3;
+  private static int nameWidth;
+  private static int statusWidth;
+  private static int startLine;
+  private static int lastLine;
+  private static readonly ConsoleColor defaultBackground = Console.BackgroundColor;
+  private static readonly object consoleLock = new();
 
-  private const int StatusCol = 50;
-  private const int StatusWidth = 80;
-  private static readonly ConsoleColor DefaultBackground = Console.BackgroundColor;
-  private static readonly object ConsoleLock = new();
-
-  public static int MinConsoleWidth => StatusCol + StatusWidth;
-
-  private static void Write(int line, int col, string text, ConsoleColor? colour = null)
+  public static void ConfigureSize(int count, int maxNameWidth)
   {
-    lock (ConsoleLock)
+    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
     {
-      colour ??= DefaultBackground;
-      Console.SetCursorPosition(col, line);
-      Console.BackgroundColor = DefaultBackground;
-      Console.Write(new string(' ', StatusWidth));
-      Console.SetCursorPosition(col, line);
-      Console.BackgroundColor = colour.Value;
-      Console.Write(text);
-      Console.BackgroundColor = DefaultBackground;
+      var bufferHeight = Console.CursorTop + count + 1;
+      if (bufferHeight > short.MaxValue)
+      {
+        Console.Clear();
+        bufferHeight = Console.CursorTop + count + 1;
+      }
+      if (Console.BufferHeight < bufferHeight)
+      {
+        Console.BufferHeight = bufferHeight;
+      }
+    }
+    var width = Console.BufferWidth;
+    nameWidth = Math.Min(maxNameWidth, width / 2);
+    statusWidth = width - nameWidth - 1;
+    startLine = Console.CursorTop;
+  }
+
+  public static void WriteName(int index, string text, ConsoleColor? backgroundColour = null)
+  {
+    ArgumentNullException.ThrowIfNull(text);
+    Write(index, 0, nameWidth, text, backgroundColour);
+  }
+
+  public static void WriteStatus(int index, string text, ConsoleColor? backgroundColour = null)
+  {
+    ArgumentNullException.ThrowIfNull(text);
+    Write(index, nameWidth + 1, statusWidth, text, backgroundColour);
+  }
+
+  public static void WriteFinishLine(string message, ConsoleColor? backgroundColour = null)
+  {
+    backgroundColour ??= defaultBackground;
+    lock (consoleLock)
+    {
+      Console.SetCursorPosition(0, lastLine + 1);
+      Console.BackgroundColor = backgroundColour.Value;
+      Console.WriteLine(message);
+      Console.BackgroundColor = defaultBackground;
     }
   }
 
-  public static void WriteDescription(int line, string text, ConsoleColor? colour = null)
+  private static void Write(int index, int col, int maxLength, string text, ConsoleColor? backgroundColour = null)
   {
-    Write(line, 0, text, colour);
-  }
-
-  public static void WriteStatus(int line, string text, ConsoleColor? colour = null)
-  {
-    ArgumentNullException.ThrowIfNull(text);
-    Write(line, StatusCol, text[..Math.Min(text.Length, StatusWidth)], colour);
-  }
-
-  public static void WriteError(string message)
-  {
-    lock (ConsoleLock)
+    backgroundColour ??= defaultBackground;
+    var line = index + startLine;
+    if (text.Length > maxLength)
     {
-      Console.WriteLine();
-      var backgroundColor = Console.BackgroundColor;
-      Console.BackgroundColor = ConsoleColor.DarkRed;
-      Console.WriteLine($"Error: {message}");
-      Console.BackgroundColor = backgroundColor;
-      Console.WriteLine();
+      text = maxLength > 13 ? $"{text[..(maxLength - 3)]}..." : text[..maxLength];
+    }
+    lock (consoleLock)
+    {
+      Console.SetCursorPosition(col, line);
+      Console.BackgroundColor = defaultBackground;
+      Console.Write(new string(' ', maxLength));
+      Console.SetCursorPosition(col, line);
+      Console.BackgroundColor = backgroundColour.Value;
+      Console.WriteLine(text);
+      Console.BackgroundColor = defaultBackground;
+      if (line > lastLine)
+      {
+        lastLine = line;
+      }
     }
   }
 

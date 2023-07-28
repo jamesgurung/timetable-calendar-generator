@@ -5,12 +5,13 @@ namespace TimetableCalendarGenerator;
 
 public class CalendarWriterFactory
 {
+  public int SimultaneousRequests { get; }
+  public string DisplayText { get; }
+
   private OutputType OutputType { get; }
   private string GoogleServiceAccountKey { get; }
   private GraphServiceClient MicrosoftClient { get; }
   private string OutputDirectory { get; }
-  public int SimultaneousRequests { get; }
-  public string DisplayText { get; }
 
   public CalendarWriterFactory(OutputType outputType, string googleServiceAccountKey, MicrosoftClientKey microsoftClientKey)
   {
@@ -20,22 +21,22 @@ public class CalendarWriterFactory
     {
       case OutputType.Csv:
         SimultaneousRequests = 4;
-        DisplayText = "Generating CSV calendars";
+        DisplayText = "Generating CSV calendars:";
         OutputDirectory = CreateOutputDirectory("csv");
         break;
       case OutputType.Ical:
         SimultaneousRequests = 4;
-        DisplayText = "Generating iCal calendars";
+        DisplayText = "Generating iCal calendars:";
         OutputDirectory = CreateOutputDirectory("ical");
         break;
       case OutputType.GoogleWorkspace:
         SimultaneousRequests = 40;
-        DisplayText = "Writing to Google Workspace calendars";
+        DisplayText = "Writing to Google Workspace calendars:";
         GoogleServiceAccountKey = googleServiceAccountKey;
         break;
       case OutputType.Microsoft365:
         SimultaneousRequests = 25;
-        DisplayText = "Writing to Microsoft 365 calendars";
+        DisplayText = "Writing to Microsoft 365 calendars:";
         ArgumentNullException.ThrowIfNull(microsoftClientKey);
         var credential = new ClientSecretCredential(microsoftClientKey.TenantId, microsoftClientKey.ClientId, microsoftClientKey.ClientSecret);
         MicrosoftClient = new GraphServiceClient(credential);
