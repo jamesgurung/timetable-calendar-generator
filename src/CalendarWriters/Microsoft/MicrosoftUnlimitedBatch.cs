@@ -1,17 +1,16 @@
 ﻿using Microsoft.Graph;
 using Microsoft.Graph.Beta;
 using Microsoft.Kiota.Abstractions;
+using System.Net;
 
 namespace TimetableCalendarGenerator;
 
 internal class MicrosoftUnlimitedBatch<T> : IDisposable
 {
   private readonly GraphServiceClient _service;
-  private readonly List<BatchRequestContent> _batches;
+  private readonly List<BatchRequestContentCollection> _batches;
   private readonly Func<T, RequestInformation> _requestInfoFunction;
   private readonly Dictionary<string, T> _originalData = new();
-
-  private bool _disposedValue;
 
   private const int BatchSizeLimit = 4; // Mailbox concurrency limit
   private const int MaxAttempts = 4;
@@ -35,7 +34,7 @@ internal class MicrosoftUnlimitedBatch<T> : IDisposable
     var currentBatch = _batches.Last();
     if (currentBatch.BatchRequestSteps.Count == BatchSizeLimit)
     {
-      currentBatch = new BatchRequestContent(_service);
+      currentBatch = new BatchRequestContentCollection(_service);
       _batches.Add(currentBatch);
     }
 
@@ -52,26 +51,23 @@ internal class MicrosoftUnlimitedBatch<T> : IDisposable
 
       for (var attempt = 1; attempt <= MaxAttempts; attempt++) {
         var stepsToRetry = current.BatchRequestSteps.Select(o => o.Key).ToList();
-        List<KeyValuePair<string, HttpResponseMessage>> responses = null;
+        List<KeyValuePair<string, HttpStatusCode>> responses = null;
         var wait = RetryFirst * (int)Math.Pow(RetryMultiplier, attempt - 1);
         try
         {
           var result = await _service.Batch.PostAsync(current);
-          responses = (await result.GetResponsesAsync()).ToList();
-          var failures = responses.Where(o => !o.Value.IsSuccessStatusCode).ToList();
+          responses = (await result.GetResponsesStatusCodesAsync()).ToList();
+          var failures = responses.Where(o => (int)o.Value < 200 || (int)o.Value > 299).ToList();
           stepsToRetry = failures.Select(o => o.Key).ToList();
           if (stepsToRetry.Count == 0)
           {
-            current.Dispose();
             break;
           }
-          wait = (int)failures.Max(o => o.Value.Headers.RetryAfter?.Delta?.TotalMilliseconds ?? wait);
           throw new HttpRequestException("Batch requests failed.");
         }
         catch when (attempt < MaxAttempts)
         {
-          current.Dispose();
-          current = new BatchRequestContent(_service);
+          current = new BatchRequestContentCollection(_service);
           foreach (var stepId in stepsToRetry)
           {
             var data = _originalData[stepId];
@@ -80,38 +76,13 @@ internal class MicrosoftUnlimitedBatch<T> : IDisposable
           }
           await Task.Delay(wait);
         }
-        finally
-        {
-          if (responses is not null)
-          {
-            foreach (var response in responses) response.Value?.Dispose();
-          }
-        }
       }
 
     }
-  }
-
-  protected virtual void Dispose(bool disposing)
-  {
-    if (_disposedValue) return;
-    if (disposing)
-    {
-      if (_batches is not null)
-      {
-        foreach (var batchRequestContent in _batches)
-        {
-          batchRequestContent?.Dispose();
-        }
-      }
-    }
-
-    _disposedValue = true;
   }
 
   public void Dispose()
   {
-    Dispose(true);
     GC.SuppressFinalize(this);
   }
 }

@@ -13,13 +13,15 @@ public class Settings
   [JsonIgnore]
   public IDictionary<DateTime, string> DayTypes { get; set; }
 
-  private IDictionary<string, string> _renameDictionary;
+  private IDictionary<string, (string Title, string Room)> _renameDictionary;
   [JsonIgnore]
-  public IDictionary<string, string> RenameDictionary => _renameDictionary ??= Renames?.ToDictionary(o => o.OriginalTitle, o => o.NewTitle) ?? new();
+  public IDictionary<string, (string Title, string Room)> RenameDictionary =>
+    _renameDictionary ??= Renames?.ToDictionary(o => o.OriginalTitle, o => (o.NewTitle, o.NewRoom)) ?? new();
 
   private IList<IGrouping<string, Timing>> _timingsByPeriod;
   [JsonIgnore]
-  public IList<IGrouping<string, Timing>> TimingsByPeriod => _timingsByPeriod ??= Timings.GroupBy(o => o.Period).ToList();
+  public IList<IGrouping<string, Timing>> TimingsByPeriod =>
+    _timingsByPeriod ??= Timings.GroupBy(o => o.Period).ToList();
 }
 
 public class Absence
@@ -45,6 +47,7 @@ public class Rename
 {
   public string OriginalTitle { get; set; }
   public string NewTitle { get; set; }
+  public string NewRoom { get; set; }
 }
 
 public class Timing

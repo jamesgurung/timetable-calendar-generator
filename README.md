@@ -47,18 +47,19 @@ This file is required to configure:
   ],
   "absences":
   [
-    { "yearGroups": [11, 13], "startDate": "2023-05-27", "endDate": "2023-08-01" }
+    { "yearGroups": [11, 13], "startDate": "2024-06-22", "endDate": "2024-08-01" }
   ],
   "overrides":
   [
-    { "date": "2022-09-07", "period": "1", "yearGroups": [8, 9, 10, 12], "title": "" },
-    { "date": "2022-09-08", "period": "1", "copyFromPeriod": "Tut" },
-    { "date": "2022-12-16", "period": "4", "title": "Whole school assembly" },
-    { "date": "2022-12-16", "period": "5", "title": "" }
+    { "date": "2023-09-06", "period": "1", "yearGroups": [8, 9, 10, 12], "title": "" },
+    { "date": "2023-09-07", "period": "1", "copyFromPeriod": "Tut" },
+    { "date": "2023-12-15", "period": "4", "title": "Whole School Assembly" },
+    { "date": "2023-12-15", "period": "5", "title": "" }
   ],
   "renames":
   [
-    { "originalTitle": "PPA", "newTitle": "" }
+    { "originalTitle": "PPA", "newTitle": "" },
+    { "originalTitle": "SLT", "newTitle": "SLT Meeting", "newRoom": "Conference Room" }
   ]
 }
 ```
@@ -71,10 +72,10 @@ Overriding or renaming a lesson to a blank string (`""`) will prevent a calendar
 List each teaching day in the school year, in `yyyy-MM-dd` format, followed by a week indicator (i.e. Week 1 or Week 2). Non-teaching days such as weekends and holidays should be excluded. This file can be created in a spreadsheet app.
 
 ```
-2022-09-07,1
-2022-09-08,1
-2022-09-09,1
-2022-09-12,2
+2023-09-06,1
+2023-09-07,1
+2023-09-08,1
+2023-09-11,2
 ...
 ```
 For schools which use a one-week timetable, the second column should be omitted so the file only contains a list of working days.

@@ -81,11 +81,13 @@ public class CalendarGenerator(Settings settings)
     if (yearGroup is not null && Settings.Absences.Any(o => o.YearGroups.Contains(yearGroup.Value) && o.StartDate <= date && o.EndDate >= date)) return (null, null);
 
     var clsName = lesson.Class;
-    if (Settings.RenameDictionary.TryGetValue(clsName, out var newTitle))
+    var room = lesson.Room;
+    if (Settings.RenameDictionary.TryGetValue(clsName, out var rename))
     {
-      if (string.IsNullOrEmpty(newTitle)) return (null, null);
-      clsName = newTitle;
+      if (string.IsNullOrEmpty(rename.Title)) return (null, null);
+      clsName = rename.Title;
+      if (rename.Room is not null) room = rename.Room;
     }
-    return (string.IsNullOrEmpty(lesson.Teacher) ? clsName : $"{clsName} ({lesson.Teacher})", lesson.Room);
+    return (string.IsNullOrEmpty(lesson.Teacher) ? clsName : $"{clsName} ({lesson.Teacher})", room);
   }
 }

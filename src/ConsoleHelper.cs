@@ -49,7 +49,10 @@ public static class ConsoleHelper
     backgroundColour ??= defaultBackground;
     lock (consoleLock)
     {
-      Console.SetCursorPosition(0, lastLine + 1);
+      if (lastLine != default)
+      {
+        Console.SetCursorPosition(0, lastLine + 1);
+      }
       Console.BackgroundColor = backgroundColour.Value;
       Console.WriteLine(message);
       Console.BackgroundColor = defaultBackground;
