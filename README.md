@@ -16,7 +16,7 @@ This is a cross-platform command line tool for bulk generating student and teach
 
 ### Usage on other platforms
 
-1. Ensure you have the [.NET 7 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/7.0) installed (on the download page, look for the latest ".NET Runtime 7.0.x" heading in the right-hand column).
+1. Ensure you have the [.NET 8 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) installed (on the download page, look for the latest ".NET Runtime 8.0.x" heading in the right-hand column).
 1. Download and extract the `xplat` ZIP package from our [Releases page](https://github.com/jamesgurung/timetable-calendar-generator/releases).
 1. In the "inputs" directory, add the input files defined below.
 1. Run commands in the format: `dotnet makecal.dll --csv`
@@ -64,6 +64,8 @@ This file is required to configure:
 }
 ```
 If you specify multiple timings for the same `period`, then when creating each event the app will use the first entry matching any `days` and `yearGroups` filters. Make sure a fallback entry (with no filters) is always provided.
+
+You can add duties to staff calendars by setting up break and lunch periods, and then including the duties as part of `teachers.csv`, e.g. with columns like `1Mon:Break`.
 
 Overriding or renaming a lesson to a blank string (`""`) will prevent a calendar event from being created at that time. The `copyFromPeriod` option can be used to clone another lesson in the same day, for example to create an extended tutor period.
 
