@@ -14,7 +14,7 @@ internal sealed class GoogleUnlimitedBatch
   {
     ArgumentOutOfRangeException.ThrowIfNegativeOrZero(batchSizeLimit);
     _service = service ?? throw new ArgumentNullException(nameof(service));
-    _batches = new List<BatchRequest> { new(_service) };
+    _batches = [new(_service)];
     BatchSizeLimit = batchSizeLimit;
   }
 

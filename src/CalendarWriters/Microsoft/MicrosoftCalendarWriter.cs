@@ -20,8 +20,8 @@ public class MicrosoftCalendarWriter : ICalendarWriter
   private const CategoryColor MeetingCategoryColour = CategoryColor.Preset4;
 
   private static readonly EventComparer<CalendarEvent> Comparer = new(e => e.Start, e => e.End, e => e.Title, e => e.Location);
-  private static readonly string[] DisplayName = new[] { "DisplayName" };
-  private static readonly string[] SelectFields = new[] { "Id", "Start", "End", "Subject", "Location" };
+  private static readonly string[] DisplayName = ["DisplayName"];
+  private static readonly string[] SelectFields = ["Id", "Start", "End", "Subject", "Location"];
 
   private readonly GraphServiceClient _client;
   private readonly UserItemRequestBuilder _userClient;
@@ -127,8 +127,8 @@ public class MicrosoftCalendarWriter : ICalendarWriter
         Location = new Location { DisplayName = o.Location },
         Start = new DateTimeTimeZone { DateTime = o.Start.ToString("s"), TimeZone = "Europe/London" },
         End = new DateTimeTimeZone { DateTime = o.End.ToString("s"), TimeZone = "Europe/London" },
-        Extensions = new() { new OpenTypeExtension { ExtensionName = Tag } },
-        Categories = new() { isDuty ? DutyCategoryName : (isMeeting ? MeetingCategoryName : CategoryName) },
+        Extensions = [new OpenTypeExtension { ExtensionName = Tag }],
+        Categories = [isDuty ? DutyCategoryName : (isMeeting ? MeetingCategoryName : CategoryName)],
         IsReminderOn = isDuty
       };
       return _userClient.Calendar.Events.ToPostRequestInformation(ev);

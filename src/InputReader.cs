@@ -183,13 +183,13 @@ public static class InputReader
         {
           continue;
         }
-        var classCode = timetable[i].Trim().TrimEnd(new[] { ReplacementCharacter });
+        var classCode = timetable[i].Trim().TrimEnd([ReplacementCharacter]);
         currentTeacher.Lessons.Add(new()
         {
           PeriodCode = periodCodes[i],
           Class = classCode,
           YearGroup = GetYearFromClassName(classCode),
-          Room = rooms[i].Trim().TrimEnd(new[] { ReplacementCharacter })
+          Room = rooms[i].Trim().TrimEnd([ReplacementCharacter])
         });
       }
 

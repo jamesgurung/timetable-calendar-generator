@@ -10,7 +10,7 @@ internal class MicrosoftUnlimitedBatch<T> : IDisposable
   private readonly GraphServiceClient _service;
   private readonly List<BatchRequestContentCollection> _batches;
   private readonly Func<T, RequestInformation> _requestInfoFunction;
-  private readonly Dictionary<string, T> _originalData = new();
+  private readonly Dictionary<string, T> _originalData = [];
 
   private const int BatchSizeLimit = 4; // Mailbox concurrency limit
   private const int MaxAttempts = 4;
@@ -20,7 +20,7 @@ internal class MicrosoftUnlimitedBatch<T> : IDisposable
   public MicrosoftUnlimitedBatch(GraphServiceClient service, Func<T, RequestInformation> requestInfoFunction)
   {
     _service = service ?? throw new ArgumentNullException(nameof(service));
-    _batches = new() { new(_service) };
+    _batches = [new(_service)];
     _requestInfoFunction = requestInfoFunction;
   }
 
@@ -56,7 +56,7 @@ internal class MicrosoftUnlimitedBatch<T> : IDisposable
         try
         {
           var result = await _service.Batch.PostAsync(current);
-          responses = (await result.GetResponsesStatusCodesAsync()).ToList();
+          responses = [.. (await result.GetResponsesStatusCodesAsync())];
           var failures = responses.Where(o => (int)o.Value < 200 || (int)o.Value > 299).ToList();
           stepsToRetry = failures.Select(o => o.Key).ToList();
           if (stepsToRetry.Count == 0)

@@ -16,7 +16,7 @@ public class Settings
   private IDictionary<string, (string Title, string Room)> _renameDictionary;
   [JsonIgnore]
   public IDictionary<string, (string Title, string Room)> RenameDictionary =>
-    _renameDictionary ??= Renames?.ToDictionary(o => o.OriginalTitle, o => (o.NewTitle, o.NewRoom)) ?? new();
+    _renameDictionary ??= Renames?.ToDictionary(o => o.OriginalTitle, o => (o.NewTitle, o.NewRoom)) ?? [];
 
   private IList<IGrouping<string, Timing>> _timingsByPeriod;
   [JsonIgnore]
