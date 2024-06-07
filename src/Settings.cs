@@ -6,8 +6,8 @@ namespace TimetableCalendarGenerator;
 public class Settings
 {
   public IList<Timing> Timings { get; set; }
-  public IList<Absence> Absences { get; set; } = new List<Absence>();
-  public IList<Override> Overrides { get; set; } = new List<Override>();
+  public IList<Absence> Absences { get; set; } = [];
+  public IList<Override> Overrides { get; set; } = [];
   public IList<Rename> Renames { get; set; }
 
   [JsonIgnore]

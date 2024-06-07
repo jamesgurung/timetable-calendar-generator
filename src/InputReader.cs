@@ -130,7 +130,7 @@ public static class InputReader
           {
             Email = newEmail,
             YearGroup = int.Parse(yearString.StartsWith("Year ", StringComparison.Ordinal) ? yearString[5..] : yearString, CultureInfo.InvariantCulture),
-            Lessons = new List<Lesson>()
+            Lessons = []
           };
           currentSubject = null;
           students.Add(currentStudent);
@@ -175,7 +175,7 @@ public static class InputReader
         throw new InvalidOperationException("Incorrectly formatted timetable (teachers).");
       }
       var rooms = await reader.ReadDataRecordAsync();
-      var currentTeacher = new Person { Email = timetable[0].ToLowerInvariant(), Lessons = new List<Lesson>() };
+      var currentTeacher = new Person { Email = timetable[0].ToLowerInvariant(), Lessons = [] };
 
       for (var i = 1; i < timetable.Count; i++)
       {

@@ -11,9 +11,9 @@
     <DebugType>None</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Azure.Identity" Version="1.10.2" />
-    <PackageReference Include="Google.Apis.Calendar.v3" Version="1.62.0.3171" />
+    <PackageReference Include="Azure.Identity" Version="1.11.3" />
+    <PackageReference Include="Google.Apis.Calendar.v3" Version="1.68.0.3430" />
     <PackageReference Include="KBCsv" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Graph.Beta" Version="5.50.0-preview" />
+    <PackageReference Include="Microsoft.Graph.Beta" Version="5.78.0-preview" />
   </ItemGroup>
 </Project>

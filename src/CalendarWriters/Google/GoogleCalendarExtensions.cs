@@ -32,8 +32,8 @@ internal static class GoogleCalendarExtensions
 
   public static async Task<IList<Event>> FetchAllWithRetryAsync(this EventsResource.ListRequest listRequest, DateTime? after = null, DateTime? before = null)
   {
-    listRequest.TimeMin = after;
-    listRequest.TimeMax = before;
+    listRequest.TimeMinDateTimeOffset = after;
+    listRequest.TimeMaxDateTimeOffset = before;
     listRequest.MaxResults = MaxPageSize;
     var pageStreamer = new PageStreamer<Event, EventsResource.ListRequest, Events, string>(
       (request, token) => request.PageToken = token,

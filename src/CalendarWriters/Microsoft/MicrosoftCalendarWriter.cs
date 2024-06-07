@@ -36,14 +36,14 @@ public class MicrosoftCalendarWriter : ICalendarWriter
   public async Task WriteAsync(IList<CalendarEvent> events)
   {
     await SetupCategoryAsync();
-    IList<CalendarEvent> eventsToAdd;
+    List<CalendarEvent> eventsToAdd;
     do
     {
       var existingEvents = await GetExistingEventsAsync();
       var removedEvents = existingEvents.Except(events, Comparer);
       var duplicateEvents = existingEvents.GroupBy(o => o, Comparer).Where(g => g.Count() > 1).SelectMany(g => g.Skip(1));
       var eventsToDelete = removedEvents.Union(duplicateEvents, Comparer).Cast<CalendarEventWithId>().OrderBy(o => o.Start).Select(o => o.Id).ToList();
-      eventsToAdd = events.Except(existingEvents, Comparer).OrderBy(o => o.Start).ToList();
+      eventsToAdd = [.. events.Except(existingEvents, Comparer).OrderBy(o => o.Start)];
 
       await DeleteEventsAsync(eventsToDelete);
       await AddEventsAsync(eventsToAdd);
