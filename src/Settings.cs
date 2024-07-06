@@ -9,6 +9,7 @@ public class Settings
   public IList<Absence> Absences { get; set; } = [];
   public IList<Override> Overrides { get; set; } = [];
   public IList<Rename> Renames { get; set; }
+  public bool WeekTypeAsSuffix { get; set; }
 
   [JsonIgnore]
   public IDictionary<DateTime, string> DayTypes { get; set; }

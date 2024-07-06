@@ -60,7 +60,8 @@ This file is required to configure:
   [
     { "originalTitle": "PPA", "newTitle": "" },
     { "originalTitle": "SLT", "newTitle": "SLT Meeting", "newRoom": "Conference Room" }
-  ]
+  ],
+  "weekTypeAsSuffix": false
 }
 ```
 If you specify multiple timings for the same `period`, then when creating each event the app will use the first entry matching any `days` and `yearGroups` filters. Make sure a fallback entry (with no filters) is always provided.
@@ -68,6 +69,8 @@ If you specify multiple timings for the same `period`, then when creating each e
 You can add duties to staff calendars by setting up break and lunch periods, and then including the duties as part of `teachers.csv`, e.g. with columns like `1Mon:Break`.
 
 Overriding or renaming a lesson to a blank string (`""`) will prevent a calendar event from being created at that time. The `copyFromPeriod` option can be used to clone another lesson in the same day, for example to create an extended tutor period.
+
+If days are labelled `Mon1` rather than `1Mon`, then `weekTypeAsSuffix` should be set to `true`.
 
 #### days.csv
 

@@ -43,7 +43,7 @@ public static class InputReader
         }
         var date = DateTime.ParseExact(record[0], "yyyy-MM-dd", CultureInfo.InvariantCulture);
         var weekType = record.Count > 1 ? record[1] : string.Empty;
-        settings.DayTypes.Add(date, weekType + date.DayOfWeek.ToString("G")[..3]);
+        settings.DayTypes.Add(date, settings.WeekTypeAsSuffix ? $"{date:ddd}{weekType}" : $"{weekType}{date:ddd}");
       }
     }
     return settings;

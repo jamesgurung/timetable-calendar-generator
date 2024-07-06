@@ -4,14 +4,14 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>preview</LangVersion>
-    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <AnalysisMode>all</AnalysisMode>
     <RootNamespace>TimetableCalendarGenerator</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DebugType>None</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Azure.Identity" Version="1.11.3" />
+    <PackageReference Include="Azure.Identity" Version="1.12.0" />
     <PackageReference Include="Google.Apis.Calendar.v3" Version="1.68.0.3430" />
     <PackageReference Include="KBCsv" Version="6.0.0" />
     <PackageReference Include="Microsoft.Graph.Beta" Version="5.78.0-preview" />
