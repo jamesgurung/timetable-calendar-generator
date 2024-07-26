@@ -35,3 +35,6 @@
 
 [assembly: SuppressMessage("Performance", "CA1852:Seal internal types",
   Justification = "Analyser error", Scope = "type", Target = "~T:TimetableCalendarGenerator.MicrosoftUnlimitedBatch`1")]
+
+[assembly: SuppressMessage("Style", "IDE0130:Namespace does not match folder structure",
+  Justification = "Intentional")]

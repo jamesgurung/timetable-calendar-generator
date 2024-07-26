@@ -127,6 +127,17 @@ To create this file in SIMS:
 1. Replace staff names in the left-hand column with their email addresses. You may be able to do this with a `VLOOKUP` formula.
 1. Save as `teachers.csv`
 
+#### events.csv
+
+Optionally, you can include a file with additional one-off events to be added to individual teacher calendars.
+
+```
+Email               , Date       , Time  , Duration , Title          , Location
+teacher1@school.org , 2024-09-12 , 09:10 , 60       , Review Meeting , Office
+teacher2@school.org , 2024-09-12 , 10:10 , 60       , Review Meeting , Office
+...
+```
+
 #### google-key.json
 
 If you are using the `--google` flag to directly sync timetables to Google Calendar, your domain administrator will need to create a free service account key:

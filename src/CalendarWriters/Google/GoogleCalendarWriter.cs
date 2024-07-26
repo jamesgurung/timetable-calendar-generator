@@ -14,6 +14,9 @@ public class GoogleCalendarWriter(string email, string serviceAccountKey) : ICal
   private const string DutyEventColour = "8";
   private const string MeetingEventColour = "2";
 
+  private static readonly string[] MeetingKeywords = ["meet", "line management", "brief", "mentor", "lmm", "review", "planning", "discuss"];
+  private static readonly string[] DutyKeywords = ["duty", "duties"];
+
   private static readonly Event.ExtendedPropertiesData EventProperties = new()
   {
     Private__ = new Dictionary<string, string> { { AppName, "true" } }
@@ -78,10 +81,8 @@ public class GoogleCalendarWriter(string email, string serviceAccountKey) : ICal
     var insertBatch = new GoogleUnlimitedBatch(_service);
     foreach (var ev in events)
     {
-      var isDuty = ev.Summary.Contains("duty", StringComparison.OrdinalIgnoreCase) || ev.Summary.Contains("duties", StringComparison.OrdinalIgnoreCase);
-      var isMeeting = ev.Summary.Contains("meet", StringComparison.OrdinalIgnoreCase) || ev.Summary.Contains("line management", StringComparison.OrdinalIgnoreCase)
-        || ev.Summary.Contains("brief", StringComparison.OrdinalIgnoreCase) || ev.Summary.Contains("mentor", StringComparison.OrdinalIgnoreCase)
-        || ev.Summary.Contains("lmm", StringComparison.OrdinalIgnoreCase);
+      var isDuty = DutyKeywords.Any(word => ev.Summary.Contains(word, StringComparison.OrdinalIgnoreCase));
+      var isMeeting = MeetingKeywords.Any(word => ev.Summary.Contains(word, StringComparison.OrdinalIgnoreCase));
       ev.ColorId = isDuty ? DutyEventColour : (isMeeting ? MeetingEventColour : EventColour);
       ev.Reminders = new Event.RemindersData { UseDefault = isDuty };
       ev.ExtendedProperties = EventProperties;

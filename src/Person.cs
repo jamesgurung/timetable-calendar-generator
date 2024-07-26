@@ -19,6 +19,7 @@ public class Person
       _email = value;
     }
   }
-  public IList<Lesson> Lessons { get; init; }
   public int? YearGroup { get; init; }
+  public IList<Lesson> Lessons { get; init; }
+  public IList<CalendarEvent> OneOffEvents { get; init; }
 }

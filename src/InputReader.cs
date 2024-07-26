@@ -12,6 +12,7 @@ public static class InputReader
   private const string DaysFileName = "inputs/days.csv";
   private const string StudentsFileName = "inputs/students.csv";
   private const string TeachersFileName = "inputs/teachers.csv";
+  private const string EventsFileName = "inputs/events.csv";
 
   private const char ReplacementCharacter = '\ufffd';
 
@@ -29,7 +30,7 @@ public static class InputReader
     if (settings?.Timings is null || settings.Timings.Count == 0) throw new InvalidOperationException("Invalid settings file.");
 
     Console.WriteLine($"Reading {DaysFileName}");
-    settings.DayTypes = new Dictionary<DateTime, string>();
+    settings.DayTypes = new Dictionary<DateOnly, string>();
 
     await using (var fs = File.OpenRead(DaysFileName))
     using (var reader = new CsvReader(fs))
@@ -41,7 +42,7 @@ public static class InputReader
         {
           continue;
         }
-        var date = DateTime.ParseExact(record[0], "yyyy-MM-dd", CultureInfo.InvariantCulture);
+        var date = DateOnly.ParseExact(record[0], "yyyy-MM-dd", CultureInfo.InvariantCulture);
         var weekType = record.Count > 1 ? record[1] : string.Empty;
         settings.DayTypes.Add(date, settings.WeekTypeAsSuffix ? $"{date:ddd}{weekType}" : $"{weekType}{date:ddd}");
       }
@@ -66,6 +67,13 @@ public static class InputReader
   {
     var people = new List<Person>();
     var sufficientInput = false;
+    ILookup<string, CalendarEvent> oneOffEvents = null;
+
+    if (File.Exists(EventsFileName))
+    {
+      Console.WriteLine($"Reading {EventsFileName}");
+      oneOffEvents = await LoadOneOffEventsAsync();
+    }
 
     if (File.Exists(StudentsFileName))
     {
@@ -81,7 +89,7 @@ public static class InputReader
     if (File.Exists(TeachersFileName))
     {
       Console.WriteLine($"Reading {TeachersFileName}");
-      people.AddRange(await LoadTeachersAsync());
+      people.AddRange(await LoadTeachersAsync(oneOffEvents));
       sufficientInput = true;
     }
     else
@@ -99,6 +107,7 @@ public static class InputReader
       throw new InvalidOperationException("No students or teachers were found in the input files.");
     }
 
+    Console.WriteLine();
     return people;
   }
 
@@ -159,7 +168,7 @@ public static class InputReader
     return students;
   }
 
-  private static async Task<IEnumerable<Person>> LoadTeachersAsync()
+  private static async Task<IEnumerable<Person>> LoadTeachersAsync(ILookup<string, CalendarEvent> oneOffEvents)
   {
     var teachers = new List<Person>();
 
@@ -175,7 +184,16 @@ public static class InputReader
         throw new InvalidOperationException("Incorrectly formatted timetable (teachers).");
       }
       var rooms = await reader.ReadDataRecordAsync();
-      var currentTeacher = new Person { Email = timetable[0].ToLowerInvariant(), Lessons = [] };
+
+      var email = timetable[0].ToLowerInvariant();
+      var teacherEvents = oneOffEvents?[email].ToList() ?? [];
+
+      var currentTeacher = new Person
+      {
+        Email = email,
+        Lessons = [],
+        OneOffEvents = teacherEvents
+      };
 
       for (var i = 1; i < timetable.Count; i++)
       {
@@ -197,6 +215,32 @@ public static class InputReader
     }
 
     return teachers;
+  }
+
+  private static async Task<ILookup<string, CalendarEvent>> LoadOneOffEventsAsync()
+  {
+    var events = new List<KeyValuePair<string, CalendarEvent>>();
+
+    await using var fs = File.OpenRead(EventsFileName);
+    using var reader = new CsvReader(fs);
+    await reader.ReadHeaderRecordAsync();
+
+    while (reader.HasMoreRecords)
+    {
+      var row = await reader.ReadDataRecordAsync();
+      var date = DateOnly.ParseExact(row["Date"], "yyyy-MM-dd", CultureInfo.InvariantCulture);
+      var startTime = TimeSpan.ParseExact(row["Time"], "hh\\:mm", CultureInfo.InvariantCulture);
+      var endTime = startTime.Add(TimeSpan.FromMinutes(int.Parse(row["Duration"], CultureInfo.InvariantCulture)));
+      events.Add(new(row["Email"].ToLowerInvariant(), new CalendarEvent
+      {
+        Title = row["Title"],
+        Location = row["Location"],
+        Start = new DateTime(date.Year, date.Month, date.Day, startTime.Hours, startTime.Minutes, 0),
+        End = new DateTime(date.Year, date.Month, date.Day, endTime.Hours, endTime.Minutes, 0),
+      }));
+    }
+
+    return events.ToLookup(o => o.Key, o => o.Value);
   }
 
   private static int? GetYearFromClassName(string className)

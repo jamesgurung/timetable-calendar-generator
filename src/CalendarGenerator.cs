@@ -3,6 +3,7 @@
 public class CalendarGenerator(Settings settings)
 {
   private Settings Settings { get; } = settings;
+  private DateOnly Today { get; } = DateOnly.FromDateTime(DateTime.Today);
 
   public IList<CalendarEvent> Generate(Person person)
   {
@@ -11,7 +12,7 @@ public class CalendarGenerator(Settings settings)
     var myLessons = person.Lessons.GroupBy(o => o.PeriodCode).ToDictionary(o => o.Key, o => o.First());
     var events = new List<CalendarEvent>();
 
-    foreach (var (date, dayCode) in Settings.DayTypes.Where(o => o.Key >= DateTime.Today))
+    foreach (var (date, dayCode) in Settings.DayTypes.Where(o => o.Key >= Today))
     {
       foreach (var periodTimings in Settings.TimingsByPeriod)
       {
@@ -73,10 +74,15 @@ public class CalendarGenerator(Settings settings)
       }
     }
 
+    foreach (var oneOffEvent in person.OneOffEvents.Where(o => o.Start >= DateTime.Today))
+    {
+      events.Add(oneOffEvent);
+    }
+
     return events;
   }
   
-  private (string Title, string Room) GetTitleAndRoom(Lesson lesson, int? yearGroup, DateTime date)
+  private (string Title, string Room) GetTitleAndRoom(Lesson lesson, int? yearGroup, DateOnly date)
   {
     if (yearGroup is not null && Settings.Absences.Any(o => o.YearGroups.Contains(yearGroup.Value) && o.StartDate <= date && o.EndDate >= date)) return (null, null);
 

@@ -12,7 +12,7 @@ public class Settings
   public bool WeekTypeAsSuffix { get; set; }
 
   [JsonIgnore]
-  public IDictionary<DateTime, string> DayTypes { get; set; }
+  public IDictionary<DateOnly, string> DayTypes { get; set; }
 
   private IDictionary<string, (string Title, string Room)> _renameDictionary;
   [JsonIgnore]
@@ -29,15 +29,15 @@ public class Absence
 {
   public IList<int> YearGroups { get; set; }
   [JsonConverter(typeof(JsonDateConverter))]
-  public DateTime StartDate { get; set; }
+  public DateOnly StartDate { get; set; }
   [JsonConverter(typeof(JsonDateConverter))]
-  public DateTime EndDate { get; set; }
+  public DateOnly EndDate { get; set; }
 }
 
 public class Override
 {
   [JsonConverter(typeof(JsonDateConverter))]
-  public DateTime Date { get; set; }
+  public DateOnly Date { get; set; }
   public string Period { get; set; }
   public string Title { get; set; }
   public IList<int?> YearGroups { get; set; }

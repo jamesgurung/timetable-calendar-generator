@@ -22,6 +22,8 @@ public class MicrosoftCalendarWriter : ICalendarWriter
   private static readonly EventComparer<CalendarEvent> Comparer = new(e => e.Start, e => e.End, e => e.Title, e => e.Location);
   private static readonly string[] DisplayName = ["DisplayName"];
   private static readonly string[] SelectFields = ["Id", "Start", "End", "Subject", "Location"];
+  private static readonly string[] MeetingKeywords = ["meet", "line management", "brief", "mentor", "lmm", "review", "planning", "discuss"];
+  private static readonly string[] DutyKeywords = ["duty", "duties"];
 
   private readonly GraphServiceClient _client;
   private readonly UserItemRequestBuilder _userClient;
@@ -117,10 +119,8 @@ public class MicrosoftCalendarWriter : ICalendarWriter
     if (!events.Any()) return;
     using var insertBatch = new MicrosoftUnlimitedBatch<CalendarEvent>(_client, o =>
     {
-      var isDuty = o.Title.Contains("duty", StringComparison.OrdinalIgnoreCase) || o.Title.Contains("duties", StringComparison.OrdinalIgnoreCase);
-      var isMeeting = o.Title.Contains("meet", StringComparison.OrdinalIgnoreCase) || o.Title.Contains("line management", StringComparison.OrdinalIgnoreCase)
-        || o.Title.Contains("brief", StringComparison.OrdinalIgnoreCase) || o.Title.Contains("mentor", StringComparison.OrdinalIgnoreCase)
-        || o.Title.Contains("LMM", StringComparison.OrdinalIgnoreCase);
+      var isDuty = DutyKeywords.Any(word => o.Title.Contains(word, StringComparison.OrdinalIgnoreCase));
+      var isMeeting = MeetingKeywords.Any(word => o.Title.Contains(word, StringComparison.OrdinalIgnoreCase));
       var ev = new Event
       {
         Subject = o.Title,
