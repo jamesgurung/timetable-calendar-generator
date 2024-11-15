@@ -30,7 +30,7 @@ public class GoogleCalendarWriter(string email, string serviceAccountKey) : ICal
   public async Task WriteAsync(IList<CalendarEvent> events)
   {
     var existingEvents = await GetExistingEventsAsync();
-      
+
     var expectedEvents = events.Select(o => new Event
     {
       Summary = o.Title,

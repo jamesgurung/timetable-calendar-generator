@@ -49,7 +49,8 @@ internal class MicrosoftUnlimitedBatch<T> : IDisposable
       if (batch.BatchRequestSteps.Count == 0) continue;
       var current = batch;
 
-      for (var attempt = 1; attempt <= MaxAttempts; attempt++) {
+      for (var attempt = 1; attempt <= MaxAttempts; attempt++)
+      {
         var stepsToRetry = current.BatchRequestSteps.Select(o => o.Key).ToList();
         List<KeyValuePair<string, HttpStatusCode>> responses = null;
         var wait = RetryFirst * (int)Math.Pow(RetryMultiplier, attempt - 1);
@@ -57,7 +58,7 @@ internal class MicrosoftUnlimitedBatch<T> : IDisposable
         {
           var result = await _service.Batch.PostAsync(current);
           responses = [.. (await result.GetResponsesStatusCodesAsync())];
-          var failures = responses.Where(o => (int)o.Value < 200 || (int)o.Value > 299).ToList();
+          var failures = responses.Where(o => (int)o.Value is < 200 or > 299).ToList();
           stepsToRetry = failures.Select(o => o.Key).ToList();
           if (stepsToRetry.Count == 0)
           {

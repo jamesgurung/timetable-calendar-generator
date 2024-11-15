@@ -38,3 +38,18 @@
 
 [assembly: SuppressMessage("Style", "IDE0130:Namespace does not match folder structure",
   Justification = "Intentional")]
+
+[assembly: SuppressMessage("Style", "IDE0072:Add missing cases",
+  Justification = "Intent is already clear", Scope = "member", Target = "~M:TimetableCalendarGenerator.CalendarWriterFactory.GetCalendarWriter(System.String)")]
+
+[assembly: SuppressMessage("Style", "IDE0046:Convert to conditional expression",
+  Justification = "Readability", Scope = "member", Target = "~M:TimetableCalendarGenerator.EventComparer`1.Equals(`0,`0)")]
+
+[assembly: SuppressMessage("Style", "IDE0058:Expression value is never used",
+  Justification = "Use of discards is unnecessary")]
+
+[assembly: SuppressMessage("Style", "IDE0010:Add missing cases",
+  Justification = "Intent is already clear", Scope = "member", Target = "~M:TimetableCalendarGenerator.CalendarWriterFactory.GetCalendarWriter(System.String)")]
+
+[assembly: SuppressMessage("Maintainability", "CA1515:Consider making public types internal",
+  Justification = "Public types are preferred")]

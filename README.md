@@ -16,7 +16,7 @@ This is a cross-platform command line tool for bulk generating student and teach
 
 ### Usage on other platforms
 
-1. Ensure you have the [.NET 8 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) installed (on the download page, look for the latest ".NET Runtime 8.0.x" heading in the right-hand column).
+1. Ensure you have the [.NET 9 runtime](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) installed (on the download page, look for the latest ".NET Runtime 9.0.x" heading in the right-hand column).
 1. Download and extract the `xplat` ZIP package from our [Releases page](https://github.com/jamesgurung/timetable-calendar-generator/releases).
 1. In the "inputs" directory, add the input files defined below.
 1. Run commands in the format: `dotnet makecal.dll --csv`

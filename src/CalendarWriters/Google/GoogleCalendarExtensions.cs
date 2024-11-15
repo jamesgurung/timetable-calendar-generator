@@ -44,6 +44,7 @@ internal static class GoogleCalendarExtensions
   }
 
   public static async Task ExecuteWithRetryAsync(this BatchRequest request)
-    => await ExecuteWithRetryAsync(async () => { await request.ExecuteAsync(); return 0; });
-
+  {
+    await ExecuteWithRetryAsync(async () => { await request.ExecuteAsync(); return 0; });
+  }
 }

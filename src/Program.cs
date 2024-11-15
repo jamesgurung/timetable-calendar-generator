@@ -1,6 +1,6 @@
 ﻿using Microsoft.Graph.Beta.Models.ODataErrors;
 
-[assembly:CLSCompliant(true)]
+[assembly: CLSCompliant(true)]
 namespace TimetableCalendarGenerator;
 
 public static class Program
@@ -21,7 +21,7 @@ public static class Program
       var calendarWriterFactory = new CalendarWriterFactory(outputType, googleKey, microsoftKey);
       Console.WriteLine(calendarWriterFactory.DisplayText);
 
-      var numberColumnWidth = (int)Math.Log10(people.Count) * 2 + 5;
+      var numberColumnWidth = ((int)Math.Log10(people.Count) * 2) + 5;
       var maxNameWidth = people.Max(o => o.Email.Length) + numberColumnWidth + 2;
       ConsoleHelper.ConfigureSize(people.Count, maxNameWidth);
 

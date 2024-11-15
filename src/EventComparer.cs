@@ -33,10 +33,10 @@ public class EventComparer<TEvent>(Func<TEvent, DateTimeOffset?> start, Func<TEv
     unchecked
     {
       var hash = 17;
-      hash = hash * 23 + (GetOriginalTitle(Title(obj))?.GetHashCode(StringComparison.Ordinal) ?? 0);
-      hash = hash * 23 + (Start(obj)?.GetHashCode() ?? 0);
-      hash = hash * 23 + (End(obj)?.GetHashCode() ?? 0);
-      hash = hash * 23 + (Location(obj) ?? string.Empty).GetHashCode(StringComparison.Ordinal);
+      hash = (hash * 23) + (GetOriginalTitle(Title(obj))?.GetHashCode(StringComparison.Ordinal) ?? 0);
+      hash = (hash * 23) + (Start(obj)?.GetHashCode() ?? 0);
+      hash = (hash * 23) + (End(obj)?.GetHashCode() ?? 0);
+      hash = (hash * 23) + (Location(obj) ?? string.Empty).GetHashCode(StringComparison.Ordinal);
       return hash;
     }
   }

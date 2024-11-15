@@ -94,7 +94,8 @@ public class MicrosoftCalendarWriter : ICalendarWriter
       config => { config.Headers.Add("Prefer", "outlook.timezone=\"Europe/London\""); return config; }
     );
     await iterator.IterateAsync();
-    return events.Select(ev => new CalendarEventWithId {
+    return events.Select(ev => new CalendarEventWithId
+    {
       Id = ev.Id,
       Title = ev.Subject,
       Location = ev.Location.DisplayName,

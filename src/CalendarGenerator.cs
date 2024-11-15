@@ -24,7 +24,7 @@ public class CalendarGenerator(Settings settings)
         var overridePeriod = Settings.Overrides.FirstOrDefault(o => o.Date == date && o.Period == period && (o.YearGroups?.Contains(yearGroup) ?? true));
 
         string title = null, room = null;
-        
+
         if (overridePeriod is not null)
         {
           if (overridePeriod.CopyFromPeriod is not null && myLessons.TryGetValue($"{dayCode}:{overridePeriod.CopyFromPeriod}", out var lessonToCopy))
@@ -55,8 +55,9 @@ public class CalendarGenerator(Settings settings)
         var start = new DateTime(date.Year, date.Month, date.Day, lessonTime.StartHour, lessonTime.StartMinute, 0);
         var end = start.AddMinutes(lessonTime.Duration);
 
-        if (char.IsDigit(period[0])) {
-          title =  $"P{period}. {title}";
+        if (char.IsDigit(period[0]))
+        {
+          title = $"P{period}. {title}";
         }
         else if (period is "AM" or "PM")
         {
@@ -81,7 +82,7 @@ public class CalendarGenerator(Settings settings)
 
     return events;
   }
-  
+
   private (string Title, string Room) GetTitleAndRoom(Lesson lesson, int? yearGroup, DateOnly date)
   {
     if (yearGroup is not null && Settings.Absences.Any(o => o.YearGroups.Contains(yearGroup.Value) && o.StartDate <= date && o.EndDate >= date)) return (null, null);

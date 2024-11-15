@@ -9,7 +9,7 @@ public static class ConsoleHelper
   private static int startLine;
   private static int lastLine;
   private static readonly ConsoleColor defaultBackground = Console.BackgroundColor;
-  private static readonly object consoleLock = new();
+  private static readonly Lock consoleLock = new();
 
   public static void ConfigureSize(int count, int maxNameWidth)
   {

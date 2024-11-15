@@ -60,7 +60,8 @@ public class Timing
 
   public string StartTime
   {
-    set {
+    set
+    {
       if (value is null) throw new ArgumentNullException(nameof(value), "Timing start time is required.");
       var parts = value.Split(':');
       StartHour = int.Parse(parts[0], CultureInfo.InvariantCulture);

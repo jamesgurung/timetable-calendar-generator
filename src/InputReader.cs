@@ -101,7 +101,7 @@ public static class InputReader
     {
       throw new InvalidOperationException($"You must include at least one of '{StudentsFileName}' and '{TeachersFileName}'.");
     }
-      
+
     if (people.Count == 0)
     {
       throw new InvalidOperationException("No students or teachers were found in the input files.");

@@ -41,6 +41,8 @@ public class CalendarWriterFactory
         var credential = new ClientSecretCredential(microsoftClientKey.TenantId, microsoftClientKey.ClientId, microsoftClientKey.ClientSecret);
         MicrosoftClient = new GraphServiceClient(credential);
         break;
+      default:
+        throw new NotImplementedException();
     }
   }
 
