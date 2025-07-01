@@ -27,12 +27,16 @@ public class MicrosoftCalendarWriter : ICalendarWriter
 
   private readonly GraphServiceClient _client;
   private readonly UserItemRequestBuilder _userClient;
+  private readonly DateTime _startDate;
+  private readonly DateTime _endDate;
 
   [CLSCompliant(false)]
-  public MicrosoftCalendarWriter(string email, GraphServiceClient client)
+  public MicrosoftCalendarWriter(string email, GraphServiceClient client, DateTime startDate, DateTime endDate)
   {
     _client = client;
     _userClient = _client.Users[email];
+    _startDate = startDate;
+    _endDate = endDate;
   }
 
   public async Task WriteAsync(IList<CalendarEvent> events)
@@ -86,7 +90,7 @@ public class MicrosoftCalendarWriter : ICalendarWriter
     {
       config.QueryParameters.Top = 999;
       config.Headers.Add("Prefer", "outlook.timezone=\"Europe/London\"");
-      config.QueryParameters.Filter = $"Start/DateTime gt '{DateTime.Today:s}' and Extensions/any(f:f/id eq '{Tag}')";
+      config.QueryParameters.Filter = $"Start/DateTime gt '{_startDate:s}' and Start/DateTime lt '{_endDate:s}' and Extensions/any(f:f/id eq '{Tag}')";
       config.QueryParameters.Select = SelectFields;
     });
     var iterator = PageIterator<Event, EventCollectionResponse>.CreatePageIterator(_client, response,
@@ -94,14 +98,14 @@ public class MicrosoftCalendarWriter : ICalendarWriter
       config => { config.Headers.Add("Prefer", "outlook.timezone=\"Europe/London\""); return config; }
     );
     await iterator.IterateAsync();
-    return events.Select(ev => new CalendarEventWithId
+    return [.. events.Select(ev => new CalendarEventWithId
     {
       Id = ev.Id,
       Title = ev.Subject,
       Location = ev.Location.DisplayName,
       Start = ev.Start?.DateTime is null ? default : DateTime.ParseExact(ev.Start.DateTime[..19], "s", CultureInfo.InvariantCulture),
       End = ev.End?.DateTime is null ? default : DateTime.ParseExact(ev.End.DateTime[..19], "s", CultureInfo.InvariantCulture)
-    }).ToList();
+    })];
   }
 
   private async Task DeleteEventsAsync(IList<string> eventIds)

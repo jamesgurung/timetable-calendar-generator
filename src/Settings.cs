@@ -22,7 +22,12 @@ public class Settings
   private IList<IGrouping<string, Timing>> _timingsByPeriod;
   [JsonIgnore]
   public IList<IGrouping<string, Timing>> TimingsByPeriod =>
-    _timingsByPeriod ??= Timings.GroupBy(o => o.Period).ToList();
+    _timingsByPeriod ??= [.. Timings.GroupBy(o => o.Period)];
+
+  [JsonIgnore]
+  public DateOnly StartDate => DayTypes.Keys.Min();
+  [JsonIgnore]
+  public DateOnly EndDate => DayTypes.Keys.Max();
 }
 
 public class Absence

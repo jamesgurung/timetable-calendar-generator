@@ -5,7 +5,7 @@ using Google.Apis.Services;
 
 namespace TimetableCalendarGenerator;
 
-public class GoogleCalendarWriter(string email, string serviceAccountKey) : ICalendarWriter, IDisposable
+public class GoogleCalendarWriter(string email, string serviceAccountKey, DateTime startDate, DateTime endDate) : ICalendarWriter, IDisposable
 {
   private const string CalendarId = "primary";
   private const string AppName = "makecal";
@@ -63,7 +63,7 @@ public class GoogleCalendarWriter(string email, string serviceAccountKey) : ICal
     var listRequest = _service.Events.List(CalendarId);
     listRequest.PrivateExtendedProperty = $"{AppName}=true";
     listRequest.Fields = "items(id,summary,location,start(dateTime),end(dateTime)),nextPageToken";
-    return await listRequest.FetchAllWithRetryAsync(after: DateTime.Today);
+    return await listRequest.FetchAllWithRetryAsync(after: startDate, before: endDate);
   }
 
   private async Task DeleteEventsAsync(IEnumerable<Event> events)

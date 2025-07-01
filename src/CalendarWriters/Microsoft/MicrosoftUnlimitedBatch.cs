@@ -57,9 +57,9 @@ internal class MicrosoftUnlimitedBatch<T> : IDisposable
         try
         {
           var result = await _service.Batch.PostAsync(current);
-          responses = [.. (await result.GetResponsesStatusCodesAsync())];
+          responses = [.. await result.GetResponsesStatusCodesAsync()];
           var failures = responses.Where(o => (int)o.Value is < 200 or > 299).ToList();
-          stepsToRetry = failures.Select(o => o.Key).ToList();
+          stepsToRetry = [.. failures.Select(o => o.Key)];
           if (stepsToRetry.Count == 0)
           {
             break;

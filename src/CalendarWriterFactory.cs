@@ -9,13 +9,18 @@ public class CalendarWriterFactory
   public string DisplayText { get; }
 
   private OutputType OutputType { get; }
+  private DateTime StartDate { get; }
+  private DateTime EndDate { get; }
   private string GoogleServiceAccountKey { get; }
   private GraphServiceClient MicrosoftClient { get; }
   private string OutputDirectory { get; }
 
-  public CalendarWriterFactory(OutputType outputType, string googleServiceAccountKey, MicrosoftClientKey microsoftClientKey)
+  public CalendarWriterFactory(OutputType outputType, string googleServiceAccountKey, MicrosoftClientKey microsoftClientKey, DateOnly startDate, DateOnly endDate)
   {
     OutputType = outputType;
+    StartDate = startDate.ToDateTime(new TimeOnly(0, 0, 0));
+    if (StartDate < DateTime.Today) StartDate = DateTime.Today;
+    EndDate = endDate.ToDateTime(new TimeOnly(23, 59, 59));
 
     switch (OutputType)
     {
@@ -52,9 +57,9 @@ public class CalendarWriterFactory
     switch (OutputType)
     {
       case OutputType.GoogleWorkspace:
-        return new GoogleCalendarWriter(email, GoogleServiceAccountKey);
+        return new GoogleCalendarWriter(email, GoogleServiceAccountKey, StartDate, EndDate);
       case OutputType.Microsoft365:
-        return new MicrosoftCalendarWriter(email, MicrosoftClient);
+        return new MicrosoftCalendarWriter(email, MicrosoftClient, StartDate, EndDate);
       default:
         var userName = email.Split('@')[0];
         var outputFileName = Path.Combine(OutputDirectory, userName);

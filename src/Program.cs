@@ -18,7 +18,7 @@ public static class Program
       var people = await InputReader.LoadPeopleAsync();
 
       var calendarGenerator = new CalendarGenerator(settings);
-      var calendarWriterFactory = new CalendarWriterFactory(outputType, googleKey, microsoftKey);
+      var calendarWriterFactory = new CalendarWriterFactory(outputType, googleKey, microsoftKey, settings.StartDate, settings.EndDate);
       Console.WriteLine(calendarWriterFactory.DisplayText);
 
       var numberColumnWidth = ((int)Math.Log10(people.Count) * 2) + 5;
