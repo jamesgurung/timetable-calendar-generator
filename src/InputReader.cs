@@ -50,10 +50,10 @@ public static class InputReader
     return settings;
   }
 
-  public static async Task<string> LoadGoogleKeyAsync()
+  public static async Task<byte[]> LoadGoogleKeyAsync()
   {
     Console.WriteLine($"Reading {GoogleKeyFileName}");
-    return await File.ReadAllTextAsync(GoogleKeyFileName);
+    return await File.ReadAllBytesAsync(GoogleKeyFileName);
   }
 
   public static async Task<MicrosoftClientKey> LoadMicrosoftKeyAsync()

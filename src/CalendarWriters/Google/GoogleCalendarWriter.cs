@@ -5,7 +5,7 @@ using Google.Apis.Services;
 
 namespace TimetableCalendarGenerator;
 
-public class GoogleCalendarWriter(string email, string serviceAccountKey, DateTime startDate, DateTime endDate) : ICalendarWriter, IDisposable
+public class GoogleCalendarWriter(string email, byte[] serviceAccountKey, DateTime startDate, DateTime endDate) : ICalendarWriter, IDisposable
 {
   private const string CalendarId = "primary";
   private const string AppName = "makecal";
@@ -47,10 +47,12 @@ public class GoogleCalendarWriter(string email, string serviceAccountKey, DateTi
     await AddEventsAsync(expectedEvents.Except(existingEvents, Comparer).OrderBy(o => o.Start?.DateTimeDateTimeOffset));
   }
 
-  private static CalendarService GetCalendarService(string serviceAccountKey, string email)
+  private static CalendarService GetCalendarService(byte[] serviceAccountKey, string email)
   {
-    var credential = GoogleCredential.FromJson(serviceAccountKey).CreateScoped(CalendarService.Scope.Calendar).CreateWithUser(email);
-
+    using var ms = new MemoryStream(serviceAccountKey);
+    var serviceAccountCredential = ServiceAccountCredential.FromServiceAccountData(ms);
+    var credential = serviceAccountCredential.ToGoogleCredential().CreateScoped(CalendarService.Scope.Calendar).CreateWithUser(email);
+    
     return new CalendarService(new BaseClientService.Initializer
     {
       HttpClientInitializer = credential,

@@ -11,11 +11,11 @@ public class CalendarWriterFactory
   private OutputType OutputType { get; }
   private DateTime StartDate { get; }
   private DateTime EndDate { get; }
-  private string GoogleServiceAccountKey { get; }
+  private byte[] GoogleServiceAccountKey { get; }
   private GraphServiceClient MicrosoftClient { get; }
   private string OutputDirectory { get; }
 
-  public CalendarWriterFactory(OutputType outputType, string googleServiceAccountKey, MicrosoftClientKey microsoftClientKey, DateOnly startDate, DateOnly endDate)
+  public CalendarWriterFactory(OutputType outputType, byte[] googleServiceAccountKey, MicrosoftClientKey microsoftClientKey, DateOnly startDate, DateOnly endDate)
   {
     OutputType = outputType;
     StartDate = startDate.ToDateTime(new TimeOnly(0, 0, 0));
