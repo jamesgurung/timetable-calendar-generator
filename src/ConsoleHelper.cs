@@ -7,7 +7,7 @@ public static class ConsoleHelper
   private static int nameWidth;
   private static int statusWidth;
   private static int startLine;
-  private static int lastLine;
+  private static int lastLine = -1;
   private static readonly ConsoleColor defaultBackground = Console.BackgroundColor;
   private static readonly Lock consoleLock = new();
 
@@ -15,11 +15,11 @@ public static class ConsoleHelper
   {
     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
     {
-      var bufferHeight = Console.CursorTop + count + 1;
+      var bufferHeight = Console.CursorTop + count + 2;
       if (bufferHeight > short.MaxValue)
       {
         Console.Clear();
-        bufferHeight = Console.CursorTop + count + 1;
+        bufferHeight = Console.CursorTop + count + 2;
       }
       if (Console.BufferHeight < bufferHeight)
       {
@@ -28,7 +28,7 @@ public static class ConsoleHelper
     }
     var width = Console.BufferWidth;
     nameWidth = Math.Min(maxNameWidth, width / 2);
-    statusWidth = width - nameWidth - 1;
+    statusWidth = width - nameWidth - 2;
     startLine = Console.CursorTop;
   }
 
@@ -49,7 +49,7 @@ public static class ConsoleHelper
     backgroundColour ??= defaultBackground;
     lock (consoleLock)
     {
-      if (lastLine != default)
+      if (lastLine >= 0)
       {
         Console.SetCursorPosition(0, lastLine + 2);
       }
@@ -63,6 +63,7 @@ public static class ConsoleHelper
   {
     backgroundColour ??= defaultBackground;
     var line = index + startLine;
+    maxLength = Math.Min(maxLength, Math.Max(0, Console.BufferWidth - col - 1));
     if (text.Length > maxLength)
     {
       text = maxLength > 13 ? $"{text[..(maxLength - 3)]}..." : text[..maxLength];
@@ -74,7 +75,8 @@ public static class ConsoleHelper
       Console.Write(new string(' ', maxLength));
       Console.SetCursorPosition(col, line);
       Console.BackgroundColor = backgroundColour.Value;
-      Console.WriteLine(text);
+      Console.Write(text);
+      Console.WriteLine();
       Console.BackgroundColor = defaultBackground;
       if (line > lastLine)
       {
