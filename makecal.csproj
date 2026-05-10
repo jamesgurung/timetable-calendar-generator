@@ -13,6 +13,7 @@
     <PackageReference Include="Azure.Identity" Version="1.21.0" />
     <PackageReference Include="Google.Apis.Calendar.v3" Version="1.73.0.4073" />
     <PackageReference Include="KBCsv" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Graph.Beta" Version="5.133.0-preview" />
+    <PackageReference Include="Microsoft.Graph.Beta" Version="5.135.0-preview" />
+    <PackageReference Include="Microsoft.Kiota.Abstractions" Version="[1.22.2]" />
   </ItemGroup>
 </Project>
